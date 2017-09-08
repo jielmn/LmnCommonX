@@ -1,3 +1,4 @@
+#include <assert.h>
 #include "LmnStringX.h"
 #include "Inner.h"
 
@@ -349,21 +350,70 @@ int  StrNiCmp( IN const char * s1, IN const char * s2, IN DWORD dwCnt )
 }
 
 
+#define  STR_REPLACE_MODE_ALL   0
+#define  STR_REPLACE_MODE_FIRST 1
+#define  STR_REPLACE_MODE_LAST  2
 
+/*
+=================|=========================|=====================|=================|=========================
+     no find段   |        find段           |      no find段      |     find段      |      final段
+=================|=========================|=====================|=================|=========================
+*/
 
+// dwDestLeftSize 已经考虑到了最后的结束符
+static int _StrRepace_Final( const char * pchFinalSeg, char * pchDest, DWORD dwDestLeftSize ){
+	// 没有找到szToReplace剩下的最后一段
+	DWORD  dwLastLen   = strlen( pchFinalSeg );
+	DWORD  dwMemcpyLen = MIN( dwLastLen, dwDestLeftSize );
+	memcpy( pchDest, pchFinalSeg, dwMemcpyLen );
+	pchDest[dwMemcpyLen] = '\0';
 
+	return (dwLastLen <= dwDestLeftSize) ? LMNX_OK : LMNX_NOT_ENOUGH_BUFF;
+}
 
-/****************************************************************************
- * 函数名：  StrReplaceAll                                                  *
- * 功  能：  用字符串szReplaceWith替换字符串szSource中的所有                *
- *           为szToReplace的地方                                            *
- * 返回值：  0          成功                                                *
- *           非0        失败                                                *
- ****************************************************************************/
-int StrReplaceAll (	OUT char * szDest, IN DWORD dwDestSize, 
-					IN const char * szSource,  
-					IN const char * szToReplace, 
-					IN const char * szReplaceWith )
+// find匹配字符串后，复制no find和find两段
+static int _StrReplace_Copy( const char * pchFind, const char * & pchSrc, char * & pchDest, DWORD & dwDestLeftSize, const char * szReplaceWith, 
+							 DWORD dwRelpaceWithLen, DWORD dwToReplaceLen ) {
+	assert( 0 != pchFind );
+	assert( 0 != pchSrc );
+
+	// 从pchSrc到pchFind之间的需要保留的字符串的长度
+	DWORD dwLen = pchFind - pchSrc;
+
+	// 如果缓冲区不够
+	if ( dwLen > dwDestLeftSize )
+	{
+		memcpy( pchDest, pchSrc, dwDestLeftSize );
+		pchDest[dwDestLeftSize] = '\0';
+		return LMNX_NOT_ENOUGH_BUFF;
+	}
+
+	memcpy( pchDest, pchSrc, dwLen );
+	pchDest        += dwLen;
+	dwDestLeftSize -= dwLen;
+
+	// 没有足够缓冲区来复制szReplaceWith
+	if ( dwRelpaceWithLen > dwDestLeftSize )
+	{
+		memcpy( pchDest, szReplaceWith, dwDestLeftSize );
+		pchDest[dwDestLeftSize] = '\0';
+		return LMNX_NOT_ENOUGH_BUFF;
+	}
+
+	
+	memcpy( pchDest, szReplaceWith, dwRelpaceWithLen );
+	pchDest        += dwRelpaceWithLen;
+	dwDestLeftSize -= dwRelpaceWithLen;
+
+	pchSrc =  pchFind + dwToReplaceLen;
+	
+	return LMNX_OK;
+}
+
+static int _StrReplace ( OUT char * szDest, IN DWORD dwDestSize, 
+				         IN const char * szSource,  
+				         IN const char * szToReplace, 
+				         IN const char * szReplaceWith, IN DWORD dwReplaceMode )
 {
 	if ( 0 == szDest || 0 == dwDestSize ) {
 		return LMNX_WRONG_PARAMS;
@@ -382,68 +432,90 @@ int StrReplaceAll (	OUT char * szDest, IN DWORD dwDestSize,
 		szReplaceWith = "";
 	}
 
-    // 定义分别指向szDest和szSource的指针，便于书写
-    char *       pchDest       = szDest;
-    const char * pchSrc        = szSource;
+	// 定义分别指向szDest和szSource的指针，便于书写
+	char *       pchDest       = szDest;
+	const char * pchSrc        = szSource;
+	const char * pchLastFind   = 0;
 
-    // 定义szDest剩余的长度(留一个字符用于结束符)
+	// 定义szDest剩余的长度(留一个字符用于结束符)
 	DWORD  dwLeftSize          = dwDestSize - 1;
 
-    // 求出被替代和替代字符串长度
+	// 求出被替代和替代字符串长度
 	DWORD  dwToReplaceLen   = strlen( szToReplace );
-    DWORD  dwRelpaceWithLen = strlen( szReplaceWith );
+	DWORD  dwRelpaceWithLen = strlen( szReplaceWith );
 
-    // 查找第一个被替换的位置
+	// 查找第一个被替换的位置
 	const char * pchFind = strstr( pchSrc, szToReplace );
 	while( pchFind )
 	{
-        // 从pchSrc到pchFind之间的需要保留的字符串的长度
-		DWORD dwLen = pchFind - pchSrc;
-        
-        // 如果缓冲区不够
-		if ( dwLen > dwLeftSize )
-		{
-			memcpy( pchDest, pchSrc, dwLeftSize );
-			pchDest[dwLeftSize] = '\0';
-			return LMNX_NOT_ENOUGH_BUFF;
-		}
-		else
-		{
-			memcpy( pchDest, pchSrc, dwLen );
-			pchDest    += dwLen;
-			dwLeftSize -= dwLen;
+		if ( STR_REPLACE_MODE_LAST == dwReplaceMode ) {
+			pchLastFind = pchFind;
 
-            // 没有足够缓冲区来复制szReplaceWith
-			if ( dwRelpaceWithLen > dwLeftSize )
-			{
-				memcpy( pchDest, szReplaceWith, dwLeftSize );
-				pchDest[dwLeftSize] = '\0';
-				return LMNX_NOT_ENOUGH_BUFF;
+			pchSrc  = pchFind + dwToReplaceLen;
+			pchFind = strstr( pchSrc, szToReplace );
+		} else {
+			int ret = _StrReplace_Copy( pchFind, pchSrc, pchDest, dwLeftSize, szReplaceWith, dwRelpaceWithLen, dwToReplaceLen );
+			if ( LMNX_OK != ret ) {
+				return ret;
 			}
-			else
-			{
-				memcpy( pchDest, szReplaceWith, dwRelpaceWithLen );
-				pchDest    += dwRelpaceWithLen;
-				dwLeftSize -= dwRelpaceWithLen;
 
-				pchSrc  = pchFind + dwToReplaceLen;
+			if ( STR_REPLACE_MODE_FIRST == dwReplaceMode ) {
+				pchFind = 0;
+			} else {
 				pchFind = strstr( pchSrc, szToReplace );
 			}
 		}
 	}
 
-    // 没有找到szToReplace剩下的最后一段
-    DWORD  dwLastLen  =  strlen( pchSrc );
-	if ( dwLastLen > dwLeftSize )
-	{
-		memcpy( pchDest, pchSrc, dwLeftSize );
-		pchDest[dwLeftSize] = '\0';
-		return LMNX_NOT_ENOUGH_BUFF;
-	}
+	if ( STR_REPLACE_MODE_LAST == dwReplaceMode ) {
+		if ( 0 == pchLastFind ) {
+			return _StrRepace_Final( szSource, szDest, dwLeftSize );
+		} else {
+			// 从pchSrc到pchFind之间的需要保留的字符串的长度
+			pchSrc  = szSource;
+			pchFind = pchLastFind;
 
-	memcpy( pchDest, pchSrc, dwLastLen );
-    pchDest[dwLastLen] = '\0';
-	dwLeftSize -= dwLastLen;
-    
-    return LMNX_OK;
+			int ret = _StrReplace_Copy( pchFind, pchSrc, pchDest, dwLeftSize, szReplaceWith, dwRelpaceWithLen, dwToReplaceLen );
+			if ( LMNX_OK != ret ) {
+				return ret;
+			}
+
+			return _StrRepace_Final( pchSrc, pchDest, dwLeftSize );
+		}
+	} else {
+		return _StrRepace_Final( pchSrc, pchDest, dwLeftSize );
+	}
+	
+}
+
+/****************************************************************************
+ * 函数名：  StrReplaceAll                                                  *
+ * 功  能：  用字符串szReplaceWith替换字符串szSource中的所有                *
+ *           为szToReplace的地方                                            *
+ * 返回值：  0          成功                                                *
+ *           非0        失败                                                *
+ ****************************************************************************/
+int StrReplaceAll (	OUT char * szDest, IN DWORD dwDestSize, 
+				    IN const char * szSource,  
+					IN const char * szToReplace, 
+					IN const char * szReplaceWith )
+{
+	return _StrReplace( szDest, dwDestSize, szSource, szToReplace, szReplaceWith, STR_REPLACE_MODE_ALL );
+}
+
+
+int StrReplaceFirst ( OUT char * szDest, IN DWORD dwDestSize, 
+					  IN const char * szSource,  
+					  IN const char * szToReplace, 
+					  IN const char * szReplaceWith )
+{
+	return _StrReplace( szDest, dwDestSize, szSource, szToReplace, szReplaceWith, STR_REPLACE_MODE_FIRST );
+}
+
+int StrReplaceLast ( OUT char * szDest, IN DWORD dwDestSize, 
+					 IN const char * szSource,  
+					 IN const char * szToReplace, 
+					 IN const char * szReplaceWith ) 
+{
+	return _StrReplace( szDest, dwDestSize, szSource, szToReplace, szReplaceWith, STR_REPLACE_MODE_LAST );
 }

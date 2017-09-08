@@ -59,5 +59,14 @@ int StrReplaceAll (	OUT char * szDest, IN DWORD dwDestSize,
 					IN const char * szToReplace, 
 					IN const char * szReplaceWith );
 
+int StrReplaceFirst ( OUT char * szDest, IN DWORD dwDestSize, 
+				      IN const char * szSource,  
+				      IN const char * szToReplace, 
+				      IN const char * szReplaceWith );
+
+int StrReplaceLast (  OUT char * szDest, IN DWORD dwDestSize, 
+					  IN const char * szSource,  
+					  IN const char * szToReplace, 
+					  IN const char * szReplaceWith );
 
 #endif

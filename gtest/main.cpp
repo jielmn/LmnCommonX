@@ -146,6 +146,32 @@ TEST( String, StrReplace )
 	ret = StrReplaceAll (	buf, sizeof(buf), 0, "o", "ooo"  );
 	ASSERT_EQ( LMNX_OK, ret );
 	ASSERT_TRUE( 0 == strcmp(buf,"") );
+
+
+	ret = StrReplaceFirst (	buf, 14, pSrc, "o", "ooo"  );
+	ASSERT_EQ( LMNX_OK, ret );
+	ASSERT_TRUE( 0 == strcmp(buf,"hellooo world") );
+
+	ret = StrReplaceFirst (	buf, 13, pSrc, "o", "ooo"  );
+	ASSERT_EQ( LMNX_NOT_ENOUGH_BUFF, ret );
+	ASSERT_TRUE( 0 == strcmp(buf,"hellooo worl") );
+
+	ret = StrReplaceFirst (	buf, sizeof(buf), pSrc, "o", 0  );
+	ASSERT_EQ( LMNX_OK, ret );
+	ASSERT_TRUE( 0 == strcmp(buf,"hell world") );
+
+
+	ret = StrReplaceLast (	buf, 14, pSrc, "o", "ooo"  );
+	ASSERT_EQ( LMNX_OK, ret );
+	ASSERT_TRUE( 0 == strcmp(buf,"hello wooorld") );
+
+	ret = StrReplaceLast (	buf, 13, pSrc, "o", "ooo"  );
+	ASSERT_EQ( LMNX_NOT_ENOUGH_BUFF, ret );
+	ASSERT_TRUE( 0 == strcmp(buf,"hello wooorl") );
+
+	ret = StrReplaceLast (	buf, sizeof(buf), pSrc, "o", 0  );
+	ASSERT_EQ( LMNX_OK, ret );
+	ASSERT_TRUE( 0 == strcmp(buf,"hello wrld") );
 }
 
 
