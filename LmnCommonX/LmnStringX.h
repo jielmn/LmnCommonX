@@ -82,4 +82,28 @@ int StrReplaceLast (  OUT char * szDest, IN DWORD dwDestSize,
  ****************************************************************************/
 int Str2Int( IN const char * szNum, OUT int * pnNum );
 
+
+
+/****************************************************************************
+ * 函数名：  EncodeBase64                                                   *
+ * 功  能：  把字节流转换成base64格式                                       *
+ * 返回值：  0          成功                                                *
+ *           非0        失败                                                *
+ ****************************************************************************/
+int EncodeBase64( OUT   char  *       pBase64, 
+                  IN    DWORD         dwBase64Size, 
+                  IN    void *        pSrc, 
+                  IN    DWORD         dwSrcLen );
+
+
+/****************************************************************************
+ * 函数名：  DecodeBase64                                                   *
+ * 功  能：  把base64格式转换成字节流                                       *
+ * 返回值：  0          成功                                                *
+ *           非0        失败                                                *
+ ****************************************************************************/
+int DecodeBase64( OUT   void  * pDest, 
+                  INOUT DWORD * pdwDestSize, 
+                  IN    const char * pBase64 );
+
 #endif

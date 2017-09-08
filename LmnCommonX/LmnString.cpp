@@ -788,3 +788,279 @@ int Str2Int( IN const char * szNum, OUT int * pnNum )
     return LMNX_OK;
 }
 
+
+
+
+
+
+static const char  s_base64_alphabet[] = 
+{ 'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P', 
+  'Q','R','S','T','U','V','W','X','Y','Z','a','b','c','d','e','f', 
+  'g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v', 
+  'w','x','y','z','0','1','2','3','4','5','6','7','8','9','+','/', '=' };
+
+/****************************************************************************
+ * 函数名：  _GetBase64Index                                                *
+ * 功  能：  根据base4字符获取字母表中的索引                                *
+ ****************************************************************************/
+static BOOL _GetBase64Index( IN char chBase64, BYTE * pbyIndex )
+{
+    if ( chBase64 >= 'A' && chBase64 <= 'Z' )
+    {
+        *pbyIndex = chBase64 - 'A';
+        return TRUE;
+    }
+    else if ( chBase64 >= 'a' && chBase64 <= 'z' )
+    {
+        *pbyIndex = chBase64 - 'a' + 26;
+        return TRUE;
+    }
+    else if ( chBase64 >= '0' && chBase64 <= '9' )
+    {
+        *pbyIndex = chBase64 - '0' + 52;
+        return TRUE;
+    }
+    else if ( chBase64 == '+' )
+    {
+        *pbyIndex = 62;
+        return TRUE;
+    }
+    else if ( chBase64 == '/' )
+    {
+        *pbyIndex = 63;
+        return TRUE;
+    }
+    else if ( chBase64 == '=' )
+    {
+        *pbyIndex = 64;
+        return TRUE;
+    }
+    else
+    {
+        return FALSE;
+    }
+}
+
+/****************************************************************************
+ * 函数名：  EncodeBase64                                                   *
+ * 功  能：  把字节流转换成base64格式                                       *
+ * 返回值：  0          成功                                                *
+ *           非0        失败                                                *
+ ****************************************************************************/
+int EncodeBase64( OUT   char  *       pBase64, 
+				  IN    DWORD         dwBase64Size, 
+				  IN    void *        pSrc, 
+				  IN    DWORD         dwSrcLen )
+{
+    // 检查参数
+    if ( 0 == pBase64 || 0 == dwBase64Size )
+    {
+        return LMNX_WRONG_PARAMS;
+    }
+
+	if ( 0 == pSrc ) {
+		pBase64[0] = '\0';
+		return LMNX_OK;
+	}
+
+    BYTE * pbyBase64    = (BYTE *)pBase64;
+    const BYTE * pbySrc = (BYTE*)pSrc;
+
+    // 计算被3除后的倍数以及余数
+    DWORD dwMultiple  = dwSrcLen / 3;
+    DWORD dwResidue   = dwSrcLen % 3;
+
+    // 计算最小需要的缓冲大小
+    DWORD dwMinSize = 4 * dwMultiple;
+    if ( 0 != dwResidue )
+    {
+        dwMinSize += 4;
+    }
+
+    // 如果缓冲不够大
+    if ( dwBase64Size <= dwMinSize )
+    {
+        return LMNX_NOT_ENOUGH_BUFF;
+    }
+
+    // Base64编码
+    // 逻辑：以3个字节为一段，逐个检查每段。如果余下1到2个字节，那就做特别处理
+    DWORD i;
+    for ( i = 0; i < dwMultiple; i++ )
+    {
+        const BYTE * pbySegment = pbySrc + 3 * i;
+    
+        BYTE b1 = GET_FRONT_BITS( pbySegment[0], 6 ) ;
+        BYTE b2 =   ( GET_BACK_BITS( pbySegment[0], 2 ) << 4 ) 
+                  | GET_FRONT_BITS( pbySegment[1], 4 );
+        BYTE b3 = ( GET_BACK_BITS(pbySegment[1],4)<<2 ) 
+                  | GET_FRONT_BITS(pbySegment[2], 2);
+        BYTE b4 = GET_BACK_BITS( pbySegment[2], 6 );
+
+        BYTE * pbyDest = pbyBase64 + 4 * i;
+
+        pbyDest[0] = s_base64_alphabet[b1];
+        pbyDest[1] = s_base64_alphabet[b2];
+        pbyDest[2] = s_base64_alphabet[b3];
+        pbyDest[3] = s_base64_alphabet[b4];
+    }
+
+    const BYTE * pbySegment = pbySrc + 3 * i;
+    BYTE *       pbyDest    = pbyBase64 + 4 * i;
+
+    // 如果余1个字节
+    if ( 1 == dwResidue )
+    {
+        BYTE b1 = GET_FRONT_BITS( pbySegment[0], 6 ) ;
+        BYTE b2 = ( GET_BACK_BITS( pbySegment[0], 2 )<<4 );
+
+        pbyDest[0] = s_base64_alphabet[b1];
+        pbyDest[1] = s_base64_alphabet[b2];
+        pbyDest[2] = s_base64_alphabet[64];
+        pbyDest[3] = s_base64_alphabet[64];
+    }
+    // 如果余2个字节
+    else if ( 2 == dwResidue )
+    {
+        BYTE b1 = GET_FRONT_BITS( pbySegment[0], 6 ) ;
+        BYTE b2 = ( GET_BACK_BITS( pbySegment[0], 2 )<<4) | GET_FRONT_BITS(pbySegment[1], 4);
+        BYTE b3 = GET_BACK_BITS(pbySegment[1],4)<<2;
+
+        pbyDest[0] = s_base64_alphabet[b1];
+        pbyDest[1] = s_base64_alphabet[b2];
+        pbyDest[2] = s_base64_alphabet[b3];
+        pbyDest[3] = s_base64_alphabet[64];
+    }
+
+	pBase64[dwMinSize] = '\0';
+    return LMNX_OK;
+}
+
+
+/****************************************************************************
+ * 函数名：  DecodeBase64                                                   *
+ * 功  能：  把base64格式转换成字节流                                       *
+ * 返回值：  0          成功                                                *
+ *           非0        失败                                                *
+ ****************************************************************************/
+int DecodeBase64( OUT   void  * pDest, 
+				  INOUT DWORD * pdwDestSize, 
+				  IN    const char * pBase64 )
+{
+    // 检查参数
+    if ( 0 == pDest || 0 == pdwDestSize )
+    {
+        return LMNX_WRONG_PARAMS;
+    }
+
+	if ( 0 == pBase64 ) {
+		*pdwDestSize = 0;
+		return LMNX_OK;
+	}
+
+    BYTE * pbyDest         = (BYTE *)pDest;
+    const BYTE * pbyBase64 = (BYTE *)pBase64;
+
+	DWORD dwBase64Len = strlen( pBase64 );
+    // base64数据格式不对
+    if ( 0 != dwBase64Len % 4 )
+    {
+        return LMNX_NOT_BASE64;
+    }
+
+    // 按4个字节为一段进行分段
+    DWORD dwMultiple =  dwBase64Len / 4;
+
+    // 检查缓冲区是否足够
+    DWORD dwMinSize = 0;
+    const BYTE * pbyLastSegment = 0;
+
+    if ( dwMultiple > 0 )
+    {
+        dwMinSize = (dwMultiple - 1) * 3;
+        pbyLastSegment = pbyBase64 + 4 * (dwMultiple - 1);
+        // 如果最后一段倒数第2个字节为'='，还需要1个字节缓冲区
+        if ( s_base64_alphabet[64] == pbyLastSegment[2] )
+        {
+            dwMinSize += 1;
+        }
+        // 如果最后一段倒数第12个字节为'='，还需要2个字节缓冲区
+        else if ( s_base64_alphabet[64] == pbyLastSegment[3] )
+        {
+            dwMinSize += 2;
+        }
+        else
+        {
+            dwMinSize += 3;
+        }
+    }
+
+    if ( *pdwDestSize < dwMinSize )
+    {
+        return LMNX_NOT_ENOUGH_BUFF;
+    }
+    
+    
+    DWORD i;
+    // 遍历每一段
+    for ( i = 0; i < dwMultiple; i++ )
+    {
+        BYTE * pbySegment   = pbyDest   + 3 * i;
+        const BYTE * pbySrc = pbyBase64 + 4 * i;
+
+        BYTE  abyIndex[4];
+        DWORD j;
+        for ( j = 0; j < 4; j++ )
+        {
+            // 获取索引失败
+            if ( !_GetBase64Index( pbySrc[j], &abyIndex[j] ) )
+            {
+                return LMNX_NOT_BASE64;
+            }
+        }
+
+        if ( 64 == abyIndex[0] || 64 == abyIndex[1] )
+        {
+            return LMNX_NOT_BASE64;
+        }
+
+        // 如果不是最后一段
+        if ( i < dwMultiple - 1 )
+        {
+            if ( 64 == abyIndex[2] || 64 == abyIndex[3] )
+            {
+                return LMNX_NOT_BASE64;
+            }
+
+            pbySegment[0] = (abyIndex[0]<<2) | GET_FRONT_BITS(abyIndex[1],4);
+            pbySegment[1] = (GET_BACK_BITS(abyIndex[1],4)<<4) | GET_FRONT_BITS(abyIndex[2],6);
+            pbySegment[2] = (GET_BACK_BITS(abyIndex[2],2)<<6) | abyIndex[3];
+        }
+        else
+        {
+            if ( 64 == abyIndex[2] )
+            {
+                if ( 64 != abyIndex[3] )
+                {
+                    return LMNX_NOT_BASE64;
+                }
+                
+                pbySegment[0] = (abyIndex[0]<<2) | GET_FRONT_BITS(abyIndex[1],4);
+            }
+            else if ( 64 == abyIndex[3] )
+            {   
+                pbySegment[0] = (abyIndex[0]<<2) | GET_FRONT_BITS(abyIndex[1],4);
+                pbySegment[1] = (GET_BACK_BITS(abyIndex[1],4)<<4) | GET_FRONT_BITS(abyIndex[2],6);
+            }
+            else
+            {
+                pbySegment[0] = (abyIndex[0]<<2) | GET_FRONT_BITS(abyIndex[1],4);
+                pbySegment[1] = (GET_BACK_BITS(abyIndex[1],4)<<4) | GET_FRONT_BITS(abyIndex[2],6);
+                pbySegment[2] = (GET_BACK_BITS(abyIndex[2],2)<<6) | abyIndex[3];
+            }
+        }
+    }
+
+    *pdwDestSize = dwMinSize;
+    return LMNX_OK;
+}

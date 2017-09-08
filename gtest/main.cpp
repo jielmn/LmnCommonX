@@ -221,6 +221,39 @@ TEST( String, Number ) {
 }
 
 
+TEST( String, Base64 ) {
+
+	int  ret = 0;
+	DWORD dwSize = 0;
+	char buf[32];
+
+	ret = EncodeBase64( buf, 9, "12345", 5 );
+	ASSERT_EQ( LMNX_OK, ret );
+	ASSERT_TRUE( 0 == strcmp("MTIzNDU=", buf) );
+
+	ret = EncodeBase64( buf, 8, "12345", 5 );
+	ASSERT_EQ( LMNX_NOT_ENOUGH_BUFF, ret );
+
+	dwSize = sizeof(buf);
+	ret = DecodeBase64( buf, &dwSize, "MTIzNDU=" );
+	ASSERT_EQ( LMNX_OK, ret );
+	ASSERT_EQ( 5, dwSize );
+	ASSERT_TRUE( 0 == StrNiCmp("12345", buf, 5) );
+
+
+	int num = 99;
+	ret = EncodeBase64( buf, 9, &num, sizeof(int) );
+	ASSERT_EQ( LMNX_OK, ret );
+	ASSERT_TRUE( 0 == strcmp("YwAAAA==", buf) );
+
+	num = 0;
+	dwSize = sizeof(int);
+	ret = DecodeBase64( &num, &dwSize, "YwAAAA==" );
+	ASSERT_EQ( LMNX_OK, ret );
+	ASSERT_EQ( 4, dwSize );
+	ASSERT_EQ( 99, num );
+}
+
 int main(int argc, TCHAR* argv[])
 {
 	testing::InitGoogleTest(&argc, argv);
