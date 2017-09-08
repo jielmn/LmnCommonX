@@ -1,6 +1,8 @@
 #include <assert.h>
 #include "LmnStringX.h"
+#include "LmnTemplates.h"
 #include "Inner.h"
+
 
 /****************************************************************************
  * 函数名：  _IsBlankChar                                                   *
@@ -1063,4 +1065,246 @@ int DecodeBase64( OUT   void  * pDest,
 
     *pdwDestSize = dwMinSize;
     return LMNX_OK;
+}
+
+
+
+
+
+
+
+
+/*************************************************************************/
+/*  调试字节流用的                                                       */
+/*  最终buff结果：左边为二进制代码，右边为字符                           */
+/*  0001H 00 00 00 0a 0b 00 00 00 00 00 00 00 00 00 00 00 ...............*/
+/*************************************************************************/
+int DebugStream(  char *       pchDebugBuf,  DWORD  dwDebugBufLen, 
+				  void *       pStream,      DWORD  dwStreamLen,
+				  BOOL         bDosCarriageReturn /* = FALSE */,
+				  BOOL         bShowAnsi /*= FALSE*/,
+				  const char * szIndent /*= 0*/ )
+{
+	if ( 0 == pchDebugBuf || 0 == dwDebugBufLen )
+	{
+		return LMNX_WRONG_PARAMS;
+	}
+
+	if ( 0 == pStream || 0 == dwStreamLen ) {
+		pchDebugBuf[0] = '\0';
+		return LMNX_OK;
+	}
+
+	const BYTE * pbyStream = (const BYTE *)pStream;
+
+	// i: iterator for stream
+	DWORD i, k;
+
+	// ascii string
+	BYTE s[17];
+
+	// keep a position for the terminate character(null)
+	DWORD dwLeftSize = dwDebugBufLen - 1;
+
+	const char * szReturn = 0;
+	DWORD        dwReturnLen = 0;
+	if ( bDosCarriageReturn )
+	{
+		szReturn = "\r\n";
+	}
+	else
+	{
+		szReturn = "\n";
+	}
+	dwReturnLen = strlen( szReturn );
+
+	const char * szMargin = " ";
+	DWORD dwMarginLen = strlen(szMargin);
+
+
+	DWORD dwMod = 0;
+	char  szBuf[32];
+
+	if ( 0 == szIndent ) {
+		szIndent = "";
+	}
+	DWORD dwIndentLen = strlen( szIndent );
+
+	for ( i = 0; i < dwStreamLen; i++ )
+	{
+		dwMod = i % 16;
+
+		if ( 0 == dwMod )
+		{
+			// want carriage return
+			if ( i > 0 )
+			{
+				// try to copy the ascii string
+
+				if ( dwLeftSize < dwMarginLen )
+				{
+					memcpy( pchDebugBuf, szMargin, dwLeftSize );
+					pchDebugBuf += dwLeftSize;
+					dwLeftSize  -= dwLeftSize;
+
+					*pchDebugBuf = '\0';
+					return LMNX_NOT_ENOUGH_BUFF;
+				}
+
+				memcpy( pchDebugBuf, szMargin, dwMarginLen );
+				pchDebugBuf += dwMarginLen;
+				dwLeftSize  -= dwMarginLen;
+
+
+				if ( dwLeftSize < 16 )
+				{
+					memcpy( pchDebugBuf, s, dwLeftSize );
+					pchDebugBuf += dwLeftSize;
+					dwLeftSize  -= dwLeftSize;
+
+					*pchDebugBuf = '\0';
+					return LMNX_NOT_ENOUGH_BUFF;
+				}
+
+				memcpy( pchDebugBuf, s, 16 );
+				pchDebugBuf += 16;
+				dwLeftSize  -= 16;
+
+				if ( dwLeftSize < dwReturnLen )
+				{
+					*pchDebugBuf = '\0';
+					return LMNX_NOT_ENOUGH_BUFF;
+				}
+
+				memcpy( pchDebugBuf, szReturn, dwReturnLen );
+				pchDebugBuf += dwReturnLen;
+				dwLeftSize  -= dwReturnLen;
+			}
+
+			// copy indent
+			if ( dwIndentLen > 0 ) {
+				if ( dwLeftSize < dwIndentLen ) {
+					memcpy( pchDebugBuf, szIndent, dwLeftSize );
+					pchDebugBuf += dwLeftSize;
+					dwLeftSize  -= dwLeftSize;
+
+					*pchDebugBuf = '\0';
+					return LMNX_NOT_ENOUGH_BUFF;
+				}
+
+				memcpy( pchDebugBuf, szIndent, dwIndentLen );
+				pchDebugBuf += dwIndentLen;
+				dwLeftSize  -= dwIndentLen;
+			}
+
+			// want the front 11 characters
+			SNPRINTF( szBuf, sizeof(szBuf), "%08lxh: ", i );
+
+			if ( dwLeftSize < 11 )
+			{
+				memcpy( pchDebugBuf, szBuf, dwLeftSize );
+				pchDebugBuf += dwLeftSize;
+				dwLeftSize  -= dwLeftSize;
+
+				*pchDebugBuf = '\0';
+				return LMNX_NOT_ENOUGH_BUFF;
+			}
+
+			memcpy( pchDebugBuf, szBuf, 11 );
+			pchDebugBuf += 11;
+			dwLeftSize  -= 11;
+		}
+
+		SNPRINTF( szBuf, sizeof(szBuf), "%02x ",  pbyStream[i] );
+
+		if ( dwLeftSize < 3 )
+		{
+			memcpy( pchDebugBuf, szBuf, dwLeftSize );
+			pchDebugBuf += dwLeftSize;
+			dwLeftSize  -= dwLeftSize;
+
+			*pchDebugBuf = '\0';
+			return LMNX_NOT_ENOUGH_BUFF;
+		}
+
+		memcpy( pchDebugBuf, szBuf, 3 );
+		pchDebugBuf += 3;
+		dwLeftSize  -= 3;
+
+		// ascii between 32 and 127 is visible
+		if ( (char)pbyStream[i] >= 32 )
+		{
+			s[dwMod] = (char)pbyStream[i];
+		}
+		else
+		{
+			if ( bShowAnsi )
+			{
+				// 也许是汉字
+				if ( IfHasBit(pbyStream[i],7) )
+				{
+					s[dwMod] = (char)pbyStream[i];
+				}
+				else
+				{
+					s[dwMod] = '.';
+				}
+			}
+			else
+			{
+				s[dwMod] = '.';
+			}
+		}
+	}
+
+	// give the ascii string the terminate char
+	s[dwMod + 1] = '\0';
+
+	for ( k = 0; k < 15 - dwMod; k++ )
+	{
+		if ( dwLeftSize < 3 )
+		{
+			memcpy( pchDebugBuf, "   ", dwLeftSize );
+			pchDebugBuf += dwLeftSize;
+			dwLeftSize  -= dwLeftSize;
+
+			*pchDebugBuf = '\0';
+			return LMNX_NOT_ENOUGH_BUFF;
+		}
+
+		memcpy( pchDebugBuf, "   ", 3 );
+		pchDebugBuf += 3;
+		dwLeftSize  -= 3;
+	}
+
+	if ( dwLeftSize < dwMarginLen )
+	{
+		memcpy( pchDebugBuf, szMargin, dwLeftSize );
+		pchDebugBuf += dwLeftSize;
+		dwLeftSize  -= dwLeftSize;
+
+		*pchDebugBuf = '\0';
+		return LMNX_NOT_ENOUGH_BUFF;
+	}
+
+	memcpy( pchDebugBuf, szMargin, dwMarginLen );
+	pchDebugBuf += dwMarginLen;
+	dwLeftSize  -= dwMarginLen;
+
+	if ( dwLeftSize < dwMod + 1 )
+	{
+		memcpy( pchDebugBuf, s, dwLeftSize );
+		pchDebugBuf += dwLeftSize;
+		dwLeftSize  -= dwLeftSize;
+
+		*pchDebugBuf = '\0';
+		return LMNX_NOT_ENOUGH_BUFF;
+	}
+
+	memcpy( pchDebugBuf, s, dwMod + 1 );
+	pchDebugBuf += dwMod + 1;
+	dwLeftSize  -= dwMod + 1;
+
+	*pchDebugBuf = '\0';
+	return LMNX_OK;
 }

@@ -173,6 +173,10 @@
 				RelativePath=".\LmnStringX.h"
 				>
 			</File>
+			<File
+				RelativePath=".\LmnTemplates.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="资源文件"

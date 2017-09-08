@@ -106,4 +106,17 @@ int DecodeBase64( OUT   void  * pDest,
                   INOUT DWORD * pdwDestSize, 
                   IN    const char * pBase64 );
 
+
+
+/***********************************************************************/
+// 功能: 查看字节流，左边显示字节值，右边显示字符
+// 参数: bDosCarriageReturn,  回车符号是\n还是\r\n
+//       bShowAnsi,  文字部分是否以ansi方式显示(显示汉字)
+/***********************************************************************/
+int DebugStream( char *       pchDebugBuf,  DWORD  dwDebugBufLen, 
+			     void *       pbyStream,    DWORD  dwStreamLen,
+				 BOOL         bDosCarriageReturn = FALSE,
+				 BOOL         bShowAnsi = FALSE,
+				 const char * szIndent = 0 );
+
 #endif

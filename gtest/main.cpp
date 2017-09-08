@@ -254,6 +254,59 @@ TEST( String, Base64 ) {
 	ASSERT_EQ( 99, num );
 }
 
+TEST( String, DebugStream) {
+	int ret = 0;
+	char buf[256];
+
+	ret = DebugStream( buf,  66, "12345", 5 );
+	ASSERT_EQ( LMNX_OK, ret );
+	ASSERT_TRUE( 0 == strcmp("00000000h: 31 32 33 34 35                                   12345",buf) );
+
+	ret = DebugStream( buf,  65, "12345", 5 );
+	ASSERT_EQ( LMNX_NOT_ENOUGH_BUFF, ret );
+	ASSERT_TRUE( 0 == strcmp("00000000h: 31 32 33 34 35                                   1234",buf) );
+
+	ret = DebugStream( buf,  77, "12345678abcdefgh", 16 );
+	ASSERT_EQ( LMNX_OK, ret );
+	ASSERT_TRUE( 0 == strcmp("00000000h: 31 32 33 34 35 36 37 38 61 62 63 64 65 66 67 68  12345678abcdefgh",buf) );
+
+	ret = DebugStream( buf,  76, "12345678abcdefgh", 16 );
+	ASSERT_EQ( LMNX_NOT_ENOUGH_BUFF, ret );
+	ASSERT_TRUE( 0 == strcmp("00000000h: 31 32 33 34 35 36 37 38 61 62 63 64 65 66 67 68  12345678abcdefg",buf) );
+
+
+	ret = DebugStream( buf,  154, "12345678abcdefgh12345678abcdefgh", 32 );
+	ASSERT_EQ( LMNX_OK, ret );
+	ASSERT_TRUE( 0 == strcmp("00000000h: 31 32 33 34 35 36 37 38 61 62 63 64 65 66 67 68  12345678abcdefgh\n"
+		                     "00000010h: 31 32 33 34 35 36 37 38 61 62 63 64 65 66 67 68  12345678abcdefgh",buf) );
+
+	ret = DebugStream( buf,  153, "12345678abcdefgh12345678abcdefgh", 32 );
+	ASSERT_EQ( LMNX_NOT_ENOUGH_BUFF, ret );
+	ASSERT_TRUE( 0 == strcmp( "00000000h: 31 32 33 34 35 36 37 38 61 62 63 64 65 66 67 68  12345678abcdefgh\n"
+		                      "00000010h: 31 32 33 34 35 36 37 38 61 62 63 64 65 66 67 68  12345678abcdefg",buf) );
+
+
+	ret = DebugStream( buf,  67, "12345", 5, FALSE, FALSE, "  " );
+	ASSERT_EQ( LMNX_NOT_ENOUGH_BUFF, ret );
+	ASSERT_TRUE( 0 == strcmp("  00000000h: 31 32 33 34 35                                   1234",buf) );
+
+	ret = DebugStream( buf,  68, "12345", 5, FALSE, FALSE, "  " );
+	ASSERT_EQ( LMNX_OK, ret );
+	ASSERT_TRUE( 0 == strcmp("  00000000h: 31 32 33 34 35                                   12345",buf) );
+
+
+	ret = DebugStream( buf,  158, "12345678abcdefgh12345678abcdefgh", 32, FALSE, FALSE, "  " );
+	ASSERT_EQ( LMNX_OK, ret );
+	ASSERT_TRUE( 0 == strcmp("  00000000h: 31 32 33 34 35 36 37 38 61 62 63 64 65 66 67 68  12345678abcdefgh\n"
+		                     "  00000010h: 31 32 33 34 35 36 37 38 61 62 63 64 65 66 67 68  12345678abcdefgh",buf) );
+
+	ret = DebugStream( buf,  157, "12345678abcdefgh12345678abcdefgh", 32, FALSE, FALSE, "  " );
+	ASSERT_EQ( LMNX_NOT_ENOUGH_BUFF, ret );
+	ASSERT_TRUE( 0 == strcmp("  00000000h: 31 32 33 34 35 36 37 38 61 62 63 64 65 66 67 68  12345678abcdefgh\n"
+		                     "  00000010h: 31 32 33 34 35 36 37 38 61 62 63 64 65 66 67 68  12345678abcdefg",buf) );
+
+}
+
 int main(int argc, TCHAR* argv[])
 {
 	testing::InitGoogleTest(&argc, argv);
