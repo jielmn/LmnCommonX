@@ -99,7 +99,7 @@ char * StrTrim( INOUT char * szStr )
 		return 0;
 	}
 
-	_StrTrim( szStr, szStr, strlen(szStr) );
+	_StrTrim( szStr, szStr, strlen(szStr)+1 );
 
 	return szStr;
 }
@@ -172,7 +172,7 @@ char *   Str2Lower( INOUT char * szStr )
         return 0;
     }
 
-    _Str2Lower( szStr, szStr, strlen(szStr) );
+    _Str2Lower( szStr, szStr, strlen(szStr)+1 );
 
 	return szStr;
 }
@@ -241,7 +241,7 @@ char *   Str2Upper( INOUT char * szStr )
         return 0;
     }
 
-    _Str2Upper( szStr, szStr, strlen(szStr) );
+    _Str2Upper( szStr, szStr, strlen(szStr)+1 );
 
 	return szStr;
 }
@@ -519,3 +519,272 @@ int StrReplaceLast ( OUT char * szDest, IN DWORD dwDestSize,
 {
 	return _StrReplace( szDest, dwDestSize, szSource, szToReplace, szReplaceWith, STR_REPLACE_MODE_LAST );
 }
+
+
+
+
+
+
+
+
+/****************************************************************************
+ * 函数名：  _GetNumberInfo                                                 *
+ * 功  能：  获得最高位上的数字，以及位数                                   *
+ * 参数  ：  dwNum      数字                                                *
+ *           dwMode     进制                                                *
+ *           pdwFirstDigital  最高位数字                                    *
+ *           pdwDigitalCount  全部数字个数                                  *
+ * 说明  ：  例如,    123      最大位数字为 1，  有3位数字                  *
+ *                    0xa23    最大位数字为 10， 有3位数字                  *
+ ****************************************************************************/
+static void _GetNumberInfo( IN  DWORD dwNum, IN DWORD dwMode, 
+                            OUT DWORD * pdwFirstDigital,
+                            OUT DWORD * pdwDigitalCount )
+{
+    *pdwFirstDigital = 0;
+    *pdwDigitalCount = 0;
+
+    while( dwNum > 0 )
+    {
+        (*pdwDigitalCount)++;
+        *pdwFirstDigital = dwNum;
+        dwNum /= dwMode;
+    }
+}
+
+/****************************************************************************
+ * 函数名：  _Ch2Num                                                        *
+ * 功  能：  把字符转换成数字(已经确认字符都为小写)                         *
+ ****************************************************************************/
+static BOOL _Ch2Digital( IN char ch, IN BOOL bDigital, OUT DWORD * pdwDigital )
+{
+	if ( bDigital )
+	{
+		if ( ch >= '0' && ch <= '9' )
+		{
+			*pdwDigital = ch - '0';
+            return TRUE;
+		}
+		else
+		{
+			return FALSE;
+		}
+	}
+	else
+	{
+        if ( ch >= '0' && ch <= '9' )
+		{
+			*pdwDigital = ch - '0';
+            return TRUE;
+		}
+		else if ( ch >= 'a' && ch <= 'f' )
+		{
+			*pdwDigital = ch - 'a' + 10;
+            return TRUE;
+		}
+		else
+		{
+			return FALSE;
+		}
+	}
+}
+
+/****************************************************************************
+ * 函数名：  _GetNumValue                                                   *
+ * 功  能：  根据一个数字所在的位置获取表示的值                             *
+ * 参  数：  dwDigital,  数字                                               *
+ *           dwPos    ,  位置。如个位，十位，百位等。序号从0开始            *
+ *           dwMode   ,  进制( 10 / 16 )                                    *
+ ****************************************************************************/
+static DWORD _GetNumValue( IN DWORD dwDigital, IN DWORD dwPos, IN DWORD dwMode )
+{
+	DWORD i = 0;
+	for ( i = 0; i < dwPos; i++ )
+	{
+		dwDigital *= dwMode;
+	}
+	return dwDigital;
+}
+
+
+/****************************************************************************
+ * 函数名：  Str2Int                                                        *
+ * 功  能：  转换字符串(10进制或16进制)为数字(有符号的)                     *
+ * 返回值：  0          成功                                                *
+ *           非0        失败                                                *
+ * 说明：    转换范围 -2147483648 ~ 2147483647                              *
+ *           或者16进制 -0x80000000~0x7FFFFFFF                              *
+ ****************************************************************************/
+int Str2Int( IN const char * szNum, OUT int * pnNum )
+{
+    // 检查参数
+    if ( 0 == pnNum )
+	{
+		return LMNX_WRONG_PARAMS;
+	}
+
+	if ( 0 == szNum ) {
+		*pnNum = 0;
+		return LMNX_OK;
+	}
+
+    // 进行trim和小写转换，所以需要复制一份内存 
+	DWORD  dwLen   =  strlen( szNum );
+    // char * pchBuf  =  new char[ dwLen + 1 ];
+    char * pchBuf  =  new char[dwLen+1];
+
+    // 如果分配内存失败
+    if ( 0 == pchBuf )
+    {
+        return LMNX_NO_MEMORY;
+    }
+
+	strcpy( pchBuf, szNum );
+	StrTrim( pchBuf );
+
+	// 转为小写
+	Str2Lower( pchBuf );
+
+    // 进行处理后的长度
+	dwLen = strlen( pchBuf );
+
+    // 如果是0长度字符串
+	if ( 0 == dwLen )
+	{
+		SAFE_FREE_ARRAY( pchBuf );
+		return LMNX_NOT_NUMBER;
+	}
+
+
+    // 定义指向数字字符串的指针
+	char * pchNum  = pchBuf;
+    // 定义是否正数
+	BOOL bPositive = TRUE;
+    // 定义是否10进制数
+	BOOL bDigital  = TRUE;
+
+
+    // 如果第一符号为'-'
+	if ( '-' == pchNum[0] )
+	{
+		bPositive = FALSE;
+		pchNum++;
+        // 除符号外的数字个数减少
+		dwLen--;
+	}
+    // 如果第一符号为'+'
+	else if ( '+' == pchNum[0] )
+	{
+		bPositive = TRUE;
+		pchNum++;
+        dwLen--;
+	}
+
+    // 再次检查有效性
+	if ( 0 == dwLen )
+	{
+		SAFE_FREE_ARRAY( pchBuf );
+		return LMNX_NOT_NUMBER;
+	}
+
+	
+	// 检查是否16进制数字
+	if ( dwLen >= 2 && '0' == pchNum[0] && 'x' == pchNum[1] )
+	{
+		bDigital = FALSE;
+		pchNum   += 2;
+		dwLen    -= 2;
+	}
+
+    // 确定进制后，再次检查长度
+    if ( 0 == dwLen )
+    {
+        SAFE_FREE_ARRAY( pchBuf );
+		return LMNX_NOT_NUMBER;
+    }
+
+   
+    // 定义除去符号外，待解析的字符串所能达到的最大正整数
+    // 正数和负数的最大面值数不同。负数要大1
+    DWORD dwMaxNum = (DWORD)(-1) / 2;
+    if ( !bPositive )
+    {
+        dwMaxNum++;
+    }
+
+    // 定义进制
+    DWORD dwMode = bDigital ? 10 : 16;
+
+    // 定义最大面值的首位数字( 10进制范围：0 ~ 9, 16进制范围：0 ~ 15 )
+    DWORD dwMaxNumFirstDigital = 0;
+    DWORD dwMaxNumDigitalCnt   = 0;
+
+    // 取得最大面值数字的最高位数字，以及位数
+    _GetNumberInfo( dwMaxNum, dwMode, &dwMaxNumFirstDigital, &dwMaxNumDigitalCnt );
+
+    // 如果字符串字符个数超过最大数字的数字个数
+    if ( dwLen > dwMaxNumDigitalCnt )
+    {
+        SAFE_FREE_ARRAY( pchBuf );
+	    return LMNX_OUT_OF_RANGE;
+    }
+
+
+	DWORD   i = 0;
+    // 定义正数部分的值
+	DWORD   dwNum = 0;
+
+    // 检查每个字符
+    // 检查逻辑：首先，要求第一个字符数字不能超过最大数字的最高位。最大数字
+    //           减去最高位数字代表的值的结果保存起来。后面的每个数字代表的值
+    //           不能超过前面保存的结果
+    DWORD   dwLeftValue = dwMaxNum;
+
+	for ( i = 0; i < dwLen; i++ )
+	{
+        DWORD  dwDigital = 0;
+
+        // 如果转换失败，不是有效数字
+		if ( !_Ch2Digital( pchNum[i], bDigital, &dwDigital ) )
+        {
+            SAFE_FREE_ARRAY( pchBuf );
+			return LMNX_NOT_NUMBER;
+        }
+
+        // 如果是第一位，检查第一位数字
+        if ( 0 == i && dwLen == dwMaxNumDigitalCnt )
+        {
+            if ( dwDigital > dwMaxNumFirstDigital )
+            {
+                SAFE_FREE_ARRAY( pchBuf );
+		    	return LMNX_OUT_OF_RANGE;
+            }
+            dwNum       += _GetNumValue( dwDigital, dwLen - 1, dwMode );
+            dwLeftValue -= dwNum;
+        }
+        else
+        {
+            DWORD dwValue = _GetNumValue( dwDigital, dwLen - i - 1, dwMode );
+            if ( dwValue > dwLeftValue )
+            {
+                SAFE_FREE_ARRAY( pchBuf );
+		    	return LMNX_OUT_OF_RANGE;
+            }
+            dwNum       += dwValue;
+            dwLeftValue -= dwValue;
+        }
+	}
+
+	if ( bPositive )
+	{
+		*pnNum = dwNum;
+	}
+	else
+	{
+		*pnNum = -(int)dwNum;
+	}
+
+    SAFE_FREE_ARRAY( pchBuf );
+    return LMNX_OK;
+}
+

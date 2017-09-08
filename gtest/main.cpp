@@ -174,6 +174,52 @@ TEST( String, StrReplace )
 	ASSERT_TRUE( 0 == strcmp(buf,"hello wrld") );
 }
 
+TEST( String, Number ) {
+
+	int ret = 0;
+	int num = 0;
+
+	ret = Str2Int( "2147483647", &num );
+	ASSERT_EQ( LMNX_OK, ret );
+	ASSERT_EQ( 2147483647, num );
+
+	ret = Str2Int( "-2147483648", &num );
+	ASSERT_EQ( LMNX_OK, ret );
+	ASSERT_EQ( -2147483647-1, num );
+
+	ret = Str2Int( "2147483648", &num );
+	ASSERT_EQ( LMNX_OUT_OF_RANGE, ret );
+
+	ret = Str2Int( "-2147483649", &num );
+	ASSERT_EQ( LMNX_OUT_OF_RANGE, ret );
+
+	ret = Str2Int( "0x7FFFFFFF", &num );
+	ASSERT_EQ( LMNX_OK, ret );
+	ASSERT_EQ( 2147483647, num );
+
+	ret = Str2Int( "-0x80000000", &num );
+	ASSERT_EQ( LMNX_OK, ret );
+	ASSERT_EQ( -2147483647-1, num );
+
+	ret = Str2Int( "0x80000000", &num );
+	ASSERT_EQ( LMNX_OUT_OF_RANGE, ret );
+
+	ret = Str2Int( "-0x80000001", &num );
+	ASSERT_EQ( LMNX_OUT_OF_RANGE, ret );
+
+
+	ret = Str2Int( 0, &num );
+	ASSERT_EQ( LMNX_OK, ret );
+	ASSERT_EQ( 0, num );
+
+	ret = Str2Int( "0x", &num );
+	ASSERT_EQ( LMNX_NOT_NUMBER, ret );
+
+	ret = Str2Int( "0x0", &num );
+	ASSERT_EQ( LMNX_OK, ret );
+	ASSERT_EQ( 0, num );
+}
+
 
 int main(int argc, TCHAR* argv[])
 {

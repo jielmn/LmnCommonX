@@ -69,4 +69,17 @@ int StrReplaceLast (  OUT char * szDest, IN DWORD dwDestSize,
 					  IN const char * szToReplace, 
 					  IN const char * szReplaceWith );
 
+
+
+
+/****************************************************************************
+ * 函数名：  Str2Int                                                        *
+ * 功  能：  转换字符串(10进制或16进制)为数字(有符号的)                     *
+ * 返回值：  0          成功                                                *
+ *           非0        失败                                                *
+ * 说明：    转换范围 -2147483648 ~ 2147483647                              *
+ *           或者16进制 -0x80000000~0x7FFFFFFF                              *
+ ****************************************************************************/
+int Str2Int( IN const char * szNum, OUT int * pnNum );
+
 #endif
