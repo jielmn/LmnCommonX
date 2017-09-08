@@ -4,6 +4,8 @@
 
 
 #include "LmnStringX.h"
+#include "LmnTemplates.h"
+
 #include <gtest/gtest.h>
 
 TEST( String, StrTrim )
@@ -306,6 +308,96 @@ TEST( String, DebugStream) {
 		                     "  00000010h: 31 32 33 34 35 36 37 38 61 62 63 64 65 66 67 68  12345678abcdefg",buf) );
 
 }
+
+
+TEST( Template, Bit ) {
+	// 8 number, 2bit: 1000
+	bool bRet = false;
+	bRet = IfHasBit( 8, 0 );
+	ASSERT_EQ( false, bRet );
+	bRet = IfHasBit( 8, 1 );
+	ASSERT_EQ( false, bRet );
+	bRet = IfHasBit( 8, 2 );
+	ASSERT_EQ( false, bRet );
+	bRet = IfHasBit( 8, 3 );
+	ASSERT_EQ( true, bRet );
+
+	int a = 0;
+	SetBit( a, 3 );
+	ASSERT_EQ( 8, a );
+	SetBit( a, 2 );
+	ASSERT_EQ( 12, a );
+	SetBit( a, 1 );
+	ASSERT_EQ( 14, a );
+	SetBit( a, 0 );
+	ASSERT_EQ( 15, a );
+	SetBit( a, 3, false );
+	ASSERT_EQ( 7, a );
+}
+
+TEST( Template, RecyledItem ) {
+	CRecycledItems<int,3>  items;
+	items.Append( 1 );
+	items.Append( 2 );
+	items.Append( 3 );
+	items.Append( 4 );
+	items.Append( 5 );
+	ASSERT_EQ( 3, items.GetCount() );
+	ASSERT_EQ( TRUE, items.IsFull() );
+	ASSERT_EQ( 3, items[0] );
+	ASSERT_EQ( 4, items[1] );
+	ASSERT_EQ( 5, items[2] );	
+}
+
+TEST( Template, FixedSizeItems ) {
+	DWORD dwRet = 0;
+	CFixedSizeItems<int,3>  items;
+
+	dwRet = items.AddItem(1);
+	ASSERT_FALSE( -1 == dwRet );
+	dwRet = items.AddItem(2);
+	ASSERT_FALSE( -1 == dwRet );
+	dwRet = items.AddItem(3);
+	ASSERT_FALSE( -1 == dwRet );
+	dwRet = items.AddItem(4);
+	ASSERT_TRUE( -1 == dwRet );
+
+	BOOL bRet = FALSE;
+	bRet = items.DeleteItem(1);
+	ASSERT_TRUE( bRet == TRUE );
+
+	DWORD dwIndex = 0;
+	dwIndex = items.GetFirstItem();
+	ASSERT_FALSE( -1 == dwIndex );
+	ASSERT_EQ(1,items[dwIndex]);
+
+	dwIndex = items.GetNextItem( dwIndex );
+	ASSERT_FALSE( -1 == dwIndex );
+	ASSERT_EQ(3,items[dwIndex]);
+
+	dwIndex = items.GetNextItem( dwIndex );
+	ASSERT_TRUE( -1 == dwIndex );
+
+	dwRet = items.AddItem(100);
+	ASSERT_FALSE( -1 == dwRet );
+
+	dwIndex = items.GetFirstItem();
+	ASSERT_FALSE( -1 == dwIndex );
+	ASSERT_EQ(1,items[dwIndex]);
+
+	dwIndex = items.GetNextItem( dwIndex );
+	ASSERT_FALSE( -1 == dwIndex );
+	ASSERT_EQ(100,items[dwIndex]);
+
+	dwIndex = items.GetNextItem( dwIndex );
+	ASSERT_FALSE( -1 == dwIndex );
+	ASSERT_EQ(3,items[dwIndex]);
+
+	dwIndex = items.GetNextItem( dwIndex );
+	ASSERT_TRUE( -1 == dwIndex );
+}
+
+
 
 int main(int argc, TCHAR* argv[])
 {
