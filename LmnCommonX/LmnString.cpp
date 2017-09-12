@@ -653,7 +653,7 @@ int Str2Int( IN const char * szNum, OUT int * pnNum )
     // 如果是0长度字符串
 	if ( 0 == dwLen )
 	{
-		SAFE_FREE_ARRAY( pchBuf );
+		SAFE_DELETE_ARRAY( pchBuf );
 		return LMNX_NOT_NUMBER;
 	}
 
@@ -685,7 +685,7 @@ int Str2Int( IN const char * szNum, OUT int * pnNum )
     // 再次检查有效性
 	if ( 0 == dwLen )
 	{
-		SAFE_FREE_ARRAY( pchBuf );
+		SAFE_DELETE_ARRAY( pchBuf );
 		return LMNX_NOT_NUMBER;
 	}
 
@@ -701,7 +701,7 @@ int Str2Int( IN const char * szNum, OUT int * pnNum )
     // 确定进制后，再次检查长度
     if ( 0 == dwLen )
     {
-        SAFE_FREE_ARRAY( pchBuf );
+        SAFE_DELETE_ARRAY( pchBuf );
 		return LMNX_NOT_NUMBER;
     }
 
@@ -727,7 +727,7 @@ int Str2Int( IN const char * szNum, OUT int * pnNum )
     // 如果字符串字符个数超过最大数字的数字个数
     if ( dwLen > dwMaxNumDigitalCnt )
     {
-        SAFE_FREE_ARRAY( pchBuf );
+        SAFE_DELETE_ARRAY( pchBuf );
 	    return LMNX_OUT_OF_RANGE;
     }
 
@@ -749,7 +749,7 @@ int Str2Int( IN const char * szNum, OUT int * pnNum )
         // 如果转换失败，不是有效数字
 		if ( !_Ch2Digital( pchNum[i], bDigital, &dwDigital ) )
         {
-            SAFE_FREE_ARRAY( pchBuf );
+            SAFE_DELETE_ARRAY( pchBuf );
 			return LMNX_NOT_NUMBER;
         }
 
@@ -758,7 +758,7 @@ int Str2Int( IN const char * szNum, OUT int * pnNum )
         {
             if ( dwDigital > dwMaxNumFirstDigital )
             {
-                SAFE_FREE_ARRAY( pchBuf );
+                SAFE_DELETE_ARRAY( pchBuf );
 		    	return LMNX_OUT_OF_RANGE;
             }
             dwNum       += _GetNumValue( dwDigital, dwLen - 1, dwMode );
@@ -769,7 +769,7 @@ int Str2Int( IN const char * szNum, OUT int * pnNum )
             DWORD dwValue = _GetNumValue( dwDigital, dwLen - i - 1, dwMode );
             if ( dwValue > dwLeftValue )
             {
-                SAFE_FREE_ARRAY( pchBuf );
+                SAFE_DELETE_ARRAY( pchBuf );
 		    	return LMNX_OUT_OF_RANGE;
             }
             dwNum       += dwValue;
@@ -786,7 +786,7 @@ int Str2Int( IN const char * szNum, OUT int * pnNum )
 		*pnNum = -(int)dwNum;
 	}
 
-    SAFE_FREE_ARRAY( pchBuf );
+    SAFE_DELETE_ARRAY( pchBuf );
     return LMNX_OK;
 }
 

@@ -152,6 +152,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\LmnContainerX.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\LmnString.cpp"
 				>
 			</File>
@@ -167,6 +171,10 @@
 			</File>
 			<File
 				RelativePath=".\LmnCommonX.h"
+				>
+			</File>
+			<File
+				RelativePath=".\LmnContainerX.h"
 				>
 			</File>
 			<File

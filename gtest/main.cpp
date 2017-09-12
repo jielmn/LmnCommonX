@@ -5,7 +5,7 @@
 
 #include "LmnStringX.h"
 #include "LmnTemplates.h"
-
+#include "LmnContainerX.h"
 #include <gtest/gtest.h>
 
 TEST( String, StrTrim )
@@ -397,6 +397,21 @@ TEST( Template, FixedSizeItems ) {
 	ASSERT_TRUE( -1 == dwIndex );
 }
 
+
+TEST( Container, Array ) {
+	int ret = 0;
+	PArray pArr = InitArray ();
+	ASSERT_TRUE( pArray != 0 );
+
+	DWORD dwIndex = 0;
+	dwIndex = Append2Array( pArr, "hello" );
+	dwIndex = Append2Array( pArr, "world" );
+	dwIndex = Append2Array( pArr, "!" );
+	ASSERT_EQ( LMNX_OK, ret );
+
+	ret = DeinitArray( pArr );
+	ASSERT_EQ( LMNX_OK, ret );
+}
 
 
 int main(int argc, TCHAR* argv[])

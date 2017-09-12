@@ -3,8 +3,9 @@
 
 // 用来强制宏后加引号
 #define DO_ONCE( statement )     do{ statement }while(0)
-#define SAFE_FREE( p )           DO_ONCE( if (0!=p) { delete p;    p = 0; } )  
-#define SAFE_FREE_ARRAY( p )     DO_ONCE( if (0!=p) { delete[] p;  p = 0; } )  
+#define SAFE_DELETE( p )           DO_ONCE( if (0!=p) { delete p;    p = 0; } )  
+#define SAFE_DELETE_ARRAY( p )     DO_ONCE( if (0!=p) { delete[] p;  p = 0; } )  
+#define SAFE_FREE( p )             DO_ONCE( if (0!=p) { free(p);     p = 0; } ) 
 
 #ifdef WIN32
 #define SNPRINTF(s,n, f,...)      _snprintf(s, n, f, __VA_ARGS__)
