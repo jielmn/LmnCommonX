@@ -401,13 +401,92 @@ TEST( Template, FixedSizeItems ) {
 TEST( Container, Array ) {
 	int ret = 0;
 	PArray pArr = InitArray ();
-	ASSERT_TRUE( pArray != 0 );
+	ASSERT_TRUE( pArr != 0 );
 
 	DWORD dwIndex = 0;
 	dwIndex = Append2Array( pArr, "hello" );
+	ASSERT_EQ( 0, dwIndex );
 	dwIndex = Append2Array( pArr, "world" );
+	ASSERT_EQ( 1, dwIndex );
 	dwIndex = Append2Array( pArr, "!" );
+	ASSERT_EQ( 2, dwIndex );
+
+	dwIndex = Insert2Array( pArr, 0, "111" );
+	ASSERT_EQ( 0, dwIndex );
+	dwIndex = Insert2Array( pArr, 10, "222" );
+	ASSERT_EQ( 4, dwIndex );
+	dwIndex = Insert2Array( pArr, 1, "333" );
+	ASSERT_EQ( 1, dwIndex );
+
+	DWORD dwSize = GetArraySize( pArr );
+	ASSERT_EQ( 6, dwSize );
+
+	char * pStr = 0;
+	ret = GetFromArray( pArr, 0, (void **)&pStr );
+	ASSERT_EQ( 0, ret );
+	ASSERT_EQ( 0, strcmp(pStr,"111") );
+
+	ret = GetFromArray( pArr, 1, (void **)&pStr );
+	ASSERT_EQ( 0, ret );
+	ASSERT_EQ( 0, strcmp(pStr,"333") );
+
+	ret = GetFromArray( pArr, 2, (void **)&pStr );
+	ASSERT_EQ( 0, ret );
+	ASSERT_EQ( 0, strcmp(pStr,"hello") );
+
+	ret = GetFromArray( pArr, 3, (void **)&pStr );
+	ASSERT_EQ( 0, ret );
+	ASSERT_EQ( 0, strcmp(pStr,"world") );
+
+	ret = GetFromArray( pArr, 4, (void **)&pStr );
+	ASSERT_EQ( 0, ret );
+	ASSERT_EQ( 0, strcmp(pStr,"!") );
+
+	ret = GetFromArray( pArr, 5, (void **)&pStr );
+	ASSERT_EQ( 0, ret );
+	ASSERT_EQ( 0, strcmp(pStr,"222") );
+
+	ret = SetArray( pArr, 6, "444" );
+	ASSERT_EQ( LMNX_OUT_OF_RANGE, ret );
+
+	ret = SetArray( pArr, 5, "444" );
 	ASSERT_EQ( LMNX_OK, ret );
+	ret = GetFromArray( pArr, 5, (void **)&pStr );
+	ASSERT_EQ( 0, ret );
+	ASSERT_EQ( 0, strcmp(pStr,"444") );
+
+	ret = EraseArray( pArr, 3 );
+	ASSERT_EQ( 0, ret );
+	dwSize = GetArraySize( pArr );
+	ASSERT_EQ( 5, dwSize );
+
+	ret = GetFromArray( pArr, 0, (void **)&pStr );
+	ASSERT_EQ( 0, ret );
+	ASSERT_EQ( 0, strcmp(pStr,"111") );
+
+	ret = GetFromArray( pArr, 1, (void **)&pStr );
+	ASSERT_EQ( 0, ret );
+	ASSERT_EQ( 0, strcmp(pStr,"333") );
+
+	ret = GetFromArray( pArr, 2, (void **)&pStr );
+	ASSERT_EQ( 0, ret );
+	ASSERT_EQ( 0, strcmp(pStr,"hello") );
+
+	ret = GetFromArray( pArr, 3, (void **)&pStr );
+	ASSERT_EQ( 0, ret );
+	ASSERT_EQ( 0, strcmp(pStr,"!") );
+
+	ret = GetFromArray( pArr, 4, (void **)&pStr );
+	ASSERT_EQ( 0, ret );
+	ASSERT_EQ( 0, strcmp(pStr,"444") );
+
+	ret = ClearArray( pArr );
+	ASSERT_EQ( 0, ret );
+	dwSize = GetArraySize( pArr );
+	ASSERT_EQ( 0, dwSize );
+
+	ret = GetFromArray( pArr, 0, (void **)&pStr );
+	ASSERT_EQ( LMNX_OUT_OF_RANGE, ret );
 
 	ret = DeinitArray( pArr );
 	ASSERT_EQ( LMNX_OK, ret );
