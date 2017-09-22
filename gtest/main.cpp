@@ -493,6 +493,108 @@ TEST( Container, Array ) {
 }
 
 
+TEST( Container, List ) {
+
+	PList pList =  InitList( );
+	ASSERT_TRUE( pList != 0 );
+
+	DWORD dwSize = GetListSize( pList );
+	ASSERT_EQ( 0, dwSize );
+
+	int ret  = 0;
+	PListNode pNode = 0;
+
+	pNode = GetListHead( pList );
+	ASSERT_TRUE( pNode == 0 );
+
+	pNode = GetListTail( pList );
+	ASSERT_TRUE( pNode == 0 );
+
+
+	pNode = Insert2List( pList, (void *)111, GetListHead(pList) );
+	ASSERT_TRUE( pNode != 0 );
+	ASSERT_EQ( 111, (int)pNode->pData );
+
+	pNode = Insert2List( pList, (void *)222, pNode );
+	ASSERT_TRUE( pNode != 0 );
+	ASSERT_EQ( 222, (int)pNode->pData );
+
+	pNode = Insert2List( pList, (void *)333, pNode );
+	ASSERT_TRUE( pNode != 0 );
+	ASSERT_EQ( 333, (int)pNode->pData );
+	
+	pNode = GetListHead( pList );
+	ASSERT_TRUE( pNode != 0 );
+	ASSERT_EQ( 333, (int)pNode->pData );
+
+	pNode = GetNextListNode( pNode );
+	ASSERT_TRUE( pNode != 0 );
+	ASSERT_EQ( 222, (int)pNode->pData );
+
+	pNode = GetNextListNode( pNode );
+	ASSERT_TRUE( pNode != 0 );
+	ASSERT_EQ( 111, (int)pNode->pData );
+
+	pNode = GetNextListNode( pNode );
+	ASSERT_TRUE( pNode == 0 );
+
+	pNode = GetListTail( pList );
+	ASSERT_TRUE( pNode != 0 );
+	ASSERT_EQ( 111, (int)pNode->pData );
+
+	dwSize = GetListSize( pList );
+	ASSERT_EQ( 3, dwSize );
+
+	pNode = GetPrevListNode( pNode );
+	ASSERT_TRUE( pNode != 0 );
+	ASSERT_EQ( 222, (int)pNode->pData );
+
+	pNode = GetPrevListNode( pNode );
+	ASSERT_TRUE( pNode != 0 );
+	ASSERT_EQ( 333, (int)pNode->pData );
+
+	pNode = GetPrevListNode( pNode );
+	ASSERT_TRUE( pNode == 0 );
+
+
+	pNode = GetListHead( pList );
+	ASSERT_TRUE( pNode != 0 );
+	ASSERT_EQ( 333, (int)pNode->pData );
+
+	pNode = GetNextListNode( pNode );
+	ASSERT_TRUE( pNode != 0 );
+	ASSERT_EQ( 222, (int)pNode->pData );
+
+	pNode = GetNextListNode( pNode );
+	ASSERT_TRUE( pNode != 0 );
+	ASSERT_EQ( 111, (int)pNode->pData );
+
+	pNode = GetNextListNode( pNode );
+	ASSERT_TRUE( pNode == 0 );
+	
+
+	pNode = GetListHead( pList );
+	ASSERT_TRUE( pNode != 0 );
+	ASSERT_EQ( 333, (int)pNode->pData );
+
+	pNode = GetNextListNode( pNode );
+	ASSERT_TRUE( pNode != 0 );
+	ASSERT_EQ( 222, (int)pNode->pData );
+
+	pNode = EraseList( pList, pNode );
+	ASSERT_TRUE( pNode != 0 );
+	ASSERT_EQ( 111, (int)pNode->pData );
+
+	pNode = EraseList( pList, pNode );
+	ASSERT_TRUE( pNode == 0 );
+
+	dwSize = GetListSize( pList );
+	ASSERT_EQ( 1, dwSize );
+
+	ret  = DeinitList( pList );
+	ASSERT_EQ( LMNX_OK, ret );
+}
+
 int main(int argc, TCHAR* argv[])
 {
 	testing::InitGoogleTest(&argc, argv);
