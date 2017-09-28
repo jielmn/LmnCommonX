@@ -595,6 +595,166 @@ TEST( Container, List ) {
 	ASSERT_EQ( LMNX_OK, ret );
 }
 
+TEST( Container, Tree ) {
+	/*
+		                 1
+              2          ,            13
+        3  ,  7  , 10              14  ,   17
+      4,5,6  8,9  11,12          15,16   18,19,20
+	*/
+	PTreeNode pNode     = 0;
+	PTreeNode pRootNode = 0;
+	PTreeNode pNodeLayer1, pNodeLayer2;
+
+	pRootNode = InitTree( "1" );
+	ASSERT_FALSE( pRootNode == 0 );
+
+	pNodeLayer1 = Insert2Tree( pRootNode, "2" );
+	ASSERT_FALSE( pNodeLayer1 == 0 );
+
+	pNodeLayer2 = Insert2Tree( pNodeLayer1, "3" );
+	ASSERT_FALSE( pNodeLayer2 == 0 );
+	pNode = Insert2Tree( pNodeLayer2, "4" );
+	ASSERT_FALSE( pNode == 0 );
+	pNode = Insert2Tree( pNodeLayer2, "5" );
+	ASSERT_FALSE( pNode == 0 );
+	pNode = Insert2Tree( pNodeLayer2, "6" );
+	ASSERT_FALSE( pNode == 0 );
+
+
+	pNodeLayer2 = Insert2Tree( pNodeLayer1, "7" );
+	ASSERT_FALSE( pNodeLayer2 == 0 );
+	pNode = Insert2Tree( pNodeLayer2, "8" );
+	ASSERT_FALSE( pNode == 0 );
+	pNode = Insert2Tree( pNodeLayer2, "9" );
+	ASSERT_FALSE( pNode == 0 );
+
+
+	pNodeLayer2 = Insert2Tree( pNodeLayer1, "10" );
+	ASSERT_FALSE( pNodeLayer2 == 0 );
+	pNode = Insert2Tree( pNodeLayer2, "11" );
+	ASSERT_FALSE( pNode == 0 );
+	pNode = Insert2Tree( pNodeLayer2, "12" );
+	ASSERT_FALSE( pNode == 0 );
+
+
+	pNodeLayer1 = Insert2Tree( pRootNode, "13" );
+	ASSERT_FALSE( pNodeLayer1 == 0 );
+
+	pNodeLayer2 = Insert2Tree( pNodeLayer1, "14" );
+	ASSERT_FALSE( pNodeLayer2 == 0 );
+	pNode = Insert2Tree( pNodeLayer2, "15" );
+	ASSERT_FALSE( pNode == 0 );
+	pNode = Insert2Tree( pNodeLayer2, "16" );
+	ASSERT_FALSE( pNode == 0 );
+
+
+	pNodeLayer2 = Insert2Tree( pNodeLayer1, "17" );
+	ASSERT_FALSE( pNodeLayer2 == 0 );
+	pNode = Insert2Tree( pNodeLayer2, "18" );
+	ASSERT_FALSE( pNode == 0 );
+	pNode = Insert2Tree( pNodeLayer2, "19" );
+	ASSERT_FALSE( pNode == 0 );
+	pNode = Insert2Tree( pNodeLayer2, "20" );
+	ASSERT_FALSE( pNode == 0 );
+	// 以上构造树完成
+
+
+	int i = 0;
+	char buf[8192];
+	//开始遍历树
+	pNode = pRootNode;
+	while ( pNode ) {
+		const char * pText = (const char *)pNode->pData;
+		sprintf( buf, "%d", i+1 );
+		ASSERT_EQ( 0, strcmp(buf,pText) );
+		pNode = GetNextTreeNode( pNode );
+		i++;
+	}
+
+	// 遍历过程中删除7,13节点
+	i = 0;
+	pNode = pRootNode;
+	const char * pText = 0;
+	while ( pNode ) {
+		pText = (const char *)pNode->pData;
+		sprintf( buf, "%d", i+1 );
+		ASSERT_EQ( 0, strcmp(buf,pText) ) << "i = " << i << ", pText = " << pText ;
+
+
+		if ( 0 == strcmp("7",pText) ) {
+			pNode = EraseTreeNode( pNode );
+			i = 9;
+		} else if ( 0 == strcmp("13",pText) ) {
+			pNode = EraseTreeNode( pNode );
+			i = -1;
+		} else {
+			pNode = GetNextTreeNode( pNode );
+			i++;
+		}		
+	}
+
+	// 遍历找到6节点
+	pNode = pRootNode;
+	while ( pNode ) {
+		pText = (const char *)pNode->pData;
+		if ( 0 == strcmp("6",pText) ) {
+			break;
+		}
+		pNode = GetNextTreeNode( pNode );
+	}
+
+	ASSERT_FALSE( 0 == pNode );
+
+	PTreeNode pParent = GetParentTreeNode( pNode );
+	ASSERT_FALSE( 0 == pParent );
+	pText = (const char *)pParent->pData;
+	ASSERT_EQ( 0, strcmp("3",pText) );
+
+	pNode = GetPrevSiblingTreeNode( pNode );
+	ASSERT_FALSE( 0 == pNode );
+	pText = (const char *)pNode->pData;
+	ASSERT_EQ( 0, strcmp("5",pText) );
+
+	pNode = GetPrevSiblingTreeNode( pNode );
+	ASSERT_FALSE( 0 == pNode );
+	pText = (const char *)pNode->pData;
+	ASSERT_EQ( 0, strcmp("4",pText) );
+
+	pNode = GetPrevSiblingTreeNode( pNode );
+	ASSERT_TRUE( 0 == pNode );
+
+	pNode = GetLastChildTreeNode( pParent );
+	ASSERT_FALSE( 0 == pNode );
+	pText = (const char *)pNode->pData;
+	ASSERT_EQ( 0, strcmp("6",pText) );
+
+
+	pNode = GetFirstChildTreeNode( pParent );
+	ASSERT_FALSE( 0 == pNode );
+	pText = (const char *)pNode->pData;
+	ASSERT_EQ( 0, strcmp("4",pText) );
+
+	pNode = GetNextSiblingTreeNode( pNode );
+	ASSERT_FALSE( 0 == pNode );
+	pText = (const char *)pNode->pData;
+	ASSERT_EQ( 0, strcmp("5",pText) );
+
+	pNode = GetNextSiblingTreeNode( pNode );
+	ASSERT_FALSE( 0 == pNode );
+	pText = (const char *)pNode->pData;
+	ASSERT_EQ( 0, strcmp("6",pText) );
+
+	pNode = GetNextSiblingTreeNode( pNode );
+	ASSERT_TRUE( 0 == pNode );
+	
+	DeInitTree(pRootNode);
+}
+
+TEST( Container, Tree1 ) {
+
+}
+
 int main(int argc, TCHAR* argv[])
 {
 	testing::InitGoogleTest(&argc, argv);
