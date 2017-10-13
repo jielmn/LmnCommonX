@@ -751,8 +751,90 @@ TEST( Container, Tree ) {
 	DeInitTree(pRootNode);
 }
 
-TEST( Container, Tree1 ) {
+TEST( Container, Hashtable ) {
+	PHashtable  pHashtable = InitHashtable( 2 );
+	ASSERT_FALSE( 0 == pHashtable );
 
+	DWORD dwCnt = 0;
+	dwCnt = GetHashtableSize( pHashtable );
+	ASSERT_EQ( 0, dwCnt );
+
+	PHashNode pNode = 0;
+	pNode = Add2Hashtable( pHashtable, "1", "hello" );
+	ASSERT_FALSE( 0 == pNode );
+
+	pNode = Add2Hashtable( pHashtable, "2", "world" );
+	ASSERT_FALSE( 0 == pNode );
+
+	pNode = Add2Hashtable( pHashtable, "3", "!" );
+	ASSERT_FALSE( 0 == pNode );
+
+	pNode = Add2Hashtable( pHashtable, "4", "xyz" );
+	ASSERT_FALSE( 0 == pNode );
+
+	pNode = Add2Hashtable( pHashtable, "5", "abc" );
+	ASSERT_FALSE( 0 == pNode );
+
+	pNode = Add2Hashtable( pHashtable, "6", "monkey" );
+	ASSERT_FALSE( 0 == pNode );
+
+	dwCnt = GetHashtableSize( pHashtable );
+	ASSERT_EQ( 6, dwCnt );
+
+	pNode = GetHashtableFirstNode( pHashtable );
+	while ( pNode ) {
+		const char * pKey = (const char *)GetHashNodeKey( pNode );
+		const char * pValue = (const char *)pNode->pData;
+
+		if ( 0 == strcmp("1",pKey) && 0 == strcmp("hello", pValue) ) {
+			dwCnt--;
+		} else if ( 0 == strcmp("2",pKey) && 0 == strcmp("world", pValue) ) {
+			dwCnt--;
+		} else if ( 0 == strcmp("3",pKey) && 0 == strcmp("!", pValue) ) {
+			dwCnt--;
+		} else if ( 0 == strcmp("4",pKey) && 0 == strcmp("xyz", pValue) ) {
+			dwCnt--;
+		} else if ( 0 == strcmp("5",pKey) && 0 == strcmp("abc", pValue) ) {
+			dwCnt--;
+		} else if ( 0 == strcmp("6",pKey) && 0 == strcmp("monkey", pValue) ) {
+			dwCnt--;
+		}
+		pNode = GetNextHashtableNode( pNode );
+	}
+	ASSERT_EQ( 0, dwCnt );
+
+	void * pOldData = 0;
+	BOOL bExist = FALSE;
+	pNode = SetHashtable( pHashtable, "1", "HELLO", &pOldData, &bExist );
+	ASSERT_FALSE( 0 == pNode );
+	ASSERT_TRUE( bExist );
+	ASSERT_TRUE( 0 == strcmp((char *)pOldData,"hello") );
+
+	pNode = SetHashtable( pHashtable, "7", "end", &pOldData, &bExist );
+	ASSERT_FALSE( 0 == pNode );
+	ASSERT_FALSE( bExist );
+
+	BOOL bRet = IfHashtableContainKey( pHashtable, "1" );
+	ASSERT_TRUE( bRet );
+
+	bRet = IfHashtableContainKey( pHashtable, "8" );
+	ASSERT_FALSE( bRet );
+
+	pNode = GetHashtableNode( pHashtable, "1"  );
+	ASSERT_FALSE( 0 == pNode );
+	ASSERT_TRUE( 0 == strcmp( (const char *)pNode->pData, "HELLO" ) );
+	
+	dwCnt = 0;
+	pNode = GetHashtableFirstNode( pHashtable );
+	while ( pNode ) {
+		pNode = EraseHashtable( pNode );
+		dwCnt++;
+	}
+	ASSERT_EQ( 7, dwCnt );
+
+	int ret = 0;
+	ret = DeinitHashtable( pHashtable );
+	ASSERT_EQ( LMNX_OK, 0 );
 }
 
 int main(int argc, TCHAR* argv[])
