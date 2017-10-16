@@ -4,7 +4,7 @@
 
 
 #include "LmnStringX.h"
-#include "LmnTemplates.h"
+#include "LmnTemplatesX.h"
 #include "LmnContainerX.h"
 #include <gtest/gtest.h>
 

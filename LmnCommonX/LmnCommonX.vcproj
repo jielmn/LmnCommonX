@@ -41,6 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				AdditionalIncludeDirectories="include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -169,22 +170,26 @@
 				RelativePath=".\Inner.h"
 				>
 			</File>
-			<File
-				RelativePath=".\LmnCommonX.h"
+			<Filter
+				Name="include"
 				>
-			</File>
-			<File
-				RelativePath=".\LmnContainerX.h"
-				>
-			</File>
-			<File
-				RelativePath=".\LmnStringX.h"
-				>
-			</File>
-			<File
-				RelativePath=".\LmnTemplates.h"
-				>
-			</File>
+				<File
+					RelativePath=".\include\LmnCommonX.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\LmnContainerX.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\LmnStringX.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\LmnTemplatesX.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="资源文件"
