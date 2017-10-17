@@ -242,7 +242,7 @@ DWORD  FileConfig::GetConfig ( const char * szConfigName, DWORD & dwConfigValue,
 		return 0;
 	}
 
-	if ( 1 != sscanf( (char *)pValue, " %u", &dwConfigValue ) ) {
+	if ( 1 != sscanf( (char *)pValue, " %lu", &dwConfigValue ) ) {
 		dwConfigValue = dwDefault;
 		return 0;
 	}
@@ -257,7 +257,7 @@ DWORD  FileConfig::SetConfig ( const char * szConfigName, DWORD dwConfigValue )
 	}
 
 	char buf[256];
-	SNPRINTF( buf, sizeof(buf), "%u", dwConfigValue );
+	SNPRINTF( buf, sizeof(buf), "%lu", dwConfigValue );
 
 	char * pKey   = 0;
 	char * pValue = 0;

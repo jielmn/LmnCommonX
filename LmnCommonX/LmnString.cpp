@@ -1691,7 +1691,7 @@ CLmnString SplitString::operator [] (DWORD dwIndex) const{
 		}
 
 		void * pData = 0;
-		int ret = GetFromArray( m_result, dwIndex, &pData );
+		GetFromArray( m_result, dwIndex, &pData );
 		CLmnString * pItem = (CLmnString *)pData;
 
 		return *pItem;

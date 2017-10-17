@@ -4,10 +4,15 @@
 #ifdef WIN32
 #include <Windows.h>
 #else
+#include <unistd.h>
+#include <sys/times.h>
 #include <pthread.h>
 #endif
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdarg.h>
 
 // 防止和windows的头文件定义冲突
 #ifndef _WINDEF_ 
