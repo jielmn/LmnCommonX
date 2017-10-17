@@ -154,7 +154,19 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\LmnContainerX.cpp"
+				RelativePath=".\LmnCommon.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\LmnConfig.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\LmnContainer.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\LmnLog.cpp"
 				>
 			</File>
 			<File
@@ -175,19 +187,27 @@
 				Name="include"
 				>
 				<File
-					RelativePath="..\include\LmnCommonX.h"
+					RelativePath="..\include\LmnCommon.h"
 					>
 				</File>
 				<File
-					RelativePath="..\include\LmnContainerX.h"
+					RelativePath="..\include\LmnConfig.h"
 					>
 				</File>
 				<File
-					RelativePath="..\include\LmnStringX.h"
+					RelativePath="..\include\LmnContainer.h"
 					>
 				</File>
 				<File
-					RelativePath="..\include\LmnTemplatesX.h"
+					RelativePath="..\include\LmnLog.h"
+					>
+				</File>
+				<File
+					RelativePath="..\include\LmnString.h"
+					>
+				</File>
+				<File
+					RelativePath="..\include\LmnTemplates.h"
 					>
 				</File>
 			</Filter>

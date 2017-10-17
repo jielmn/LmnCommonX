@@ -1,8 +1,8 @@
 #ifndef  _LEMON_STRINGX_2017_09_06_
 #define  _LEMON_STRINGX_2017_09_06_
 
-#include "LmnCommonX.h"
-#include "LmnContainerX.h"
+#include "LmnCommon.h"
+#include "LmnContainer.h"
 
 /****************************************************************************
  * º¯ÊýÃû£º  strtrim                                                        *

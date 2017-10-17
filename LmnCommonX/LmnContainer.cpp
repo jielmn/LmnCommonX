@@ -5,7 +5,7 @@
 
 
 #include "Inner.h"
-#include "LmnContainerX.h"
+#include "LmnContainer.h"
 
 
 /****************************************************************************
@@ -839,6 +839,25 @@ int  DeinitList( IN PList pList )
 
 	return LMNX_OK;
 }
+
+PListNode  FindFirstListNodeByValue( PList  pList, void * pValue )
+{
+	PListNode_ pNode_ = (PListNode_)GetListHead( pList );
+	while( pNode_ )
+	{
+		if ( pNode_->pData == pValue )
+		{
+			return (PListNode)pNode_;
+		}
+
+		pNode_ = pNode_->pNext;
+	}
+
+	return 0;
+}
+
+
+
 
 
 

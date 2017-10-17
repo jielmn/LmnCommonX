@@ -1,6 +1,6 @@
 #include <assert.h>
-#include "LmnStringX.h"
-#include "LmnTemplatesX.h"
+#include "LmnString.h"
+#include "LmnTemplates.h"
 #include "Inner.h"
 
 

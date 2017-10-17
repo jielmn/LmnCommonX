@@ -1,7 +1,7 @@
 #ifndef  _LEMON_CONTAINERX_2017_09_08_
 #define  _LEMON_CONTAINERX_2017_09_08_
 
-#include "LmnCommonX.h"
+#include "LmnCommon.h"
 
 
 /****************************************************************************/
@@ -226,6 +226,8 @@ int  ClearList( IN PList pList );
 int  DeinitList( IN PList pList );
 
 
+// 根据值，找到第一个节点
+PListNode  FindFirstListNodeByValue( PList  pList, void * pValue );
 
 
 

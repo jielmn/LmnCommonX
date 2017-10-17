@@ -3,9 +3,11 @@
 #endif
 
 
-#include "LmnStringX.h"
-#include "LmnTemplatesX.h"
-#include "LmnContainerX.h"
+#include "LmnString.h"
+#include "LmnTemplates.h"
+#include "LmnContainer.h"
+#include "LmnLog.h"
+#include "LmnConfig.h"
 #include <gtest/gtest.h>
 
 TEST( String, StrTrim )
@@ -903,6 +905,134 @@ TEST( STRING, SPLIT )
 	ASSERT_EQ( 0, strcmp("4",s[3]) );
 	ASSERT_EQ( 0, strcmp("5",s[4]) );
 
+}
+
+TEST( LOG, FILELOG )
+{
+	int nRet = 0;
+	ILog * log = new FileLog();
+	nRet = log->Init("test.log","[%Y-%m-%d %H:%M:%S %O] ");
+	ASSERT_EQ( 0, nRet );
+	nRet = log->Output( ILog::LOG_SEVERITY_ERROR, "hello");
+	ASSERT_EQ( 0, nRet );
+	nRet = log->Deinit();
+	ASSERT_EQ( 0, nRet );
+	delete log;
+
+	char buf[256] = {0};
+	FILE * fp = fopen("test.log","rb");
+	fread( buf, 1, sizeof(buf), fp );
+	char * pFind = strchr( buf, ']');
+	ASSERT_FALSE( pFind == 0 );
+
+	pFind++;
+	StrTrim( pFind );
+	ASSERT_TRUE( strcmp(pFind,"hello") == 0 );
+
+	fclose( fp );
+}
+
+
+TEST( CONFIG, FILE_CONFIG )
+{
+	system("del LmnConfig.cfg");
+
+	int nRet = 0;
+	char szValue[256];
+	DWORD dwValue = 0;
+
+
+	IConfig * pCfg = new FileConfig();
+
+	// 第一次初始化
+	nRet = pCfg->Init();
+	ASSERT_EQ( 0, nRet );
+
+	nRet = pCfg->GetConfig ( "test1", szValue, sizeof(szValue), "hello" );
+	ASSERT_EQ( 0, nRet );
+	ASSERT_EQ( 0, strcmp( szValue, "hello") );
+
+	nRet = pCfg->SetConfig( "test1", "world" );
+	ASSERT_EQ( 0, nRet );
+
+	nRet = pCfg->SetConfig( "test2", 100 );
+	ASSERT_EQ( 0, nRet );
+
+	const char * pResult = pCfg->operator []("abc");
+	ASSERT_FALSE( pResult == 0 );
+	ASSERT_EQ( 0, strcmp(pResult,"") );
+
+	pResult = pCfg->operator []("test1");
+	ASSERT_FALSE( pResult == 0 );
+	ASSERT_EQ( 0, strcmp(pResult,"world") );
+
+	nRet = pCfg->Deinit();
+	ASSERT_EQ( 0, nRet );
+
+
+	// 再初始化一次
+	nRet = pCfg->Init();
+	ASSERT_EQ( 0, nRet );
+
+	nRet = pCfg->GetConfig ( "test1", szValue, sizeof(szValue), "hello" );
+	ASSERT_EQ( 0, nRet );
+	ASSERT_EQ( 0, strcmp( szValue, "world") );
+
+	pResult = pCfg->operator []("test1");
+	ASSERT_FALSE( pResult == 0 );
+	ASSERT_EQ( 0, strcmp(pResult,"world") );
+
+	nRet = pCfg->GetConfig ( "test2", dwValue, 10 );
+	ASSERT_EQ( 0, nRet );
+	ASSERT_EQ( 100, dwValue );
+
+	nRet = pCfg->Deinit();
+	ASSERT_EQ( 0, nRet );
+
+
+	delete pCfg;
+}
+
+TEST( MISC, COMMON ) 
+{
+	Point pt;
+	Point atPolygon[4];
+
+	pt.x = pt.y = 0;
+	atPolygon[0].x = 1;
+	atPolygon[0].y = 1;
+
+	atPolygon[1].x = 1;
+	atPolygon[1].y = -1;
+
+	atPolygon[2].x = -1;
+	atPolygon[2].y = -1;
+
+	atPolygon[3].x = -1;
+	atPolygon[3].y = 1;
+
+	BOOL bRet = IsPointInPolygon( &pt, atPolygon, sizeof(atPolygon) / sizeof(Point) );
+	ASSERT_TRUE( bRet );
+
+	pt.x = 2;
+	pt.y = 0;
+	bRet = IsPointInPolygon( &pt, atPolygon, sizeof(atPolygon) / sizeof(Point) );
+	ASSERT_FALSE( bRet );
+
+	
+	InitRand( );
+	for ( int i = 0; i < 100; i++ ) {
+		DWORD n = GetRand( 1, 20 );
+		ASSERT_TRUE( n >= 1 && n <= 20 );
+	}
+
+
+	DWORD dwStartTick = LmnGetTickCount();
+	LmnSleep( 1000 );
+	DWORD dwEndTick = LmnGetTickCount();
+	DWORD dwDiff = dwEndTick - dwStartTick;
+	ASSERT_TRUE( dwDiff >= 950 && dwDiff <= 1050 ) << "dwDiff = " << dwDiff << "ms";
+	
 }
 
 

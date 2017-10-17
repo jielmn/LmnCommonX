@@ -1,19 +1,6 @@
 #ifndef _INNER_HEADER_2017_09_06_
 #define _INNER_HEADER_2017_09_06_
 
-// 用来强制宏后加引号
-#define DO_ONCE( statement )     do{ statement }while(0)
-#define SAFE_DELETE( p )           DO_ONCE( if (0!=p) { delete p;    p = 0; } )  
-#define SAFE_DELETE_ARRAY( p )     DO_ONCE( if (0!=p) { delete[] p;  p = 0; } )  
-#define SAFE_FREE( p )             DO_ONCE( if (0!=p) { free(p);     p = 0; } ) 
-
-#ifdef WIN32
-#define SNPRINTF(s,n, f,...)      _snprintf(s, n, f, __VA_ARGS__)
-#define STRNCPY(d, s, n)          DO_ONCE( strncpy( d, s, (n)-1 ); d[(n)-1] = '\0'; )
-#else
-#define SNPRINTF(s,n, f...)       snprintf(s, n, f)
-#define STRNCPY(d, s, n)          strncpy( d, s, n )
-#endif
 
 #define MIN( a, b )               ( (a) < (b) ? (a) : (b) )
 #define MAX( a, b )               ( (a) > (b) ? (a) : (b) )
