@@ -837,6 +837,75 @@ TEST( Container, Hashtable ) {
 	ASSERT_EQ( LMNX_OK, 0 );
 }
 
+
+TEST( STRING, LMNSTRING )
+{
+	CLmnString s(" \thello");
+	CLmnString t = s + " world" + " 2017";
+
+	ASSERT_EQ( 0, strcmp( t, " \thello world 2017" ) );
+
+	t += "! \r\n";
+	ASSERT_EQ( 0, strcmp( t, " \thello world 2017! \r\n" ) );
+
+	t.Trim();
+	ASSERT_EQ( 0, strcmp( t, "hello world 2017!" ) );
+
+
+	t = "nice ";
+	t += 123;
+	ASSERT_EQ( 0, strcmp( t, "nice 123" ) );
+}
+
+TEST( STRING, SPLIT )
+{
+	SplitString  s;
+	int nRet = 0;
+
+	nRet = s.Split("hello world", ' ');
+	ASSERT_EQ( 0, nRet );
+	ASSERT_EQ( 2, s.Size() );
+	ASSERT_EQ( 0, strcmp("hello",s[0]) );
+	ASSERT_EQ( 0, strcmp("world",s[1]) );
+
+
+	nRet = s.Split("123,,456,,xyz,", ',');
+	ASSERT_EQ( 0, nRet );
+	ASSERT_EQ( 6, s.Size() );
+	ASSERT_EQ( 0, strcmp("123",s[0]) );
+	ASSERT_EQ( 0, strcmp("456",s[2]) );
+	ASSERT_EQ( 0, strcmp("xyz",s[4]) );
+	ASSERT_EQ( 0, strcmp("",s[1]) );
+	ASSERT_EQ( 0, strcmp("",s[3]) );
+	ASSERT_EQ( 0, strcmp("",s[5]) );
+
+	nRet = s.Split("hello==world==!", "==");
+	ASSERT_EQ( 0, nRet );
+	ASSERT_EQ( 3, s.Size() );
+	ASSERT_EQ( 0, strcmp("hello",s[0]) );
+	ASSERT_EQ( 0, strcmp("world",s[1]) );
+	ASSERT_EQ( 0, strcmp("!",s[2]) );
+
+
+	nRet = s.SplitByAnyChar("hello world,fine", " ,X");
+	ASSERT_EQ( 0, nRet );
+	ASSERT_EQ( 3, s.Size() );
+	ASSERT_EQ( 0, strcmp("hello",s[0]) );
+	ASSERT_EQ( 0, strcmp("world",s[1]) );
+	ASSERT_EQ( 0, strcmp("fine",s[2]) );
+
+	nRet = s.SplitByBlankChars("1   \t   2   \r\n3    4   5");
+	ASSERT_EQ( 0, nRet );
+	ASSERT_EQ( 5, s.Size() );
+	ASSERT_EQ( 0, strcmp("1",s[0]) );
+	ASSERT_EQ( 0, strcmp("2",s[1]) );
+	ASSERT_EQ( 0, strcmp("3",s[2]) );
+	ASSERT_EQ( 0, strcmp("4",s[3]) );
+	ASSERT_EQ( 0, strcmp("5",s[4]) );
+
+}
+
+
 int main(int argc, TCHAR* argv[])
 {
 	testing::InitGoogleTest(&argc, argv);

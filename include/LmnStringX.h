@@ -2,6 +2,7 @@
 #define  _LEMON_STRINGX_2017_09_06_
 
 #include "LmnCommonX.h"
+#include "LmnContainerX.h"
 
 /****************************************************************************
  * 函数名：  strtrim                                                        *
@@ -118,5 +119,60 @@ int DebugStream( char *       pchDebugBuf,  DWORD  dwDebugBufLen,
 				 BOOL         bDosCarriageReturn = FALSE,
 				 BOOL         bShowAnsi = FALSE,
 				 const char * szIndent = 0 );
+
+
+
+
+
+
+/**********************         classes     ***********************************/
+class CLmnString{
+public:
+	CLmnString();
+	CLmnString(const char * s);
+	CLmnString(const char * s,DWORD dwLen);
+	CLmnString(int n);
+	CLmnString(const CLmnString & obj );
+	~CLmnString();
+
+	CLmnString & operator = ( const CLmnString & obj );
+	CLmnString   operator +  ( const CLmnString & obj );
+	CLmnString & operator += ( const CLmnString & obj );
+	CLmnString   operator +  ( int n );
+	CLmnString & operator += ( int n );
+
+	operator char *() const;
+
+	CLmnString & Trim();
+private:
+	void  Clear();
+	void  Init( const char * s = 0 );
+	void  Init( const char * s, DWORD dwLen );
+
+	char *   m_str;                                // 字符串
+	DWORD    m_dwStrSize;                          // 字符内存大小
+	DWORD    m_dwStrLen;                           // 字符串长度
+};
+
+
+class  SplitString {
+public:
+	SplitString( );
+	~SplitString();
+
+	int Split( const char * szLine, char chSplit );
+	int Split( const char * szLine, const char * szSplit );
+	int SplitByAnyChar( const char * szLine, const char * delimiters );
+	// 例如 "1   \t   2   \r\n3    4   5"  --->   1, 2, 3, 4, 5
+	int SplitByBlankChars( const char * szLine );
+
+	DWORD  Size() const;
+	CLmnString operator [] (DWORD dwIndex) const;
+
+private:
+	void  Clear();
+
+	PArray     m_result;
+};
 
 #endif

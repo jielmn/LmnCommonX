@@ -1308,3 +1308,394 @@ int DebugStream(  char *       pchDebugBuf,  DWORD  dwDebugBufLen,
 	*pchDebugBuf = '\0';
 	return LMNX_OK;
 }
+
+
+
+
+
+
+
+
+
+/*************************    classes     ************************************/
+#define CSTRING_INITIAL_BLOCK_SIZE    128
+
+DWORD  CalcReqBufLen( DWORD dwReqLen )
+{
+	DWORD  dwMin = CSTRING_INITIAL_BLOCK_SIZE;
+
+	while( dwMin < dwReqLen )
+	{
+		dwMin *= 2;
+	}
+
+	return dwMin;
+}
+
+
+CLmnString::CLmnString() {
+	Init();
+}
+
+CLmnString::CLmnString(const char * s) {
+	Init( s );
+}
+
+CLmnString::CLmnString(const char * s,DWORD dwLen) {
+	Init(s,dwLen);
+}
+
+CLmnString::CLmnString(int n){
+	char buf[256];
+	SNPRINTF( buf, sizeof(buf), "%d", n );
+	Init( buf );
+}
+
+CLmnString::CLmnString(const CLmnString & obj){
+	Init( obj.m_str );
+}
+
+CLmnString::~CLmnString(){
+	Clear();
+}
+
+void  CLmnString::Clear() {
+	if ( m_str ) {
+		delete[] m_str;
+		m_str = 0;
+		m_dwStrSize = 0;
+		m_dwStrLen = 0;
+	}
+}
+
+void  CLmnString::Init( const char * s /* = 0 */ ) {
+
+	if ( 0 == s ) {
+		m_str = new char[CSTRING_INITIAL_BLOCK_SIZE];
+		if ( 0 != m_str ) {
+			memset( m_str, 0, CSTRING_INITIAL_BLOCK_SIZE );
+			m_dwStrSize = CSTRING_INITIAL_BLOCK_SIZE;
+		} else {
+			m_dwStrSize = 0;
+		}
+		m_dwStrLen = 0;
+	} else {
+		DWORD dwLen    = strlen(s);
+		DWORD dwReqLen = CalcReqBufLen( dwLen + 1 );
+
+		m_str = new char[dwReqLen];
+		if ( 0 != m_str ) {
+			// memset( m_str, 0, dwReqLen );
+			memcpy( m_str, s, dwLen + 1 );
+			m_dwStrSize = dwReqLen;
+			m_dwStrLen  = dwLen;
+		} else {
+			m_dwStrSize = 0;
+			m_dwStrLen = 0;
+		}
+	}
+}
+
+void  CLmnString::Init( const char * s, DWORD dwSpanLen ) {
+
+	if ( 0 == s ) {
+		m_str = new char[CSTRING_INITIAL_BLOCK_SIZE];
+		if ( 0 != m_str ) {
+			memset( m_str, 0, CSTRING_INITIAL_BLOCK_SIZE );
+			m_dwStrSize = CSTRING_INITIAL_BLOCK_SIZE;
+		} else {
+			m_dwStrSize = 0;
+		}
+		m_dwStrLen = 0;
+	} else {
+		DWORD dwStrLen = strlen(s);
+		DWORD dwLen = dwStrLen < dwSpanLen ? dwStrLen : dwSpanLen;
+		DWORD dwReqLen = CalcReqBufLen( dwLen + 1 );
+
+		m_str = new char[dwReqLen];
+		if ( 0 != m_str ) {
+			memset( m_str, 0, dwReqLen );
+			memcpy( m_str, s, dwLen );
+			m_dwStrSize = dwReqLen;
+			m_dwStrLen  = dwLen;
+		} else {
+			m_dwStrSize = 0;
+			m_dwStrLen = 0;
+		}
+	}
+}
+
+CLmnString & CLmnString::operator = ( const CLmnString & obj ) {
+	Clear();
+	Init( obj.m_str );	
+	return *this;
+}
+
+CLmnString  CLmnString::operator + ( const CLmnString & obj ) {
+
+	CLmnString ret;
+	ret += *this;
+	ret += obj;
+
+	return ret;
+}
+
+CLmnString & CLmnString::operator += ( const CLmnString & obj ){
+	// Èç¹ûÄÚ´æ²»¹»
+	if ( obj.m_dwStrLen + m_dwStrLen >= m_dwStrSize ) {
+		char * pOld = m_str;
+
+		DWORD dwReqLen = CalcReqBufLen( obj.m_dwStrLen + m_dwStrLen + 1 );
+		m_str = new char[dwReqLen];
+		if ( 0 != m_str ) {
+			memcpy( m_str, pOld, m_dwStrLen );
+			memcpy( m_str + m_dwStrLen, obj.m_str, obj.m_dwStrLen + 1 );
+			m_dwStrSize  = dwReqLen;
+			m_dwStrLen  += obj.m_dwStrLen;
+			// ·ÖÅäÄÚ´æÊ§°Ü
+		} else {
+			m_str = pOld;
+		}
+
+		// µ±Ç°ÄÚ´æ×ã¹»
+	} else {
+		memcpy( m_str + m_dwStrLen, obj.m_str, obj.m_dwStrLen + 1 );
+		m_dwStrLen += obj.m_dwStrLen;
+	}
+	return *this;
+}
+
+CLmnString   CLmnString::operator +  ( int n ){
+	CLmnString ret;
+	ret += *this;
+	ret += n;
+	return ret;
+}
+
+CLmnString & CLmnString::operator += ( int n ){
+	char buf[256];
+	SNPRINTF( buf, sizeof(buf), "%d", n );
+	return this->operator +=(buf);
+}
+
+
+CLmnString::operator char *() const {
+	return m_str;
+}
+
+CLmnString & CLmnString::Trim(){
+	if ( m_str ) {
+		StrTrim( m_str );
+		m_dwStrLen = strlen( m_str );
+	}
+	return *this;
+}
+
+
+
+SplitString::SplitString( ){
+	m_result = InitArray( 0 );
+}
+
+SplitString::~SplitString(){
+	if ( 0 != m_result ) {
+		Clear();
+		DeinitArray( m_result );
+		m_result = 0;
+	}
+}
+
+void  SplitString::Clear(){
+	if ( m_result ) {
+		DWORD dwCnt = GetArraySize( m_result );
+		for ( DWORD i = 0; i < dwCnt; i++ ) {
+
+			void * pData = 0;
+			int ret = GetFromArray( m_result, i, &pData );
+			CLmnString * pItem = (CLmnString *)(pData);
+
+			assert( pItem && 0 == ret );
+			delete pItem;
+		}
+		ClearArray(m_result);
+	}
+}
+
+int SplitString::Split( const char * szLine, char chSplit ){
+	Clear();
+
+	if ( 0 == szLine ) {
+		return LMNX_WRONG_PARAMS;
+	}
+
+	if ( 0 == m_result ) {
+		return LMNX_NO_MEMORY;
+	}
+
+	const char * pStart = szLine;
+	const char * pFind  = 0;
+
+	do {
+		pFind  = strchr( pStart, chSplit );
+		if ( pFind ) {
+			DWORD dwLen = pFind - pStart;
+			CLmnString * pItem = new CLmnString( pStart, dwLen );
+			if ( pItem ) {
+				Append2Array( m_result, pItem );
+			}
+			pStart = pFind + 1;
+		} else {
+			CLmnString * pItem = new CLmnString( pStart );
+			if ( pItem ) {
+				Append2Array( m_result, pItem );
+			}
+		}
+	} while ( pFind );
+
+	return 0;
+}
+
+int SplitString::Split( const char * szLine, const char * szSplit ){
+	Clear();
+
+	if ( 0 == szLine || 0 == szSplit ) {
+		return LMNX_WRONG_PARAMS;
+	}
+
+	if ( 0 == m_result ) {
+		return LMNX_NO_MEMORY;
+	}
+
+	const char * pStart = szLine;
+	const char * pFind  = 0;
+	DWORD dwSplitLen = strlen( szSplit );
+
+	do {
+		pFind  = strstr( pStart, szSplit );
+		if ( pFind ) {
+			DWORD dwLen = pFind - pStart;
+			CLmnString * pItem = new CLmnString( pStart, dwLen );
+			if ( pItem ) {
+				Append2Array( m_result, pItem );
+			}
+			pStart = pFind + dwSplitLen;
+		} else {
+			CLmnString * pItem = new CLmnString( pStart );
+			if ( pItem ) {
+				Append2Array( m_result, pItem );
+			}
+		}
+	} while ( pFind );
+
+	return 0;
+}
+
+int SplitString::SplitByAnyChar( const char * szLine, const char * szSplits ){
+	Clear();
+
+	if ( 0 == szLine || 0 == szSplits ) {
+		return LMNX_WRONG_PARAMS;
+	}
+
+	if ( 0 == m_result ) {
+		return LMNX_NO_MEMORY;
+	}
+
+	DWORD dwSplitLen = strlen( szSplits );
+	const char * pCurrent = szLine;
+	const char * pStart   = szLine;
+
+	while ( *pCurrent != '\0' ) {
+		for ( DWORD i = 0; i < dwSplitLen; i++ ) {
+			// ÕÒµ½·Ö¸ô·û
+			if (*pCurrent == szSplits[i]) {
+				DWORD dwLen = pCurrent - pStart;
+				CLmnString * pItem = new CLmnString( pStart, dwLen );
+				if ( pItem ) {
+					Append2Array( m_result, pItem );
+				}
+				pStart = pCurrent + 1;
+				break;
+			}
+		}
+		pCurrent++;
+	}
+
+	DWORD dwLen = pCurrent - pStart;
+	CLmnString * pItem = new CLmnString( pStart, dwLen );
+	if ( pItem ) {
+		Append2Array( m_result, pItem );
+	}
+
+	return 0;
+}
+
+int SplitString::SplitByBlankChars( const char * szLine ) {
+	Clear();
+
+	if ( 0 == szLine ) {
+		return LMNX_WRONG_PARAMS;
+	}
+
+	if ( 0 == m_result ) {
+		return LMNX_NO_MEMORY;
+	}
+
+	const char * pCurrent = szLine;
+	const char * pStart   = 0;
+
+	while ( *pCurrent != '\0' ) {
+		if ( 0 == pStart ) {
+			// Ñ°ÕÒ·Ç¿Õ°××Ö·û
+			if ( !_IsBlankChar(*pCurrent) ) {
+				pStart = pCurrent;
+			}
+		} else {
+			// Ñ°ÕÒ¿Õ°××Ö·û
+			if ( _IsBlankChar(*pCurrent) ) {
+				DWORD dwLen = pCurrent - pStart;
+				CLmnString * pItem = new CLmnString( pStart, dwLen );
+				if ( pItem ) {
+					Append2Array( m_result, pItem );
+				}
+				pStart = 0;
+			}
+		}
+		pCurrent++;
+	}
+
+	if ( pStart ) {
+		DWORD dwLen = pCurrent - pStart;
+		CLmnString * pItem = new CLmnString( pStart, dwLen );
+		if ( pItem ) {
+			Append2Array( m_result, pItem );
+		}
+	}
+
+	return 0;
+}
+
+DWORD  SplitString::Size() const{
+	if ( m_result ) {
+		return GetArraySize( m_result );
+	} else {
+		return 0;
+	}
+}
+
+CLmnString SplitString::operator [] (DWORD dwIndex) const{
+	if ( m_result ) {
+		DWORD dwCnt = GetArraySize( m_result );
+		if ( dwIndex >= dwCnt ) {
+			return "";
+		}
+
+		void * pData = 0;
+		int ret = GetFromArray( m_result, dwIndex, &pData );
+		CLmnString * pItem = (CLmnString *)pData;
+
+		return *pItem;
+	} else {
+		return "";
+	}
+}
