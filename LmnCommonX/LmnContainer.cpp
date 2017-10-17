@@ -18,7 +18,7 @@
 // 数组的内部结构 
 typedef struct tagArray_
 {
-	void **           ppData;                    // 数据数组
+	const void **     ppData;                    // 数据数组
 	DWORD             dwCount;                   // 数据个数
 	DWORD             dwMaxCount;                // 数据数组大小
 }Array_, *PArray_;
@@ -29,8 +29,7 @@ typedef struct tagArray_
  * 功  能：  插入数据到数组                                                 *
  * 参  数：  dwIndex 插入到哪个索引前面                                     *
  ****************************************************************************/
-static DWORD _Insert2Array( IN PArray_ pArray_,  IN DWORD dwIndex, 
-                          IN void * pData )
+static DWORD _Insert2Array( IN PArray_ pArray_,  IN DWORD dwIndex, IN const void * pData )
 {
     assert( pArray_ );
     
@@ -40,7 +39,7 @@ static DWORD _Insert2Array( IN PArray_ pArray_,  IN DWORD dwIndex,
         // 把数组空间扩大1倍
         DWORD   dwNextSize = pArray_->dwMaxCount * 2;
         // void ** ppTmp      = new void *[dwNextSize];
-        void ** ppTmp      = (void **)malloc( sizeof(void *) * dwNextSize );
+        const void ** ppTmp      = (const void **)malloc( sizeof(const void *) * dwNextSize );
         // 如果分配内存失败
         if ( 0 == ppTmp )
         {
@@ -48,7 +47,7 @@ static DWORD _Insert2Array( IN PArray_ pArray_,  IN DWORD dwIndex,
         }
 
         // 转移旧数据
-        memcpy( ppTmp, pArray_->ppData, pArray_->dwCount * sizeof(void *) );
+        memcpy( ppTmp, pArray_->ppData, pArray_->dwCount * sizeof(const void *) );
         // 释放旧的数据
         SAFE_FREE( pArray_->ppData );
         // 赋值
@@ -99,7 +98,7 @@ PArray InitArray( IN DWORD dwMaxSize )
     }
     memset( pArray_, 0, sizeof(Array_) );
 
-    pArray_->ppData  = (void **)malloc( sizeof(void *)*dwMaxSize );
+    pArray_->ppData  = (const void **)malloc( sizeof(const void *)*dwMaxSize );
     if ( 0 == pArray_->ppData )
     {
         SAFE_FREE( pArray_ );
@@ -134,7 +133,7 @@ DWORD  GetArraySize ( IN PArray pArray )
  * 功  能：  把数组追加到数组末尾                                           *
  * 返回值：  成功， 添加数据的索引；失败，-1                                *
  ****************************************************************************/
- DWORD  Append2Array  ( IN PArray pArray,  IN void * pData )
+ DWORD  Append2Array  ( IN PArray pArray,  IN const void * pData )
 {
 	if ( 0 == pArray )
 	{
@@ -152,8 +151,7 @@ DWORD  GetArraySize ( IN PArray pArray )
  * 功  能：  把数组插入到数组任意位置                                       *
  * 返回值：  成功， 添加数据的索引；失败，-1                                *
  ****************************************************************************/
-DWORD Insert2Array( IN PArray pArray, IN DWORD dwIndex, 
-                                IN void * pData )
+DWORD Insert2Array( IN PArray pArray, IN DWORD dwIndex, IN const void * pData )
 {
 	if ( 0 == pArray )
 	{
@@ -171,7 +169,7 @@ DWORD Insert2Array( IN PArray pArray, IN DWORD dwIndex,
  * 功  能：  取数组任意位置的数据                                           *
  * 返回值：  成功 0， 数据；失败，非0                                       *
  ****************************************************************************/
-int GetFromArray( IN PArray pArray,  IN DWORD dwIndex, INOUT void ** ppData )
+int GetFromArray( IN PArray pArray,  IN DWORD dwIndex, INOUT const void ** ppData )
 {
 	if ( 0 == pArray || 0 == ppData )
 	{
@@ -197,7 +195,7 @@ int GetFromArray( IN PArray pArray,  IN DWORD dwIndex, INOUT void ** ppData )
  * 功  能：  设置数组任意位置的数据                                         *
  * 返回值：  成功， 0；失败，非0                                            *
  ****************************************************************************/
-int SetArray( IN PArray pArray, IN DWORD dwIndex, IN void * pData )
+int SetArray( IN PArray pArray, IN DWORD dwIndex, IN const void * pData )
 {
 	if ( 0 == pArray )
 	{
@@ -892,7 +890,7 @@ PListNode  FindFirstListNodeByValue( PList  pList, void * pValue )
 
 typedef struct tagTreeNode_
 {
-	void *                   pData;
+	const void *             pData;
 	struct tagTreeNode_ *    pParent;
 	struct tagTreeNode_ *    pNextSibling;
 	struct tagTreeNode_ *    pPrevSibling;
@@ -908,7 +906,7 @@ typedef struct tagTreeNode_
  * 返回值：  成功，新的节点；失败，0                                        *
  ****************************************************************************/
 static  PTreeNode_ _Insert2Tree( IN PTreeNode_  pParent_, IN PTreeNode_ pChildNode_, 
-								 IN BOOL bAfterChild_,    IN void * pData )
+								 IN BOOL bAfterChild_,    IN const void * pData )
 {
     assert( pParent_ );
 
@@ -1014,7 +1012,7 @@ static  void  _EraseTreeNode( IN PTreeNode_  pTreeNode_ )
  * 功  能：  初始化树                                                       *
  * 返回值：  成功，非0；失败，0                                             *
  ****************************************************************************/
- PTreeNode InitTree( void * pData )
+ PTreeNode InitTree( const void * pData )
 {
     PTreeNode_  pTreeNode_  =  (PTreeNode_)malloc( sizeof(TreeNode_) );
     if ( 0 == pTreeNode_ )
@@ -1033,7 +1031,7 @@ static  void  _EraseTreeNode( IN PTreeNode_  pTreeNode_ )
  * 功  能：  往树里插入节点                                                 *
  * 返回值：  成功，新的节点；失败，0                                        *
  ****************************************************************************/
-PTreeNode Insert2Tree( IN PTreeNode pParent,             IN void * pData, 
+PTreeNode Insert2Tree( IN PTreeNode pParent,             IN const void * pData, 
 	                   IN PTreeNode pChildNode /*= 0*/,  IN BOOL bAfterChild /*= TRUE*/ )
 {
     if ( 0 == pParent )

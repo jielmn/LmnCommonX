@@ -3,14 +3,14 @@
 # ==============================================================
 #              请修改这部分的内容
 # omit .o  包括完整的路径，如 $(BASE)/t1 $(CALL)/call
-OBJS            := LmnCommonX/gtest/main
+OBJS            := gtest/main
 
 # 宏定义
 DEFINES         := 
 
 
 # multiple  例如  /usr/include   /user/openssl
-INCLUDE_PATH    := . LmnCommonX/include
+INCLUDE_PATH    := . include gtest-1.7.0/include
 
 
 # multiple
@@ -18,7 +18,7 @@ LIB_PATH        := .
 
 
 # multiple  例如：pthread  rt  
-LIBS            := 
+LIBS            := LmnCommonX gtest_main pthread rt
 
 
 # 打包archive(.a)还是exe(.out)

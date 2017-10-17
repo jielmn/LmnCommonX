@@ -93,7 +93,7 @@ int Str2Int( IN const char * szNum, OUT int * pnNum );
  ****************************************************************************/
 int EncodeBase64( OUT   char  *       pBase64, 
                   IN    DWORD         dwBase64Size, 
-                  IN    void *        pSrc, 
+                  IN    const void *  pSrc, 
                   IN    DWORD         dwSrcLen );
 
 
@@ -115,7 +115,7 @@ int DecodeBase64( OUT   void  * pDest,
 //       bShowAnsi,  文字部分是否以ansi方式显示(显示汉字)
 /***********************************************************************/
 int DebugStream( char *       pchDebugBuf,  DWORD  dwDebugBufLen, 
-			     void *       pbyStream,    DWORD  dwStreamLen,
+			     const void * pbyStream,    DWORD  dwStreamLen,
 				 BOOL         bDosCarriageReturn = FALSE,
 				 BOOL         bShowAnsi = FALSE,
 				 const char * szIndent = 0 );

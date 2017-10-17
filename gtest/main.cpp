@@ -241,7 +241,7 @@ TEST( String, Base64 ) {
 	dwSize = sizeof(buf);
 	ret = DecodeBase64( buf, &dwSize, "MTIzNDU=" );
 	ASSERT_EQ( LMNX_OK, ret );
-	ASSERT_EQ( 5, dwSize );
+	ASSERT_EQ( (DWORD)5, dwSize );
 	ASSERT_TRUE( 0 == StrNiCmp("12345", buf, 5) );
 
 
@@ -254,7 +254,7 @@ TEST( String, Base64 ) {
 	dwSize = sizeof(int);
 	ret = DecodeBase64( &num, &dwSize, "YwAAAA==" );
 	ASSERT_EQ( LMNX_OK, ret );
-	ASSERT_EQ( 4, dwSize );
+	ASSERT_EQ( (DWORD)4, dwSize );
 	ASSERT_EQ( 99, num );
 }
 
@@ -344,7 +344,7 @@ TEST( Template, RecyledItem ) {
 	items.Append( 3 );
 	items.Append( 4 );
 	items.Append( 5 );
-	ASSERT_EQ( 3, items.GetCount() );
+	ASSERT_EQ( (DWORD)3, items.GetCount() );
 	ASSERT_EQ( TRUE, items.IsFull() );
 	ASSERT_EQ( 3, items[0] );
 	ASSERT_EQ( 4, items[1] );
@@ -356,13 +356,13 @@ TEST( Template, FixedSizeItems ) {
 	CFixedSizeItems<int,3>  items;
 
 	dwRet = items.AddItem(1);
-	ASSERT_FALSE( -1 == dwRet );
+	ASSERT_FALSE( (DWORD)-1 == dwRet );
 	dwRet = items.AddItem(2);
-	ASSERT_FALSE( -1 == dwRet );
+	ASSERT_FALSE( (DWORD)-1 == dwRet );
 	dwRet = items.AddItem(3);
-	ASSERT_FALSE( -1 == dwRet );
+	ASSERT_FALSE( (DWORD)-1 == dwRet );
 	dwRet = items.AddItem(4);
-	ASSERT_TRUE( -1 == dwRet );
+	ASSERT_TRUE( (DWORD)-1 == dwRet );
 
 	BOOL bRet = FALSE;
 	bRet = items.DeleteItem(1);
@@ -370,33 +370,33 @@ TEST( Template, FixedSizeItems ) {
 
 	DWORD dwIndex = 0;
 	dwIndex = items.GetFirstItem();
-	ASSERT_FALSE( -1 == dwIndex );
+	ASSERT_FALSE( (DWORD)-1 == dwIndex );
 	ASSERT_EQ(1,items[dwIndex]);
 
 	dwIndex = items.GetNextItem( dwIndex );
-	ASSERT_FALSE( -1 == dwIndex );
+	ASSERT_FALSE( (DWORD)-1 == dwIndex );
 	ASSERT_EQ(3,items[dwIndex]);
 
 	dwIndex = items.GetNextItem( dwIndex );
-	ASSERT_TRUE( -1 == dwIndex );
+	ASSERT_TRUE( (DWORD)-1 == dwIndex );
 
 	dwRet = items.AddItem(100);
-	ASSERT_FALSE( -1 == dwRet );
+	ASSERT_FALSE( (DWORD)-1 == dwRet );
 
 	dwIndex = items.GetFirstItem();
-	ASSERT_FALSE( -1 == dwIndex );
+	ASSERT_FALSE( (DWORD)-1 == dwIndex );
 	ASSERT_EQ(1,items[dwIndex]);
 
 	dwIndex = items.GetNextItem( dwIndex );
-	ASSERT_FALSE( -1 == dwIndex );
+	ASSERT_FALSE( (DWORD)-1 == dwIndex );
 	ASSERT_EQ(100,items[dwIndex]);
 
 	dwIndex = items.GetNextItem( dwIndex );
-	ASSERT_FALSE( -1 == dwIndex );
+	ASSERT_FALSE( (DWORD)-1 == dwIndex );
 	ASSERT_EQ(3,items[dwIndex]);
 
 	dwIndex = items.GetNextItem( dwIndex );
-	ASSERT_TRUE( -1 == dwIndex );
+	ASSERT_TRUE( (DWORD)-1 == dwIndex );
 }
 
 
@@ -407,44 +407,44 @@ TEST( Container, Array ) {
 
 	DWORD dwIndex = 0;
 	dwIndex = Append2Array( pArr, "hello" );
-	ASSERT_EQ( 0, dwIndex );
+	ASSERT_EQ( (DWORD)0, dwIndex );
 	dwIndex = Append2Array( pArr, "world" );
-	ASSERT_EQ( 1, dwIndex );
+	ASSERT_EQ( (DWORD)1, dwIndex );
 	dwIndex = Append2Array( pArr, "!" );
-	ASSERT_EQ( 2, dwIndex );
+	ASSERT_EQ( (DWORD)2, dwIndex );
 
 	dwIndex = Insert2Array( pArr, 0, "111" );
-	ASSERT_EQ( 0, dwIndex );
+	ASSERT_EQ( (DWORD)0, dwIndex );
 	dwIndex = Insert2Array( pArr, 10, "222" );
-	ASSERT_EQ( 4, dwIndex );
+	ASSERT_EQ( (DWORD)4, dwIndex );
 	dwIndex = Insert2Array( pArr, 1, "333" );
-	ASSERT_EQ( 1, dwIndex );
+	ASSERT_EQ( (DWORD)1, dwIndex );
 
 	DWORD dwSize = GetArraySize( pArr );
-	ASSERT_EQ( 6, dwSize );
+	ASSERT_EQ( (DWORD)6, dwSize );
 
 	char * pStr = 0;
-	ret = GetFromArray( pArr, 0, (void **)&pStr );
+	ret = GetFromArray( pArr, 0, (const void **)&pStr );
 	ASSERT_EQ( 0, ret );
 	ASSERT_EQ( 0, strcmp(pStr,"111") );
 
-	ret = GetFromArray( pArr, 1, (void **)&pStr );
+	ret = GetFromArray( pArr, 1, (const void **)&pStr );
 	ASSERT_EQ( 0, ret );
 	ASSERT_EQ( 0, strcmp(pStr,"333") );
 
-	ret = GetFromArray( pArr, 2, (void **)&pStr );
+	ret = GetFromArray( pArr, 2, (const void **)&pStr );
 	ASSERT_EQ( 0, ret );
 	ASSERT_EQ( 0, strcmp(pStr,"hello") );
 
-	ret = GetFromArray( pArr, 3, (void **)&pStr );
+	ret = GetFromArray( pArr, 3, (const void **)&pStr );
 	ASSERT_EQ( 0, ret );
 	ASSERT_EQ( 0, strcmp(pStr,"world") );
 
-	ret = GetFromArray( pArr, 4, (void **)&pStr );
+	ret = GetFromArray( pArr, 4, (const void **)&pStr );
 	ASSERT_EQ( 0, ret );
 	ASSERT_EQ( 0, strcmp(pStr,"!") );
 
-	ret = GetFromArray( pArr, 5, (void **)&pStr );
+	ret = GetFromArray( pArr, 5, (const void **)&pStr );
 	ASSERT_EQ( 0, ret );
 	ASSERT_EQ( 0, strcmp(pStr,"222") );
 
@@ -453,41 +453,41 @@ TEST( Container, Array ) {
 
 	ret = SetArray( pArr, 5, "444" );
 	ASSERT_EQ( LMNX_OK, ret );
-	ret = GetFromArray( pArr, 5, (void **)&pStr );
+	ret = GetFromArray( pArr, 5, (const void **)&pStr );
 	ASSERT_EQ( 0, ret );
 	ASSERT_EQ( 0, strcmp(pStr,"444") );
 
 	ret = EraseArray( pArr, 3 );
 	ASSERT_EQ( 0, ret );
 	dwSize = GetArraySize( pArr );
-	ASSERT_EQ( 5, dwSize );
+	ASSERT_EQ( (DWORD)5, dwSize );
 
-	ret = GetFromArray( pArr, 0, (void **)&pStr );
+	ret = GetFromArray( pArr, 0, (const void **)&pStr );
 	ASSERT_EQ( 0, ret );
 	ASSERT_EQ( 0, strcmp(pStr,"111") );
 
-	ret = GetFromArray( pArr, 1, (void **)&pStr );
+	ret = GetFromArray( pArr, 1, (const void **)&pStr );
 	ASSERT_EQ( 0, ret );
 	ASSERT_EQ( 0, strcmp(pStr,"333") );
 
-	ret = GetFromArray( pArr, 2, (void **)&pStr );
+	ret = GetFromArray( pArr, 2, (const void **)&pStr );
 	ASSERT_EQ( 0, ret );
 	ASSERT_EQ( 0, strcmp(pStr,"hello") );
 
-	ret = GetFromArray( pArr, 3, (void **)&pStr );
+	ret = GetFromArray( pArr, 3, (const void **)&pStr );
 	ASSERT_EQ( 0, ret );
 	ASSERT_EQ( 0, strcmp(pStr,"!") );
 
-	ret = GetFromArray( pArr, 4, (void **)&pStr );
+	ret = GetFromArray( pArr, 4, (const void **)&pStr );
 	ASSERT_EQ( 0, ret );
 	ASSERT_EQ( 0, strcmp(pStr,"444") );
 
 	ret = ClearArray( pArr );
 	ASSERT_EQ( 0, ret );
 	dwSize = GetArraySize( pArr );
-	ASSERT_EQ( 0, dwSize );
+	ASSERT_EQ( (DWORD)0, dwSize );
 
-	ret = GetFromArray( pArr, 0, (void **)&pStr );
+	ret = GetFromArray( pArr, 0, (const void **)&pStr );
 	ASSERT_EQ( LMNX_OUT_OF_RANGE, ret );
 
 	ret = DeinitArray( pArr );
@@ -501,7 +501,7 @@ TEST( Container, List ) {
 	ASSERT_TRUE( pList != 0 );
 
 	DWORD dwSize = GetListSize( pList );
-	ASSERT_EQ( 0, dwSize );
+	ASSERT_EQ( (DWORD)0, dwSize );
 
 	int ret  = 0;
 	PListNode pNode = 0;
@@ -515,45 +515,45 @@ TEST( Container, List ) {
 
 	pNode = Insert2List( pList, (void *)111, GetListHead(pList) );
 	ASSERT_TRUE( pNode != 0 );
-	ASSERT_EQ( 111, (int)pNode->pData );
+	ASSERT_EQ( (void *)111, pNode->pData );
 
 	pNode = Insert2List( pList, (void *)222, pNode );
 	ASSERT_TRUE( pNode != 0 );
-	ASSERT_EQ( 222, (int)pNode->pData );
+	ASSERT_EQ( (void *)222, pNode->pData );
 
 	pNode = Insert2List( pList, (void *)333, pNode );
 	ASSERT_TRUE( pNode != 0 );
-	ASSERT_EQ( 333, (int)pNode->pData );
+	ASSERT_EQ( (void *)333, pNode->pData );
 	
 	pNode = GetListHead( pList );
 	ASSERT_TRUE( pNode != 0 );
-	ASSERT_EQ( 333, (int)pNode->pData );
+	ASSERT_EQ( (void *)333, pNode->pData );
 
 	pNode = GetNextListNode( pNode );
 	ASSERT_TRUE( pNode != 0 );
-	ASSERT_EQ( 222, (int)pNode->pData );
+	ASSERT_EQ( (void *)222, pNode->pData );
 
 	pNode = GetNextListNode( pNode );
 	ASSERT_TRUE( pNode != 0 );
-	ASSERT_EQ( 111, (int)pNode->pData );
+	ASSERT_EQ( (void *)111, pNode->pData );
 
 	pNode = GetNextListNode( pNode );
 	ASSERT_TRUE( pNode == 0 );
 
 	pNode = GetListTail( pList );
 	ASSERT_TRUE( pNode != 0 );
-	ASSERT_EQ( 111, (int)pNode->pData );
+	ASSERT_EQ( (void *)111, pNode->pData );
 
 	dwSize = GetListSize( pList );
-	ASSERT_EQ( 3, dwSize );
+	ASSERT_EQ( (DWORD)3, dwSize );
 
 	pNode = GetPrevListNode( pNode );
 	ASSERT_TRUE( pNode != 0 );
-	ASSERT_EQ( 222, (int)pNode->pData );
+	ASSERT_EQ( (void *)222, pNode->pData );
 
 	pNode = GetPrevListNode( pNode );
 	ASSERT_TRUE( pNode != 0 );
-	ASSERT_EQ( 333, (int)pNode->pData );
+	ASSERT_EQ( (void *)333, pNode->pData );
 
 	pNode = GetPrevListNode( pNode );
 	ASSERT_TRUE( pNode == 0 );
@@ -561,15 +561,15 @@ TEST( Container, List ) {
 
 	pNode = GetListHead( pList );
 	ASSERT_TRUE( pNode != 0 );
-	ASSERT_EQ( 333, (int)pNode->pData );
+	ASSERT_EQ( (void *)333, pNode->pData );
 
 	pNode = GetNextListNode( pNode );
 	ASSERT_TRUE( pNode != 0 );
-	ASSERT_EQ( 222, (int)pNode->pData );
+	ASSERT_EQ( (void *)222, pNode->pData );
 
 	pNode = GetNextListNode( pNode );
 	ASSERT_TRUE( pNode != 0 );
-	ASSERT_EQ( 111, (int)pNode->pData );
+	ASSERT_EQ( (void *)111, pNode->pData );
 
 	pNode = GetNextListNode( pNode );
 	ASSERT_TRUE( pNode == 0 );
@@ -577,21 +577,21 @@ TEST( Container, List ) {
 
 	pNode = GetListHead( pList );
 	ASSERT_TRUE( pNode != 0 );
-	ASSERT_EQ( 333, (int)pNode->pData );
+	ASSERT_EQ( (void *)333, pNode->pData );
 
 	pNode = GetNextListNode( pNode );
 	ASSERT_TRUE( pNode != 0 );
-	ASSERT_EQ( 222, (int)pNode->pData );
+	ASSERT_EQ( (void *)222, pNode->pData );
 
 	pNode = EraseList( pList, pNode );
 	ASSERT_TRUE( pNode != 0 );
-	ASSERT_EQ( 111, (int)pNode->pData );
+	ASSERT_EQ( (void *)111, pNode->pData );
 
 	pNode = EraseList( pList, pNode );
 	ASSERT_TRUE( pNode == 0 );
 
 	dwSize = GetListSize( pList );
-	ASSERT_EQ( 1, dwSize );
+	ASSERT_EQ( (DWORD)1, dwSize );
 
 	ret  = DeinitList( pList );
 	ASSERT_EQ( LMNX_OK, ret );
@@ -759,7 +759,7 @@ TEST( Container, Hashtable ) {
 
 	DWORD dwCnt = 0;
 	dwCnt = GetHashtableSize( pHashtable );
-	ASSERT_EQ( 0, dwCnt );
+	ASSERT_EQ( (DWORD)0, dwCnt );
 
 	PHashNode pNode = 0;
 	pNode = Add2Hashtable( pHashtable, "1", "hello" );
@@ -781,7 +781,7 @@ TEST( Container, Hashtable ) {
 	ASSERT_FALSE( 0 == pNode );
 
 	dwCnt = GetHashtableSize( pHashtable );
-	ASSERT_EQ( 6, dwCnt );
+	ASSERT_EQ( (DWORD)6, dwCnt );
 
 	pNode = GetHashtableFirstNode( pHashtable );
 	while ( pNode ) {
@@ -803,7 +803,7 @@ TEST( Container, Hashtable ) {
 		}
 		pNode = GetNextHashtableNode( pNode );
 	}
-	ASSERT_EQ( 0, dwCnt );
+	ASSERT_EQ( (DWORD)0, dwCnt );
 
 	void * pOldData = 0;
 	BOOL bExist = FALSE;
@@ -832,7 +832,7 @@ TEST( Container, Hashtable ) {
 		pNode = EraseHashtable( pNode );
 		dwCnt++;
 	}
-	ASSERT_EQ( 7, dwCnt );
+	ASSERT_EQ( (DWORD)7, dwCnt );
 
 	int ret = 0;
 	ret = DeinitHashtable( pHashtable );
@@ -866,14 +866,14 @@ TEST( STRING, SPLIT )
 
 	nRet = s.Split("hello world", ' ');
 	ASSERT_EQ( 0, nRet );
-	ASSERT_EQ( 2, s.Size() );
+	ASSERT_EQ((DWORD)2, s.Size() );
 	ASSERT_EQ( 0, strcmp("hello",s[0]) );
 	ASSERT_EQ( 0, strcmp("world",s[1]) );
 
 
 	nRet = s.Split("123,,456,,xyz,", ',');
 	ASSERT_EQ( 0, nRet );
-	ASSERT_EQ( 6, s.Size() );
+	ASSERT_EQ( (DWORD)6, s.Size() );
 	ASSERT_EQ( 0, strcmp("123",s[0]) );
 	ASSERT_EQ( 0, strcmp("456",s[2]) );
 	ASSERT_EQ( 0, strcmp("xyz",s[4]) );
@@ -883,7 +883,7 @@ TEST( STRING, SPLIT )
 
 	nRet = s.Split("hello==world==!", "==");
 	ASSERT_EQ( 0, nRet );
-	ASSERT_EQ( 3, s.Size() );
+	ASSERT_EQ( (DWORD)3, s.Size() );
 	ASSERT_EQ( 0, strcmp("hello",s[0]) );
 	ASSERT_EQ( 0, strcmp("world",s[1]) );
 	ASSERT_EQ( 0, strcmp("!",s[2]) );
@@ -891,14 +891,14 @@ TEST( STRING, SPLIT )
 
 	nRet = s.SplitByAnyChar("hello world,fine", " ,X");
 	ASSERT_EQ( 0, nRet );
-	ASSERT_EQ( 3, s.Size() );
+	ASSERT_EQ( (DWORD)3, s.Size() );
 	ASSERT_EQ( 0, strcmp("hello",s[0]) );
 	ASSERT_EQ( 0, strcmp("world",s[1]) );
 	ASSERT_EQ( 0, strcmp("fine",s[2]) );
 
 	nRet = s.SplitByBlankChars("1   \t   2   \r\n3    4   5");
 	ASSERT_EQ( 0, nRet );
-	ASSERT_EQ( 5, s.Size() );
+	ASSERT_EQ( (DWORD)5, s.Size() );
 	ASSERT_EQ( 0, strcmp("1",s[0]) );
 	ASSERT_EQ( 0, strcmp("2",s[1]) );
 	ASSERT_EQ( 0, strcmp("3",s[2]) );
@@ -935,7 +935,11 @@ TEST( LOG, FILELOG )
 
 TEST( CONFIG, FILE_CONFIG )
 {
+#ifdef WIN32
 	system("del LmnConfig.cfg");
+#else
+	system("rm -fr LmnConfig.cfg");
+#endif
 
 	int nRet = 0;
 	char szValue[256];
@@ -984,7 +988,7 @@ TEST( CONFIG, FILE_CONFIG )
 
 	nRet = pCfg->GetConfig ( "test2", dwValue, 10 );
 	ASSERT_EQ( 0, nRet );
-	ASSERT_EQ( 100, dwValue );
+	ASSERT_EQ( (DWORD)100, dwValue );
 
 	nRet = pCfg->Deinit();
 	ASSERT_EQ( 0, nRet );
@@ -1031,12 +1035,12 @@ TEST( MISC, COMMON )
 	LmnSleep( 1000 );
 	DWORD dwEndTick = LmnGetTickCount();
 	DWORD dwDiff = dwEndTick - dwStartTick;
-	ASSERT_TRUE( dwDiff >= 950 && dwDiff <= 1050 ) << "dwDiff = " << dwDiff << "ms";
+	ASSERT_TRUE( dwDiff >= (DWORD)950 && dwDiff <= (DWORD)1050 ) << "dwDiff = " << dwDiff << "ms";
 	
 }
 
 
-int main(int argc, TCHAR* argv[])
+int main(int argc, char* argv[])
 {
 	testing::InitGoogleTest(&argc, argv);
 	int r = RUN_ALL_TESTS();

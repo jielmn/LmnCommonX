@@ -3,7 +3,7 @@
 # ==============================================================
 #              请修改这部分的内容
 # omit .o  包括完整的路径，如 $(BASE)/t1 $(CALL)/call
-OBJS            := LmnCommonX/LmnCommonX/LmnCommon LmnCommonX/LmnCommonX/LmnConfig LmnCommonX/LmnCommonX/LmnContainer LmnCommonX/LmnCommonX/LmnLog LmnCommonX/LmnCommonX/LmnString
+OBJS            := LmnCommonX/LmnCommon LmnCommonX/LmnConfig LmnCommonX/LmnContainer LmnCommonX/LmnLog LmnCommonX/LmnString
 
 
 # 宏定义
@@ -11,7 +11,7 @@ DEFINES         :=
 
 
 # multiple  例如  /usr/include   /user/openssl
-INCLUDE_PATH    := . LmnCommonX/include
+INCLUDE_PATH    := . include
 
 
 # multiple

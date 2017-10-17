@@ -708,7 +708,8 @@ int Str2Int( IN const char * szNum, OUT int * pnNum )
    
     // 定义除去符号外，待解析的字符串所能达到的最大正整数
     // 正数和负数的最大面值数不同。负数要大1
-    DWORD dwMaxNum = (DWORD)(-1) / 2;
+    //DWORD dwMaxNum = (DWORD)(-1) / 2;
+	DWORD dwMaxNum = (DWORD)0xFFFFFFFF / 2;
     if ( !bPositive )
     {
         dwMaxNum++;
@@ -851,7 +852,7 @@ static BOOL _GetBase64Index( IN char chBase64, BYTE * pbyIndex )
  ****************************************************************************/
 int EncodeBase64( OUT   char  *       pBase64, 
 				  IN    DWORD         dwBase64Size, 
-				  IN    void *        pSrc, 
+				  IN    const void *  pSrc, 
 				  IN    DWORD         dwSrcLen )
 {
     // 检查参数
@@ -1080,7 +1081,7 @@ int DecodeBase64( OUT   void  * pDest,
 /*  0001H 00 00 00 0a 0b 00 00 00 00 00 00 00 00 00 00 00 ...............*/
 /*************************************************************************/
 int DebugStream(  char *       pchDebugBuf,  DWORD  dwDebugBufLen, 
-				  void *       pStream,      DWORD  dwStreamLen,
+				  const void * pStream,      DWORD  dwStreamLen,
 				  BOOL         bDosCarriageReturn /* = FALSE */,
 				  BOOL         bShowAnsi /*= FALSE*/,
 				  const char * szIndent /*= 0*/ )
@@ -1510,7 +1511,7 @@ void  SplitString::Clear(){
 		DWORD dwCnt = GetArraySize( m_result );
 		for ( DWORD i = 0; i < dwCnt; i++ ) {
 
-			void * pData = 0;
+			const void * pData = 0;
 			int ret = GetFromArray( m_result, i, &pData );
 			CLmnString * pItem = (CLmnString *)(pData);
 
@@ -1690,7 +1691,7 @@ CLmnString SplitString::operator [] (DWORD dwIndex) const{
 			return "";
 		}
 
-		void * pData = 0;
+		const void * pData = 0;
 		GetFromArray( m_result, dwIndex, &pData );
 		CLmnString * pItem = (CLmnString *)pData;
 

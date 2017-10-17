@@ -33,7 +33,7 @@ DWORD  GetArraySize ( IN PArray pArray );
  * 功  能：  把数组追加到数组末尾                                           *
  * 返回值：  成功， 添加数据的索引；失败，-1                                *
  ****************************************************************************/
-DWORD  Append2Array ( IN PArray pArray,  IN void * pData );
+DWORD  Append2Array ( IN PArray pArray,  IN const void * pData );
 
 
 /****************************************************************************
@@ -41,7 +41,7 @@ DWORD  Append2Array ( IN PArray pArray,  IN void * pData );
  * 功  能：  把数组插入到数组任意位置                                       *
  * 返回值：  成功， 添加数据的索引；失败，-1                                *
  ****************************************************************************/
-DWORD  Insert2Array( IN PArray pArray, IN DWORD dwIndex, IN void * pData );
+DWORD  Insert2Array( IN PArray pArray, IN DWORD dwIndex, IN const void * pData );
 
 
 /****************************************************************************
@@ -49,7 +49,7 @@ DWORD  Insert2Array( IN PArray pArray, IN DWORD dwIndex, IN void * pData );
  * 功  能：  取数组任意位置的数据                                           *
  * 返回值：  成功 0， 数据；失败，非0                                       *
  ****************************************************************************/
-int GetFromArray( IN PArray pArray, IN DWORD dwIndex, INOUT void ** ppData );
+int GetFromArray( IN PArray pArray, IN DWORD dwIndex, INOUT const void ** ppData );
 
 
 /****************************************************************************
@@ -57,7 +57,7 @@ int GetFromArray( IN PArray pArray, IN DWORD dwIndex, INOUT void ** ppData );
  * 功  能：  设置数组任意位置的数据                                         *
  * 返回值：  成功， 0；失败，非0                                            *
  ****************************************************************************/
-int SetArray( IN PArray pArray, IN DWORD dwIndex, IN void * pData );
+int SetArray( IN PArray pArray, IN DWORD dwIndex, IN const void * pData );
 
 
 /****************************************************************************
@@ -270,7 +270,7 @@ typedef struct tagTreeNode
  * 返回值：  成功，非0；失败，0                                             *
  *           root node                                                      *
  ****************************************************************************/
-PTreeNode InitTree( void * pData );
+PTreeNode InitTree( const void * pData );
 
 
 /****************************************************************************
@@ -279,7 +279,7 @@ PTreeNode InitTree( void * pData );
  * 返回值：  成功，新的节点；失败，0                                        *
  * 说  明：  如果pChildNode为NULL,则表示最后一个子node                      *
  ****************************************************************************/
-PTreeNode Insert2Tree( IN PTreeNode pParent,         IN void * pData, 
+PTreeNode Insert2Tree( IN PTreeNode pParent,         IN const void * pData, 
 					   IN PTreeNode pChildNode = 0,  IN BOOL bAfterChild = TRUE );
 
 
