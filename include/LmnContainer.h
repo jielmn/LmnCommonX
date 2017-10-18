@@ -361,16 +361,6 @@ typedef struct tagHashNode
 }HashNode, *PHashNode;
 
 
-// 自定义hash函数
-typedef DWORD (*HashFunc)( void * pKey );
-
-// 自定义两个key值比较结果
-// 返回值 
-//     0：相等
-//     1：ke1  > key2
-//    -1：key1 < key2
-typedef int  (*CompFunc)( void * pKey1,void * pKey2 );
-
 // 初始化一个Hashtable
 // CAUSION：如果pfnCmp不为0，则pfnHash也必须不为0
 PHashtable   InitHashtable( DWORD dwSize = 0, HashFunc pfnHash = 0, CompFunc pfnCmp = 0 );
