@@ -173,6 +173,10 @@
 				RelativePath=".\LmnString.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\LmnThread.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Í·ÎÄ¼þ"
@@ -208,6 +212,10 @@
 				</File>
 				<File
 					RelativePath="..\include\LmnTemplates.h"
+					>
+				</File>
+				<File
+					RelativePath="..\include\LmnThread.h"
 					>
 				</File>
 			</Filter>

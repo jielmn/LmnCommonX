@@ -8,6 +8,7 @@
 #include "LmnContainer.h"
 #include "LmnLog.h"
 #include "LmnConfig.h"
+#include "LmnThread.h"
 #include <gtest/gtest.h>
 
 TEST( String, StrTrim )
@@ -1037,6 +1038,78 @@ TEST( MISC, COMMON )
 	DWORD dwDiff = dwEndTick - dwStartTick;
 	ASSERT_TRUE( dwDiff >= (DWORD)950 && dwDiff <= (DWORD)1050 ) << "dwDiff = " << dwDiff << "ms";
 	
+}
+
+
+
+
+
+
+
+
+LmnToolkits::Thread *  g_pMainThread = 0;
+
+class MyMessageHandlerMain : public LmnToolkits::MessageHandler {
+public:
+	void OnMessage( DWORD dwMessageId, const  LmnToolkits::MessageData * pMessageData ) {
+		printf("main thread received message:%lu\n", dwMessageId);
+		if ( 103 == dwMessageId ) {
+			LmnToolkits::ThreadManager::GetInstance()->CurrentThread()->PostMessage( 0 );
+		}
+	}
+	BOOL CanBeFreed() { return false; }
+};
+MyMessageHandlerMain  g_MsgHandlerMain;
+
+class MyMessageHandler : public LmnToolkits::MessageHandler {
+public:
+	void OnMessage( DWORD dwMessageId, const  LmnToolkits::MessageData * pMessageData ) {
+		printf("received message:%lu\n", dwMessageId);
+		if ( g_pMainThread ) {
+			g_pMainThread->PostMessage( &g_MsgHandlerMain, dwMessageId, new LmnToolkits::MessageData );
+		}
+		if ( 103 == dwMessageId ) {
+			LmnToolkits::ThreadManager::GetInstance()->CurrentThread()->PostMessage( 0 );
+		}
+	}
+	BOOL CanBeFreed() { return false; }
+};
+MyMessageHandler  g_MsgHandler;
+
+TEST( THREAD, THREAD ) {
+	LmnToolkits::ThreadManager::GetInstance();
+
+	int nRet = 0;
+	LmnToolkits::Thread t;
+	nRet = t.Start();
+	ASSERT_EQ( 0, nRet );
+
+	nRet = t.PostMessage(&g_MsgHandler, 1000, new LmnToolkits::MessageData);
+	ASSERT_EQ( 0, nRet );
+	nRet = t.PostMessage(&g_MsgHandler, 2000, new LmnToolkits::MessageData);
+	ASSERT_EQ( 0, nRet );
+	nRet = t.PostMessage(&g_MsgHandler, 3000, new LmnToolkits::MessageData);
+	ASSERT_EQ( 0, nRet );
+
+	nRet = t.PostDelayMessage(2000, &g_MsgHandler, 103, new LmnToolkits::MessageData);
+	ASSERT_EQ( 0, nRet );
+	nRet = t.PostDelayMessage(200,  &g_MsgHandler,  101, new LmnToolkits::MessageData);
+	ASSERT_EQ( 0, nRet );
+	nRet = t.PostDelayMessage(1000, &g_MsgHandler, 102, new LmnToolkits::MessageData);
+	ASSERT_EQ( 0, nRet );
+
+	g_pMainThread = new LmnToolkits::Thread;
+	nRet = g_pMainThread->Start( FALSE );
+	ASSERT_EQ( 0, nRet );
+	nRet = g_pMainThread->Stop();
+	ASSERT_EQ( 0, nRet );
+	delete g_pMainThread;
+	g_pMainThread = 0;
+
+	nRet = t.Stop();
+	ASSERT_EQ( 0, nRet );
+
+	LmnToolkits::ThreadManager::ReleaseInstance();
 }
 
 
