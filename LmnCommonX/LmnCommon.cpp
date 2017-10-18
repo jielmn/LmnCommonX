@@ -288,6 +288,7 @@ void   LmnSleep( DWORD dwMiliSeconds )         //单位：毫秒
 typedef  struct  tagConsoleMenu_
 {
 	char                  szName[MAX_CONSOLE_MENU_NAME_SIZE];     // 菜单标题
+	const void *          pArg;                                   // 对应的参数
 	PList                 pItemsList;
 }TConsoleMenu_, *PTConsoleMenu_;
 
@@ -327,7 +328,7 @@ int InitConsole( SelectChoiceCb pfnSelect, HandleChoiceCb  pfnHandleChoice )
 
 
 // 创建菜单
-ConsoleMenuHandle  CreateConsoleMenu( const char * szTitle )
+ConsoleMenuHandle  CreateConsoleMenu( const char * szTitle, const void * pArg /*= 0*/ )
 {
 	PTConsoleMenu_   pMenu_ = (PTConsoleMenu_)malloc( sizeof(TConsoleMenu_) );
 	if ( 0 == pMenu_ )
@@ -348,6 +349,8 @@ ConsoleMenuHandle  CreateConsoleMenu( const char * szTitle )
 		SAFE_FREE( pMenu_ );
 		return 0;
 	}
+
+	pMenu_->pArg = pArg;
 
 	if ( 0 == Insert2ListTail( s_pMenusList, pMenu_ ) )
 	{
@@ -469,7 +472,7 @@ int  DisplayConsoleMenu( ConsoleMenuHandle hConsoleMenu )
 		Str2Lower( szChoice );
 
 		// 如果返回值是QUIT_CONSOLE_MENU，跳出系统
-		DWORD dwChoice = s_pfnSelect( pMenu_, szChoice );
+		DWORD dwChoice = s_pfnSelect( pMenu_, pMenu_->pArg, szChoice );
 		if ( QUIT_CONSOLE_MENU == dwChoice )
 		{
 			break;
@@ -510,7 +513,7 @@ int  DisplayConsoleMenu( ConsoleMenuHandle hConsoleMenu )
 			}
 			else
 			{
-				s_pfnHandleChoice( hConsoleMenu, dwChoice );
+				s_pfnHandleChoice( hConsoleMenu, pMenu_->pArg, dwChoice );
 
 				fflush( stdin );
 				printf("PREESS ANY KEY TO CONTINUE!");

@@ -115,6 +115,17 @@ void    LmnSleep( DWORD dwMiliSeconds );         //单位：毫秒
 
 
 /****************************** 简略命令行菜单 ******************************/
+/*
+      菜单A                 菜单B                 菜单C
+  1.跳转菜单B          1.计算睡眠时间         1.计算月支出
+  2.跳转菜单C          2.统计睡眠质量
+  3.加法计算
+  4.减法计算
+  5.退出
+
+  每个菜单由N个菜单项组成
+  每个菜单项的功能是：跳转到其他菜单或者用户的自定义处理(HandleChoiceCb)
+*/
 typedef  void *  ConsoleMenuHandle;
 
 #define  MAX_CONSOLE_MENU_ITEM_NAME_SIZE         80
@@ -125,21 +136,21 @@ typedef  struct  tagConsoleMenuItem
 }TConsoleMenuItem, *PTConsoleMenuItem;
 
 // 用户自定义的选择某项菜单后的回调函数
-typedef void  (*HandleChoiceCb)( ConsoleMenuHandle hMenu,  DWORD dwIndex );
+typedef void  (*HandleChoiceCb)( ConsoleMenuHandle hMenu, const void * pArg, DWORD dwIndex );
 
 
 // 选择当前菜单的哪个选项
 // 返回值: QUIT_CONSOLE_MENU, 退出ConsoleMenu系统
 //         0 ~ N对应当前菜单的索引
 #define QUIT_CONSOLE_MENU                        ((DWORD)-1)
-typedef DWORD (*SelectChoiceCb)( ConsoleMenuHandle hMenu, const char * szChoice );
+typedef DWORD (*SelectChoiceCb)( ConsoleMenuHandle hMenu, const void * pArg, const char * szChoice );
 
 
 // 初始化菜单系统
 int InitConsole( SelectChoiceCb pfnSelect, HandleChoiceCb  pfnHandleChoice );
 
 // 创建子菜单
-ConsoleMenuHandle  CreateConsoleMenu( const char * szTitle );
+ConsoleMenuHandle  CreateConsoleMenu( const char * szTitle, const void * pArg = 0 );
 
 // 添加菜单项(到末尾)
 int AddConsoleMenuItem( ConsoleMenuHandle hConsoleMenu,  const TConsoleMenuItem * pMenuItem );
