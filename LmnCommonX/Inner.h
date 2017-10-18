@@ -1,6 +1,8 @@
 #ifndef _INNER_HEADER_2017_09_06_
 #define _INNER_HEADER_2017_09_06_
 
+#include "LmnCommon.h"
+#include "LmnContainer.h"
 
 #define MIN( a, b )               ( (a) < (b) ? (a) : (b) )
 #define MAX( a, b )               ( (a) > (b) ? (a) : (b) )
@@ -48,8 +50,22 @@
 // 从右至左（低位到高位顺序）
 #define GET_MID_BITS( b, start, n )  (((BYTE)((b)<<(8-(n)-(start))))>>(8-(n)))
 
+#define  MIN_BLOCK_SIZE    64
 
 
+void  ClearListWithPointerValue_ ( PList  pList );
+
+/**************** DATA BUFFER like CDataBuf ***********************/
+void * dfCreate();
+BOOL   dfDestroy( void * h );
+BOOL   dfAppend( void * h,const void * pData, DWORD dwDataLen );
+BOOL   dfClear(void * h );
+BOOL   dfRead(void * h, void * pData, DWORD dwDataSize = -1 );
+BOOL   dfResetReadPos(void * h);
+DWORD  dfGetDataLength(void * h);
+const void * dfGetData(void * h);
+DWORD  dfGetReadPos(void * h);
+BOOL   dfSetReadPos( void * h, DWORD dwPos );
 
 #endif
 

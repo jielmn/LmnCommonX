@@ -2702,8 +2702,6 @@ CDataBuf::~CDataBuf()
 }
 
 
-#define  MIN_BLOCK_SIZE    64
-
 // 用自定义的方法计算需要块的实际分配内存大小
 DWORD  CDataBuf::CalcReqBufLen( DWORD dwReqLen )
 {
