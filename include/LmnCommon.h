@@ -384,12 +384,11 @@ public:
 
 	BOOL Read( void * pData, DWORD dwDataSize = -1 );                    // 从当前读位置开始读取数据(可以连续读取数据)
 	void ResetReadPos();                                                 // 把读重置为0
-	BOOL SetReadPos( DWORD dwPos );
+	BOOL SetReadPos( DWORD dwPos );                                      // 任意指定读取位置
 
-	DWORD         GetDataLength() const;
-	const void *  GetData() const;
-	DWORD         GetReadPos() const;
-
+	DWORD         GetDataLength() const;                                 // 未读的数据长度
+	const void *  GetData() const;                                       // 未读的数据
+	DWORD         GetReadPos() const;                                    // 当前的读取指针位置
 
 	// 把前面的已读的内存去掉（未读的内存往前移动），减少以后可能再分配空间的可能性
 	void         Reform();
@@ -400,7 +399,7 @@ private:
 
 	BYTE *   m_pData;                                       // 数据
 	DWORD    m_dwDataBufLen;                                // 数据buf长度
-	DWORD    m_dwDataLen;                                   // 有效数据长度
+	DWORD    m_dwDataLen;                                   // 有效数据长度(实际已经写入长度)
 	DWORD    m_dwRPos;                                      // 当前读的位置
 };
 
