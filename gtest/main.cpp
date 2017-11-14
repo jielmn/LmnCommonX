@@ -9,7 +9,7 @@
 #include "LmnLog.h"
 #include "LmnConfig.h"
 #include "LmnThread.h"
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 TEST( String, StrTrim )
 {
