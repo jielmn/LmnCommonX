@@ -101,6 +101,7 @@
     <ClInclude Include="..\include\LmnString.h" />
     <ClInclude Include="..\include\LmnTemplates.h" />
     <ClInclude Include="..\include\LmnThread.h" />
+    <ClInclude Include="..\include\sigslot.h" />
     <ClInclude Include="Inner.h" />
   </ItemGroup>
   <ItemGroup>

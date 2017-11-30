@@ -9,6 +9,7 @@
 #include "LmnLog.h"
 #include "LmnConfig.h"
 #include "LmnThread.h"
+#include "sigslot.h"
 #include "gtest/gtest.h"
 
 TEST( String, StrTrim )
@@ -1112,6 +1113,54 @@ TEST( THREAD, THREAD ) {
 	LmnToolkits::ThreadManager::ReleaseInstance();
 }
 
+static int  sigslot_test_int = 0;
+
+class MyHasSlots : public sigslot::has_slots<> {
+public:
+	void OnIntEvent(int n) {
+		sigslot_test_int = n;
+	}
+};
+
+class MyHasSlots1 : public sigslot::has_slots<> {
+public:
+	void OnEvent() {
+		sigslot_test_int = 404;
+	}
+};
+
+TEST( SIG_SLOT, SIG_SLOT ) {
+	sigslot::signal1<int>  sigInt;
+
+	MyHasSlots a;
+	sigInt.connect(&a, &MyHasSlots::OnIntEvent );
+	sigInt.emit(100);
+	ASSERT_EQ(sigslot_test_int, 100);
+	sigInt.emit(200);
+	ASSERT_EQ(sigslot_test_int, 200);
+
+
+	sigslot::signal0<> * sig0 = new sigslot::signal0<>;
+	MyHasSlots1 * b = new MyHasSlots1;
+	sig0->connect(b, &MyHasSlots1::OnEvent);
+	sig0->emit();
+	ASSERT_EQ(sigslot_test_int, 404);
+
+	delete b;
+	b = 0;
+	sigslot_test_int = 0;
+
+	sig0->emit();
+	ASSERT_EQ(sigslot_test_int, 0);
+
+	b = new MyHasSlots1;
+	sig0->connect(b, &MyHasSlots1::OnEvent);
+	sig0->emit();
+	ASSERT_EQ(sigslot_test_int, 404);
+
+	delete sig0;
+	delete b;
+}
 
 int main(int argc, char* argv[])
 {
