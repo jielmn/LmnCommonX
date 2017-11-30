@@ -11,12 +11,14 @@ namespace LmnToolkits {
 	public:
 		MessageData() {}
 		virtual ~MessageData(){}
+		// 是否可由Thread系统用delete方法删除以回收内存
 		virtual  BOOL CanBeFreed() { return true; }
 	};
 
 	class MessageHandler {
 	public:
 		virtual void OnMessage( DWORD dwMessageId, const MessageData * pMessageData ) = 0;
+		// 是否可由Thread系统用delete方法删除以回收内存
 		virtual BOOL CanBeFreed() { return true; }
 	};
 
@@ -43,6 +45,9 @@ namespace LmnToolkits {
 			}
 		}
 
+		// 是否可由Thread系统用delete方法删除以回收内存
+		virtual BOOL CanBeFreed() { return true; }
+
 
 		MessageHandler * m_phandler;
 		DWORD            m_dwMessageId;
@@ -60,7 +65,7 @@ namespace LmnToolkits {
 		Thread();
 		virtual ~Thread();
 
-		virtual int Start( BOOL bCreateSubThread = TRUE );
+		virtual int Start(BOOL bCreateSubThread = TRUE, DWORD dwIdleSleepTime = 100 );
 		virtual int Stop();
 
 		// ID 为0的消息默认为退出线程
@@ -70,7 +75,7 @@ namespace LmnToolkits {
 	protected:
 		virtual int Run();
 		virtual int GetMessage( Message * & pMessage );
-		void        ClearMessages();
+		virtual void ClearMessages();
 
 		PArray      m_MessageQueue;                     // 消息
 		PArray      m_DelayMessageQueue;                // 触发时间+消息
@@ -80,6 +85,7 @@ namespace LmnToolkits {
 		static void * PreRun(void *);
 		LmnLockType   m_lock;
 		BOOL          m_bLoop;
+		DWORD         m_dwIdleSleepTime;
 	};
 
 

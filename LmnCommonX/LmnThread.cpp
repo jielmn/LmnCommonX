@@ -15,11 +15,9 @@ namespace LmnToolkits {
 	Thread::~Thread(){
 
 		LmnLock( &m_lock );
-
 		ClearMessages();
 		DeinitArray( m_DelayMessageQueue );
 		DeinitArray( m_MessageQueue );
-
 		LmnUnlock( &m_lock );
 
 		LmnDeinitLock( &m_lock );
@@ -34,7 +32,8 @@ namespace LmnToolkits {
 			Message * pMessage = (Message *)pData;
 
 			assert( pMessage );
-			delete pMessage;
+			if ( pMessage->CanBeFreed() ) 
+				delete pMessage;
 		}
 
 		dwSize = GetArraySize( m_MessageQueue );
@@ -44,17 +43,20 @@ namespace LmnToolkits {
 			Message * pMessage = (Message *)pData;
 
 			assert( pMessage );
-			delete pMessage;
+			if (pMessage->CanBeFreed())
+				delete pMessage;
 		}
 
 		ClearArray( m_DelayMessageQueue );
 		ClearArray( m_MessageQueue );
 	}
 
-	int Thread::Start( BOOL bCreateSubThread /*= TRUE*/  ){
+	int Thread::Start( BOOL bCreateSubThread /*= TRUE*/, DWORD dwIdleSleepTime /*= 100 */ ){
 		if ( 0 != m_ThredHandle ) {
 			return LMNX_THREAD_RUNNING;
 		}
+
+		m_dwIdleSleepTime = dwIdleSleepTime;
 		assert( m_bLoop == FALSE );
 		if ( bCreateSubThread ) {
 			m_ThredHandle = LmnCreateThread( PreRun, this, 0 );
@@ -90,10 +92,12 @@ namespace LmnToolkits {
 						pMessage->m_phandler->OnMessage( pMessage->m_dwMessageId, pMessage->m_pData );
 					}
 				}
-				delete pMessage;				
+				if ( pMessage->CanBeFreed() )
+					delete pMessage;				
 				// 没有消息
 			} else {
-				LmnSleep( 100 );
+				//LmnSleep( 100 );
+				LmnSleep(m_dwIdleSleepTime);
 			}
 
 		}
@@ -107,10 +111,11 @@ namespace LmnToolkits {
 		}
 
 		m_bLoop = FALSE;
-		// 如果非主线程
+		// 如果非当前线程
 		if ( (LmnThrdType)-1 != m_ThredHandle ) {
 			LmnWait4Thrd( m_ThredHandle );
 		}
+		// 如果是当前线程，能走到Stop，说明Run这一步已经退出了
 		m_ThredHandle = 0;
 
 
