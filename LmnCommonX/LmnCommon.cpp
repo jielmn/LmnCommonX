@@ -16,12 +16,12 @@
 
 typedef struct tagLine_
 {
-	Point p1;
-	Point p2;
+	MyPoint p1;
+	MyPoint p2;
 }Line_, * PLine_;
 
 
-static BOOL _IsPointInPoint( const Point * p1, const Point * p2 )
+static BOOL _IsPointInPoint( const MyPoint * p1, const MyPoint * p2 )
 {
 	float diff_x = p1->x - p2->x;
 	if ( !(diff_x >= -IGNORED_DIMENSION && diff_x <= IGNORED_DIMENSION) )
@@ -44,7 +44,7 @@ static BOOL _IsPointInPoint( const Point * p1, const Point * p2 )
 // -1: int the line but not in the line section
 // 0 : not in the line
 /**********************************************************/
-static int _IsPointInLine( const Point * pt, const Line_ * pLine )
+static int _IsPointInLine( const MyPoint * pt, const Line_ * pLine )
 {
 	if ( _IsPointInPoint( pt, &pLine->p1 ) || _IsPointInPoint( pt, &pLine->p2 ) )
 	{
@@ -124,7 +124,7 @@ static int _IsPointInLine( const Point * pt, const Line_ * pLine )
 	}
 }
 
-BOOL IsPointInPolygon( const Point * pt, const Point polygon[], DWORD dwNum )
+BOOL IsPointInPolygon( const MyPoint * pt, const MyPoint polygon[], DWORD dwNum )
 {
 	DWORD dwCount = 0;
 
@@ -183,7 +183,7 @@ BOOL IsPointInPolygon( const Point * pt, const Point polygon[], DWORD dwNum )
 				continue;
 			}
 
-			Point intersectPoint;
+			MyPoint intersectPoint;
 			intersectPoint.x = 0.0f;
 			intersectPoint.y = pt->y;
 

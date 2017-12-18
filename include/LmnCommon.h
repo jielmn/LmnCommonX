@@ -117,13 +117,13 @@ typedef struct tagPoint
 {
 	float x;
 	float y;
-}Point, * PPoint;
+}MyPoint, * PMyPoint;
 
 
 /************************************************************************/
 // 功能: 判断一个点是否在一个多边形中
 /************************************************************************/
-BOOL IsPointInPolygon( const Point *  ptPoint,  const Point atPolygon[],  DWORD dwVertexCount );
+BOOL IsPointInPolygon( const MyPoint *  ptPoint,  const MyPoint atPolygon[],  DWORD dwVertexCount );
 
 
 /***********************************************************************/
