@@ -2,6 +2,7 @@
 #define _LEMON_CONFIG_
 
 #include "LmnCommon.h"
+#include "LmnContainer.h"
 
 class IConfig
 {

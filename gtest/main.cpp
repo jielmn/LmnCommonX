@@ -1001,8 +1001,8 @@ TEST( CONFIG, FILE_CONFIG )
 
 TEST( MISC, COMMON ) 
 {
-	Point pt;
-	Point atPolygon[4];
+	MyPoint pt;
+	MyPoint atPolygon[4];
 
 	pt.x = pt.y = 0;
 	atPolygon[0].x = 1;
@@ -1017,12 +1017,12 @@ TEST( MISC, COMMON )
 	atPolygon[3].x = -1;
 	atPolygon[3].y = 1;
 
-	BOOL bRet = IsPointInPolygon( &pt, atPolygon, sizeof(atPolygon) / sizeof(Point) );
+	BOOL bRet = IsPointInPolygon( &pt, atPolygon, sizeof(atPolygon) / sizeof(MyPoint) );
 	ASSERT_TRUE( bRet );
 
 	pt.x = 2;
 	pt.y = 0;
-	bRet = IsPointInPolygon( &pt, atPolygon, sizeof(atPolygon) / sizeof(Point) );
+	bRet = IsPointInPolygon( &pt, atPolygon, sizeof(atPolygon) / sizeof(MyPoint) );
 	ASSERT_FALSE( bRet );
 
 	
