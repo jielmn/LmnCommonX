@@ -1492,6 +1492,10 @@ CLmnString & CLmnString::Trim(){
 	return *this;
 }
 
+DWORD   CLmnString::GetLength() const {
+	return m_dwStrLen;
+}
+
 
 
 SplitString::SplitString( ){

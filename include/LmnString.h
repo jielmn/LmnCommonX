@@ -144,6 +144,8 @@ public:
 	operator char *() const;
 
 	CLmnString & Trim();
+
+	DWORD  GetLength() const;
 private:
 	void  Clear();
 	void  Init( const char * s = 0 );
