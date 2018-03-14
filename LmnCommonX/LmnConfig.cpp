@@ -100,6 +100,56 @@ DWORD  FileConfig::Init(const char * szCfgFileName /*= 0*/)
 	return 0;
 }
 
+
+
+DWORD  FileConfig::Reload( )
+{
+	Clear();
+	m_bChanged = FALSE;
+
+	FILE * fp = fopen(m_szFileName, "r");
+	// 如果不存在文件，则认为空的集合
+	if (0 == fp) {	
+		return 0;
+	}
+
+	char buf[8192] = { 0 };
+	while (!feof(fp)) {
+		fgets(buf, sizeof(buf) - 1, fp);
+
+		char * pEqual = strchr(buf, '=');
+		if (0 == pEqual) {
+			continue;
+		}
+
+		DWORD dwIndex = pEqual - buf;
+		buf[dwIndex] = '\0';
+
+		StrTrim(buf);
+		StrTrim(pEqual + 1);
+
+		// 如果key不为空
+		if (buf[0] != '\0') {
+			DWORD  dwLen = strlen(buf);
+			char * pKey = new char[dwLen + 1];
+			strcpy(pKey, buf);
+			pKey[dwLen] = '\0';
+
+			dwLen = strlen(pEqual + 1);
+			char * pValue = new char[dwLen + 1];
+			strcpy(pValue, pEqual + 1);
+			pValue[dwLen] = '\0';
+
+			Add2Hashtable(m_pHtable, pKey, pValue);
+		}
+	}
+
+	fclose(fp);
+	return 0;
+}
+
+
+
 DWORD  FileConfig::Deinit()
 {
 	if ( !m_bInited ) {
@@ -153,6 +203,7 @@ void   FileConfig::Clear()
 		delete[] pValue;
 		pNode = GetNextHashtableNode( pNode );
 	}
+	ClearHashtable(m_pHtable);
 }
 
 const char * FileConfig::operator [] ( const char * szConfigName ) {

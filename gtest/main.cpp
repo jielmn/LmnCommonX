@@ -998,6 +998,8 @@ TEST( CONFIG, FILE_CONFIG )
 	ASSERT_EQ( 0, nRet );
 	ASSERT_EQ( (DWORD)100, dwValue );
 
+	pCfg->Reload();
+
 	nRet = pCfg->Deinit();
 	ASSERT_EQ( 0, nRet );
 
