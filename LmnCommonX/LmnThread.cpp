@@ -175,7 +175,7 @@ namespace LmnToolkits {
 		return 0;
 	}
 
-	int Thread::PostDelayMessage( DWORD dwDelayTime, MessageHandler * phandler, DWORD dwMessageID /*= THREAD_ID_CLOSE_THREAD*/, MessageData * pdata /*= 0*/ ){
+	int Thread::PostDelayMessage( DWORD dwDelayTime, MessageHandler * phandler, DWORD dwMessageID /*= THREAD_ID_CLOSE_THREAD*/, MessageData * pdata /*= 0*/, BOOL bDropSameMsg /*= FALSE*/ ){
 		if ( 0 == dwDelayTime ) {
 			return PostMessage( phandler, dwMessageID, pdata );
 		}
@@ -198,6 +198,35 @@ namespace LmnToolkits {
 				return LMNX_SYSTEM_ERROR;
 			}
 			return 0;
+		}
+
+		// 如果需要像定时器一样，只能保存最近的定时器消息
+		if ( bDropSameMsg ) {
+			for (DWORD i = 0; i < dwSize; ) {
+				const void * pData = 0;
+				GetFromArray(m_DelayMessageQueue, i, &pData);
+				Message * pMessageItem = (Message *)pData;
+				assert(pMessageItem && pMessageItem->m_bTimeTriggerd);
+
+				// 如果定时器消息ID相同
+				if ( pMessageItem->m_dwMessageId == dwMessageID ) {
+					EraseArray( m_DelayMessageQueue, i );
+					dwSize--;
+				}
+				else {
+					i++;
+				}
+			}
+
+			// 如果删除完了
+			if (0 == dwSize) {
+				dwRet = Append2Array(m_DelayMessageQueue, pMessage);
+				if ((DWORD)-1 == dwRet) {
+					delete pMessage;
+					return LMNX_SYSTEM_ERROR;
+				}
+				return 0;
+			}
 		}
 
 		DWORD dwStart  = 0;
