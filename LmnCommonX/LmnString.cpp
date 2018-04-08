@@ -1537,6 +1537,10 @@ int SplitString::Split( const char * szLine, char chSplit ){
 		return LMNX_NO_MEMORY;
 	}
 
+	if (szLine[0] == '\0') {
+		return 0;
+	}
+
 	const char * pStart = szLine;
 	const char * pFind  = 0;
 
@@ -1569,6 +1573,10 @@ int SplitString::Split( const char * szLine, const char * szSplit ){
 
 	if ( 0 == m_result ) {
 		return LMNX_NO_MEMORY;
+	}
+
+	if (szLine[0] == '\0') {
+		return 0;
 	}
 
 	const char * pStart = szLine;
