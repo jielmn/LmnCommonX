@@ -51,6 +51,57 @@ namespace LmnToolkits {
 		ClearArray( m_MessageQueue );
 	}
 
+	void Thread::DeleteMessages(DWORD dwMessageId /*= 0*/) {
+
+		LmnLock(&m_lock);
+		
+		if (0 == dwMessageId) {
+			ClearMessages();
+
+			LmnUnlock(&m_lock);
+			return;
+		}
+
+		DWORD dwSize = GetArraySize(m_DelayMessageQueue);
+		for (DWORD i = 0; i < dwSize; ) {
+			const void * pData = 0;
+			GetFromArray(m_DelayMessageQueue, i, &pData);
+			Message * pMessage = (Message *)pData;
+
+			assert(pMessage);
+
+			// 如果ID相同
+			if (pMessage->m_dwMessageId == dwMessageId) {
+				EraseArray(m_DelayMessageQueue, i);
+				if (pMessage->CanBeFreed())
+					delete pMessage;
+			}
+			else {
+				i++;
+			}
+		}
+
+		dwSize = GetArraySize(m_MessageQueue);
+		for (DWORD i = 0; i < dwSize; ++i) {
+			const void * pData = 0;
+			GetFromArray(m_MessageQueue, i, &pData);
+			Message * pMessage = (Message *)pData;
+
+			assert(pMessage);
+			if (pMessage->m_dwMessageId == dwMessageId) {
+				EraseArray(m_MessageQueue, i);
+				if (pMessage->CanBeFreed())
+					delete pMessage;
+			}
+			else {
+				i++;
+			}
+			
+		}
+
+		LmnUnlock(&m_lock);
+	}
+
 	int Thread::Start( BOOL bCreateSubThread /*= TRUE*/, DWORD dwIdleSleepTime /*= 100 */ ){
 		if ( 0 != m_ThredHandle ) {
 			return LMNX_THREAD_RUNNING;

@@ -72,6 +72,7 @@ namespace LmnToolkits {
 		virtual int PostMessage( MessageHandler * phandler, DWORD dwMessageID = MESSAGE_ID_CLOSE_THREAD, MessageData * pdata = 0 );
 		virtual int PostDelayMessage( DWORD dwDelayTime, MessageHandler * phandler, DWORD dwMessageID = MESSAGE_ID_CLOSE_THREAD, MessageData * pdata = 0, BOOL bDropSameMsg = FALSE );
 
+		virtual void DeleteMessages( DWORD dwMessageId = 0 );
 	protected:
 		virtual int Run();
 		virtual int GetMessage( Message * & pMessage );
