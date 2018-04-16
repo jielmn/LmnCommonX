@@ -18,6 +18,7 @@ public:
 	virtual DWORD     SetConfig ( const char * szConfigName, DWORD dwConfigValue ) = 0;
 
 	virtual DWORD     Reload() = 0;
+	virtual DWORD     Save() = 0;
 };
 
 
@@ -38,6 +39,7 @@ public:
 	DWORD       SetConfig ( const char * szConfigName, DWORD dwConfigValue );
 
 	DWORD       Reload();
+	DWORD       Save();
 
 private:
 	void          Clear();

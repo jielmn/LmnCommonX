@@ -148,6 +148,29 @@ DWORD  FileConfig::Reload( )
 	return 0;
 }
 
+DWORD   FileConfig::Save() {
+	FILE * fp = fopen(m_szFileName, "wb");
+	if (0 == fp) {
+		return LMNX_FAIL_OPEN_FILE;
+	}
+
+	char buf[8192];
+	PHashNode pNode = GetHashtableFirstNode(m_pHtable);
+	while (pNode) {
+		char * pKey = (char *)GetHashNodeKey(pNode);
+		char * pValue = (char *)pNode->pData;
+		assert(pKey && pValue);
+
+		memset(buf, sizeof(buf), 0);
+		SNPRINTF(buf, sizeof(buf) - 1, "%s = %s\r\n", pKey, pValue);
+		fwrite(buf, 1, strlen(buf), fp);
+		pNode = GetNextHashtableNode(pNode);
+	}
+	fclose(fp);
+
+	return 0;
+}
+
 
 
 DWORD  FileConfig::Deinit()
@@ -165,24 +188,25 @@ DWORD  FileConfig::Deinit()
 		return 0;
 	}
 
-	FILE * fp = fopen( m_szFileName, "wb" );
-	if ( 0 == fp ) {
-		return LMNX_FAIL_OPEN_FILE;
-	}
+	//FILE * fp = fopen( m_szFileName, "wb" );
+	//if ( 0 == fp ) {
+	//	return LMNX_FAIL_OPEN_FILE;
+	//}
 
-	char buf[8192];
-	PHashNode pNode = GetHashtableFirstNode( m_pHtable );
-	while( pNode ) {
-		char * pKey   = (char *)GetHashNodeKey( pNode );
-		char * pValue = (char *)pNode->pData;
-		assert( pKey && pValue );
+	//char buf[8192];
+	//PHashNode pNode = GetHashtableFirstNode( m_pHtable );
+	//while( pNode ) {
+	//	char * pKey   = (char *)GetHashNodeKey( pNode );
+	//	char * pValue = (char *)pNode->pData;
+	//	assert( pKey && pValue );
 
-		memset( buf, sizeof(buf), 0 );
-		SNPRINTF( buf, sizeof(buf)-1, "%s = %s\r\n", pKey, pValue );
-		fwrite( buf, 1, strlen(buf), fp );
-		pNode = GetNextHashtableNode( pNode );
-	}
-	fclose(fp);
+	//	memset( buf, sizeof(buf), 0 );
+	//	SNPRINTF( buf, sizeof(buf)-1, "%s = %s\r\n", pKey, pValue );
+	//	fwrite( buf, 1, strlen(buf), fp );
+	//	pNode = GetNextHashtableNode( pNode );
+	//}
+	//fclose(fp);
+	Save();
 
 	Clear();
 	DeinitHashtable(m_pHtable);
