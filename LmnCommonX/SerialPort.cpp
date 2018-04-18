@@ -192,6 +192,14 @@ BOOL  CSerialPort::Write( const void * WriteBuf, DWORD & WriteDataLen ) {
 		return FALSE;
 	}
 
+	if ( 0 == WriteBuf ) {
+		return FALSE;
+	}
+
+	if ( 0 == WriteDataLen ) {
+		return TRUE;
+	}
+
 	return WriteUartPort(m_hComm, WriteBuf, WriteDataLen, &WriteDataLen);
 }
 
@@ -199,6 +207,14 @@ BOOL  CSerialPort::Read(void *RcvBuf, DWORD & RcvDataLen) {
 	// 如果没有打卡串口
 	if (0 == m_hComm) {
 		return FALSE;
+	}
+
+	if (0 == RcvBuf) {
+		return FALSE;
+	}
+
+	if (0 == RcvDataLen) {
+		return TRUE;
 	}
 
 	return ReadUartPort( m_hComm, RcvBuf, RcvDataLen, &RcvDataLen, 0);
