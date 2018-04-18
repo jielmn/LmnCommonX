@@ -845,26 +845,26 @@ TEST( Container, Hashtable ) {
 TEST( STRING, LMNSTRING )
 {
 	CLmnString s(" \thello");
-	ASSERT_EQ(7, s.GetLength() );
+	ASSERT_EQ((DWORD)7, s.GetLength() );
 
 	CLmnString t = s + " world" + " 2017";
 
 	ASSERT_EQ( 0, strcmp( t, " \thello world 2017" ) );
-	ASSERT_EQ(18, t.GetLength());
+	ASSERT_EQ((DWORD)18, t.GetLength());
 
 	t += "! \r\n";
 	ASSERT_EQ( 0, strcmp( t, " \thello world 2017! \r\n" ) );
-	ASSERT_EQ(22, t.GetLength());
+	ASSERT_EQ((DWORD)22, t.GetLength());
 
 	t.Trim();
 	ASSERT_EQ( 0, strcmp( t, "hello world 2017!" ) );
-	ASSERT_EQ(17, t.GetLength());
+	ASSERT_EQ((DWORD)17, t.GetLength());
 
 
 	t = "nice ";
 	t += 123;
 	ASSERT_EQ( 0, strcmp( t, "nice 123" ) );
-	ASSERT_EQ(8, t.GetLength());
+	ASSERT_EQ((DWORD)8, t.GetLength());
 }
 
 TEST( STRING, SPLIT )
