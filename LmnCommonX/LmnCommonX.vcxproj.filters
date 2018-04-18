@@ -42,7 +42,7 @@
     <ClCompile Include="LmnThread.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="SerialPort.cpp">
+    <ClCompile Include="LmnSerialPort.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -77,7 +77,7 @@
     <ClInclude Include="..\include\sigslot.h">
       <Filter>头文件\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\SerialPort.h">
+    <ClInclude Include="..\include\LmnSerialPort.h">
       <Filter>头文件\include</Filter>
     </ClInclude>
   </ItemGroup>

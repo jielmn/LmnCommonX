@@ -1,4 +1,4 @@
-#include "SerialPort.h"
+#include "LmnSerialPort.h"
 
 
 CSerialPort::CSerialPort() {
