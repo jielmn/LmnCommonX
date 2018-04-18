@@ -1007,6 +1007,142 @@ TEST( CONFIG, FILE_CONFIG )
 	delete pCfg;
 }
 
+TEST(CONFIG, FILE_CONFIG1)
+{
+#ifdef WIN32
+	system("del LmnConfig.cfg");
+#else
+	system("rm -fr LmnConfig.cfg");
+#endif	
+
+	int nRet = 0;
+	char szValue[256];
+	DWORD dwValue = 0;
+
+
+	IConfig * pCfg = new FileConfigEx();
+
+	// 第一次初始化
+	nRet = pCfg->Init();
+	ASSERT_EQ(0, nRet);
+
+	nRet = pCfg->GetConfig("test1", szValue, sizeof(szValue), "hello");
+	ASSERT_EQ(0, nRet);
+	ASSERT_EQ(0, strcmp(szValue, "hello"));
+
+	nRet = pCfg->SetConfig("test1", "world");
+	ASSERT_EQ(0, nRet);
+
+	nRet = pCfg->SetConfig("test2", 100);
+	ASSERT_EQ(0, nRet);
+
+	const char * pResult = pCfg->operator []("abc");
+	ASSERT_FALSE(pResult == 0);
+	ASSERT_EQ(0, strcmp(pResult, ""));
+
+	pResult = pCfg->operator []("test1");
+	ASSERT_FALSE(pResult == 0);
+	ASSERT_EQ(0, strcmp(pResult, "world"));
+
+	nRet = pCfg->Deinit();
+	ASSERT_EQ(0, nRet);
+
+
+	// 再初始化一次
+	nRet = pCfg->Init();
+	ASSERT_EQ(0, nRet);
+
+	nRet = pCfg->GetConfig("test1", szValue, sizeof(szValue), "hello");
+	ASSERT_EQ(0, nRet);
+	ASSERT_EQ(0, strcmp(szValue, "world"));
+
+	pResult = pCfg->operator []("test1");
+	ASSERT_FALSE(pResult == 0);
+	ASSERT_EQ(0, strcmp(pResult, "world"));
+
+	nRet = pCfg->GetConfig("test2", dwValue, 10);
+	ASSERT_EQ(0, nRet);
+	ASSERT_EQ((DWORD)100, dwValue);
+
+	pCfg->Reload();
+
+	nRet = pCfg->Deinit();
+	ASSERT_EQ(0, nRet);
+
+
+	delete pCfg;
+}
+
+TEST(CONFIG, FILE_CONFIG2)
+{
+#ifdef WIN32
+	system("del LmnConfig.cfg");
+#else
+	system("rm -fr LmnConfig.cfg");
+#endif	
+
+	/*
+	[section 1]
+	a = 100  # this is a test line
+	b = 200  # another test line
+
+	# [seciont 2]
+	# 3th test line
+	4th test line
+	abs = pop
+	xyx = ##hello##world
+	*/
+
+	FILE * fp = fopen("LmnConfig.cfg", "wb");
+	ASSERT_FALSE(fp == 0);
+	const char * szOrigianText =
+		"[section 1]\r\n"
+		"a = 100  # this is a test line\r\n"
+		"b = 200  # another test line\r\n"
+		"\r\n"
+		"# [seciont 2]\r\n"
+		"# 3th test line\r\n"
+		"4th test line\r\n"
+		"abs = pop\r\n"
+		"xyx = ##hello##world\r\n";
+	fwrite(szOrigianText, 1, strlen(szOrigianText), fp);
+	fclose(fp);
+
+	int nRet = 0;
+	char szValue[256];
+	DWORD dwValue = 0;
+
+
+	IConfig * pCfg = new FileConfigEx();
+
+	nRet = pCfg->Init();
+	ASSERT_EQ(0, nRet);
+
+	nRet = pCfg->GetConfig("a", szValue, sizeof(szValue), "a value");
+	ASSERT_EQ(0, nRet);
+	ASSERT_EQ(0, strcmp(szValue, "100"));
+
+	const char * pResult = pCfg->operator []("b");
+	ASSERT_FALSE(pResult == 0);
+	ASSERT_EQ(0, strcmp(pResult, "200"));
+
+	nRet = pCfg->GetConfig("abs", szValue, sizeof(szValue), "abs value");
+	ASSERT_EQ(0, nRet);
+	ASSERT_EQ(0, strcmp(szValue, "pop"));
+
+	nRet = pCfg->GetConfig("xyx", szValue, sizeof(szValue), "xyx value");
+	ASSERT_EQ(0, nRet);
+	ASSERT_EQ(0, strcmp(szValue, "#hello#world"));
+
+	pCfg->SetConfig("oop", "a test");
+
+	nRet = pCfg->Deinit();
+	ASSERT_EQ(0, nRet);
+
+	delete pCfg;
+}
+
+
 TEST( MISC, COMMON ) 
 {
 	MyPoint pt;
