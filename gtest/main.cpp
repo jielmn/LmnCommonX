@@ -1110,7 +1110,7 @@ TEST(CONFIG, FILE_CONFIG2)
 
 	int nRet = 0;
 	char szValue[256];
-	DWORD dwValue = 0;
+	//DWORD dwValue = 0;
 
 
 	IConfig * pCfg = new FileConfigEx();

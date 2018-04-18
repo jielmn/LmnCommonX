@@ -457,7 +457,7 @@ static DWORD  PraseLine_( const char * szLine, ConfigItem_ * & pItem ) {
 	}
 
 	// 没有找到 = 号
-	if (dwEqualIndex == -1) {
+	if (dwEqualIndex == (DWORD)-1) {
 		pItem->nType = LINE_TYPE_TEXT;
 
 		pItem->szOriginalText = new char[dwLineLen + 1];
@@ -479,7 +479,7 @@ static DWORD  PraseLine_( const char * szLine, ConfigItem_ * & pItem ) {
 	DWORD   dwValueLen = 0;
 
 	// 如果没有右注释
-	if (dwCommentIndex == -1) {
+	if (dwCommentIndex == (DWORD)-1) {
 		dwValueLen = dwLineLen - dwEqualIndex - 1;
 	}
 	else {
@@ -527,7 +527,7 @@ static DWORD  PraseLine_( const char * szLine, ConfigItem_ * & pItem ) {
 	pItem->szValue = pTmp;
 
 	// 如果没有右注释
-	if (dwCommentIndex == -1) {
+	if (dwCommentIndex == (DWORD)-1) {
 		return 0;
 	}
 
@@ -728,7 +728,7 @@ DWORD  FileConfigEx::SetConfig(const char * szConfigName, const char * szConfigV
 		return LMNX_WRONG_PARAMS;
 	}
 
-	char * szKey = 0;
+	// char * szKey = 0;
 	char * szValue = 0;
 	DWORD  dwKeyLen = strlen(szConfigName);
 	DWORD  dwValueLen = strlen(szConfigValue);
