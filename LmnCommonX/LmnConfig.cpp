@@ -452,7 +452,9 @@ static DWORD  PraseLine_( const char * szLine, ConfigItem_ * & pItem ) {
 		}
 		// ’“µΩ = ∫≈£¨ºÃ–¯’“ # ∫≈
 		else if (szLine[i] == '=') {
-			dwEqualIndex = i;
+			if (dwEqualIndex == -1) {
+				dwEqualIndex = i;
+			}
 		}
 	}
 
