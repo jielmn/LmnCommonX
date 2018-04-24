@@ -89,6 +89,7 @@
     <ClCompile Include="LmnContainer.cpp" />
     <ClCompile Include="LmnFile.cpp" />
     <ClCompile Include="LmnLog.cpp" />
+    <ClCompile Include="LmnOdbc.cpp" />
     <ClCompile Include="LmnSerialPort.cpp" />
     <ClCompile Include="LmnString.cpp" />
     <ClCompile Include="LmnThread.cpp" />
@@ -99,6 +100,7 @@
     <ClInclude Include="..\include\LmnContainer.h" />
     <ClInclude Include="..\include\LmnFile.h" />
     <ClInclude Include="..\include\LmnLog.h" />
+    <ClInclude Include="..\include\LmnOdbc.h" />
     <ClInclude Include="..\include\LmnSerialPort.h" />
     <ClInclude Include="..\include\LmnString.h" />
     <ClInclude Include="..\include\LmnTemplates.h" />
