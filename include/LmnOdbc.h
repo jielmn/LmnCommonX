@@ -7,6 +7,15 @@
 #include <sqltypes.h>
 #include "sigslot.h"
 
+class CLmnOdbcException {
+public:
+	CLmnOdbcException(int nError);
+	int GetError() const;
+
+private:
+	int m_nError;
+};
+
 class  CLmnOdbc {
 public:
 	CLmnOdbc();
@@ -26,7 +35,7 @@ public:
 		ERROR_FAILED_TO_FETCH,
 		ERROR_FAILED_TO_GET_DATA,
 		ERROR_RECORDSET_EOF,
-	};
+	};	
 
 	DATABASE_STATUS GetStatus() const;
 	const char * GetSysStatus() const;
@@ -35,19 +44,19 @@ public:
 	// 连接数据库
 	int ConnectDb(const char * szOdbcStr = 0);
 	// 断开数据库
-	int DisconnectDb();
+	void DisconnectDb();
 
 	// 打开记录集
-	int OpenRecordSet(const char * szSql);
+	void OpenRecordSet(const char * szSql);
 	// 关闭记录集
-	int CloseRecordSet();
+	void CloseRecordSet();
 	// 获取数据
-	int GetFieldValue( int nColumnIndex, char * szValue, DWORD dwValueSize, BOOL * pbIsNull = 0 );
+	void GetFieldValue( int nColumnIndex, char * szValue, DWORD dwValueSize, BOOL * pbIsNull = 0 );
 	// 移动记录集指针
-	int MoveNext();
+	BOOL MoveNext();
 
 	// 执行，同OpenRecordSet
-	int Execute(const char * szSql);
+	void Execute(const char * szSql);
 
 public:
 	sigslot::signal1<DATABASE_STATUS>                               sigStatusChange;

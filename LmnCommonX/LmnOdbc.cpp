@@ -6,6 +6,17 @@
 //#pragma comment(lib, "odbccp32.lib")
 //#pragma comment(lib, "crypt32.lib")
 
+CLmnOdbcException::CLmnOdbcException(int nError) : m_nError(nError) {
+
+}
+
+int CLmnOdbcException::GetError() const {
+	return m_nError;
+}
+
+
+
+
 CLmnOdbc::CLmnOdbc() {
 	m_eDbStatus = STATUS_CLOSE;
 	memset( m_szOdbStr, 0, sizeof(m_szOdbStr) );
@@ -152,7 +163,7 @@ int CLmnOdbc::ConnectDb(const char * szOdbcStr /*= 0*/) {
 	return 0;
 }
 
-int CLmnOdbc::DisconnectDb() {
+void CLmnOdbc::DisconnectDb() {
 	ClearSysStatus();
 
 	if (0 != m_hdbc) {
@@ -166,15 +177,15 @@ int CLmnOdbc::DisconnectDb() {
 		sigStatusChange.emit(m_eDbStatus);
 	}
 	m_szOdbStr[0] = '\0';
-	return 0;
 }
 
 // 打开记录集
-int CLmnOdbc::OpenRecordSet(const char * szSql) {
+void CLmnOdbc::OpenRecordSet(const char * szSql) {
 	ClearSysStatus();
 
 	if (m_eDbStatus == STATUS_CLOSE) {
-		return ERROR_DISCONNECTED;
+		throw CLmnOdbcException(ERROR_DISCONNECTED);
+		return;
 	}
 
 	if (0 != m_hstmt) {
@@ -186,7 +197,8 @@ int CLmnOdbc::OpenRecordSet(const char * szSql) {
 	if (SQL_SUCCESS != retcode) {
 		SQLFreeHandle(SQL_HANDLE_STMT, m_hstmt);
 		m_hstmt = 0;
-		return ERROR_FAILED_TO_ALLOCATE_HANDLE;
+		throw CLmnOdbcException(ERROR_FAILED_TO_ALLOCATE_HANDLE);
+		return;
 	}
 
 	retcode = SQLExecDirect( m_hstmt, (SQLCHAR*)szSql, SQL_NTS );
@@ -194,36 +206,36 @@ int CLmnOdbc::OpenRecordSet(const char * szSql) {
 		GetDBError(SQL_HANDLE_STMT, m_hstmt);
 		SQLFreeHandle(SQL_HANDLE_STMT, m_hstmt);
 		m_hstmt = 0;
-		return ERROR_FAILED_TO_EXECUTE;
+		throw CLmnOdbcException(ERROR_FAILED_TO_EXECUTE);
+		return;
 	}
-
-	return 0;
 }
 
 // 关闭记录集
-int CLmnOdbc::CloseRecordSet() {
+void CLmnOdbc::CloseRecordSet() {
 	ClearSysStatus();
 
 	if (0 != m_hstmt) {
 		SQLFreeHandle(SQL_HANDLE_STMT, m_hstmt);
 		m_hstmt = 0;
 	}
-	return 0;
 }
 
 // 获取数据
-int CLmnOdbc::GetFieldValue(int nColumnIndex, char * szValue, DWORD dwValueSize, BOOL * pbIsNull /*= 0*/ ) {
+void CLmnOdbc::GetFieldValue(int nColumnIndex, char * szValue, DWORD dwValueSize, BOOL * pbIsNull /*= 0*/ ) {
 	ClearSysStatus();
 
 	if (m_eDbStatus == STATUS_CLOSE) {
-		return ERROR_DISCONNECTED;
+		throw CLmnOdbcException(ERROR_DISCONNECTED);
+		return;
 	}
 
 	SQLINTEGER len = 0; 
 	SQLRETURN retcode = SQLGetData( m_hstmt, nColumnIndex, SQL_C_CHAR, szValue, dwValueSize, &len );
 	if ( SQL_ERROR == retcode ) {
 		GetDBError( SQL_HANDLE_STMT, m_hstmt );
-		return ERROR_FAILED_TO_GET_DATA;
+		throw CLmnOdbcException(ERROR_FAILED_TO_GET_DATA);
+		return;
 	}
 
 	if ( SQL_NULL_DATA == len ) {
@@ -237,35 +249,34 @@ int CLmnOdbc::GetFieldValue(int nColumnIndex, char * szValue, DWORD dwValueSize,
 			*pbIsNull = FALSE;
 		}
 	}
-	return 0;
 }
 
 // 移动记录集指针
-int CLmnOdbc::MoveNext() {
+BOOL CLmnOdbc::MoveNext() {
 	ClearSysStatus();
 
 	if ( m_eDbStatus == STATUS_CLOSE ) {
-		return ERROR_DISCONNECTED;
+		throw CLmnOdbcException(ERROR_DISCONNECTED);
 	}
 
 	SQLRETURN retcode = SQLFetch(m_hstmt);
 	if ( retcode == SQL_ERROR ) {
 		GetDBError(SQL_HANDLE_STMT, m_hstmt);
-		return ERROR_FAILED_TO_FETCH;
+		throw CLmnOdbcException(ERROR_FAILED_TO_FETCH);
 	}
 	else if (retcode == SQL_NO_DATA) {
-		return ERROR_RECORDSET_EOF;
+		return FALSE;
 	}
 
-	return 0;
+	return TRUE;
 }
 
 // 执行
-int CLmnOdbc::Execute(const char * szSql) {
+void CLmnOdbc::Execute(const char * szSql) {
 	ClearSysStatus();
 
 	if (m_eDbStatus == STATUS_CLOSE) {
-		return ERROR_DISCONNECTED;
+		throw CLmnOdbcException(ERROR_DISCONNECTED);
 	}
 
 	if (0 != m_hstmt) {
@@ -277,7 +288,7 @@ int CLmnOdbc::Execute(const char * szSql) {
 	if (SQL_SUCCESS != retcode) {
 		SQLFreeHandle(SQL_HANDLE_STMT, m_hstmt);
 		m_hstmt = 0;
-		return ERROR_FAILED_TO_ALLOCATE_HANDLE;
+		throw CLmnOdbcException(ERROR_FAILED_TO_ALLOCATE_HANDLE);
 	}
 
 	retcode = SQLExecDirect(m_hstmt, (SQLCHAR*)szSql, SQL_NTS);
@@ -285,10 +296,9 @@ int CLmnOdbc::Execute(const char * szSql) {
 		GetDBError(SQL_HANDLE_STMT, m_hstmt);
 		SQLFreeHandle(SQL_HANDLE_STMT, m_hstmt);
 		m_hstmt = 0;
-		return ERROR_FAILED_TO_EXECUTE;
+		throw CLmnOdbcException(ERROR_FAILED_TO_EXECUTE);
 	}
 
 	SQLFreeHandle(SQL_HANDLE_STMT, m_hstmt);
 	m_hstmt = 0;
-	return 0;
 }
