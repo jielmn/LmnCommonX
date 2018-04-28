@@ -29,6 +29,8 @@ public:
 	};
 
 	DATABASE_STATUS GetStatus() const;
+	const char * GetSysStatus() const;
+	const char * GetSysErrMsg() const;
 
 	// 连接数据库
 	int ConnectDb(const char * szOdbcStr = 0);
@@ -64,6 +66,10 @@ private:
 	DATABASE_STATUS     m_eDbStatus;
 	// odbc 连接字符串
 	char                m_szOdbStr[256];
+
+	// odbc SQLGetDiagRec获取的错误信息
+	char                m_szSysStatus[10];
+	char                m_szSysErrMsg[1024];
 };
 
 

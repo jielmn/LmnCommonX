@@ -13,6 +13,9 @@ CLmnOdbc::CLmnOdbc() {
 	m_hdbc = 0;
 	m_hstmt = 0;
 
+	memset(m_szSysStatus, 0, sizeof(m_szSysStatus));
+	memset(m_szSysErrMsg, 0, sizeof(m_szSysErrMsg));
+
 	AllocateHandle();
 }
 
@@ -79,17 +82,25 @@ void  CLmnOdbc::FreeHandle() {
 }
 
 void CLmnOdbc::GetDBError(SQLSMALLINT type, SQLHANDLE sqlHandle) {
-	CHAR pStatus[10], pErrMsg[1024];
+	//CHAR pStatus[10], pErrMsg[1024];
 	SQLSMALLINT SQLmsglen;
 	SQLINTEGER SQLerr;
-	SQLGetDiagRec( type, sqlHandle, 1, (SQLCHAR *)pStatus, &SQLerr, (SQLCHAR*)pErrMsg, 100, &SQLmsglen );
-	if ( 0 == StrICmp("08S01", pStatus) || 0 == StrICmp("HYT01", pStatus) || 0 == StrICmp("HYT00", pStatus) ) {
+	SQLGetDiagRec( type, sqlHandle, 1, (SQLCHAR *)m_szSysStatus, &SQLerr, (SQLCHAR*)m_szSysErrMsg, sizeof(m_szSysErrMsg), &SQLmsglen );
+	if ( 0 == StrICmp("08S01", m_szSysStatus) || 0 == StrICmp("HYT01", m_szSysStatus) || 0 == StrICmp("HYT00", m_szSysStatus) ) {
 		DisconnectDb();
 	}
 }
 
 CLmnOdbc::DATABASE_STATUS CLmnOdbc::GetStatus() const {
 	return m_eDbStatus;
+}
+
+const char * CLmnOdbc::GetSysStatus() const {
+	return m_szSysStatus;
+}
+
+const char * CLmnOdbc::GetSysErrMsg() const {
+	return m_szSysErrMsg;
 }
 
 // 连接数据库
