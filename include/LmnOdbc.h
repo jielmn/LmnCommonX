@@ -58,6 +58,9 @@ private:
 	void FreeHandle();
 	void GetDBError(SQLSMALLINT type, SQLHANDLE sqlHandle);
 
+	// 用在public方法里，清空系统错误描述和状态
+	void ClearSysStatus();
+
 private:
 	SQLHENV             m_henv;
 	SQLHDBC             m_hdbc;

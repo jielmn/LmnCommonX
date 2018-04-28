@@ -32,6 +32,12 @@ void CLmnOdbc::Clear() {
 	FreeHandle();
 }
 
+// 清空系统错误状态
+void CLmnOdbc::ClearSysStatus() {
+	memset(m_szSysStatus, 0, sizeof(m_szSysStatus));
+	memset(m_szSysErrMsg, 0, sizeof(m_szSysErrMsg));
+}
+
 BOOL  CLmnOdbc::AllocateHandle() {
 	SQLRETURN result;
 
@@ -105,6 +111,7 @@ const char * CLmnOdbc::GetSysErrMsg() const {
 
 // 连接数据库
 int CLmnOdbc::ConnectDb(const char * szOdbcStr /*= 0*/) {
+	ClearSysStatus();
 
 	if ( 0 != szOdbcStr ) {
 		// 如果要连接的数据库和上一次要连接的数据库相同，则设置szOdbc为NULL
@@ -146,6 +153,8 @@ int CLmnOdbc::ConnectDb(const char * szOdbcStr /*= 0*/) {
 }
 
 int CLmnOdbc::DisconnectDb() {
+	ClearSysStatus();
+
 	if (0 != m_hdbc) {
 		SQLDisconnect(m_hdbc);
 	}
@@ -162,6 +171,8 @@ int CLmnOdbc::DisconnectDb() {
 
 // 打开记录集
 int CLmnOdbc::OpenRecordSet(const char * szSql) {
+	ClearSysStatus();
+
 	if (m_eDbStatus == STATUS_CLOSE) {
 		return ERROR_DISCONNECTED;
 	}
@@ -191,6 +202,7 @@ int CLmnOdbc::OpenRecordSet(const char * szSql) {
 
 // 关闭记录集
 int CLmnOdbc::CloseRecordSet() {
+	ClearSysStatus();
 
 	if (0 != m_hstmt) {
 		SQLFreeHandle(SQL_HANDLE_STMT, m_hstmt);
@@ -201,6 +213,8 @@ int CLmnOdbc::CloseRecordSet() {
 
 // 获取数据
 int CLmnOdbc::GetFieldValue(int nColumnIndex, char * szValue, DWORD dwValueSize, BOOL * pbIsNull /*= 0*/ ) {
+	ClearSysStatus();
+
 	if (m_eDbStatus == STATUS_CLOSE) {
 		return ERROR_DISCONNECTED;
 	}
@@ -228,6 +242,8 @@ int CLmnOdbc::GetFieldValue(int nColumnIndex, char * szValue, DWORD dwValueSize,
 
 // 移动记录集指针
 int CLmnOdbc::MoveNext() {
+	ClearSysStatus();
+
 	if ( m_eDbStatus == STATUS_CLOSE ) {
 		return ERROR_DISCONNECTED;
 	}
@@ -246,6 +262,8 @@ int CLmnOdbc::MoveNext() {
 
 // 执行
 int CLmnOdbc::Execute(const char * szSql) {
+	ClearSysStatus();
+
 	if (m_eDbStatus == STATUS_CLOSE) {
 		return ERROR_DISCONNECTED;
 	}
