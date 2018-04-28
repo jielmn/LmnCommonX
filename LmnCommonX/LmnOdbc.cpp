@@ -83,7 +83,7 @@ void CLmnOdbc::GetDBError(SQLSMALLINT type, SQLHANDLE sqlHandle) {
 	SQLSMALLINT SQLmsglen;
 	SQLINTEGER SQLerr;
 	SQLGetDiagRec( type, sqlHandle, 1, (SQLCHAR *)pStatus, &SQLerr, (SQLCHAR*)pErrMsg, 100, &SQLmsglen );
-	if ( 0 == StrICmp("08S01", pStatus) || 0 == StrICmp("HYT01", pStatus) ) {
+	if ( 0 == StrICmp("08S01", pStatus) || 0 == StrICmp("HYT01", pStatus) || 0 == StrICmp("HYT00", pStatus) ) {
 		DisconnectDb();
 	}
 }
