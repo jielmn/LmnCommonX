@@ -3,11 +3,11 @@
 
 #include "LmnCommon.h"
 
-class   CSerialPort
+class   CLmnSerialPort
 {
 public:
-	CSerialPort();
-	virtual ~CSerialPort();
+	CLmnSerialPort();
+	virtual ~CLmnSerialPort();
 
 	// 打开串口
 	// 参数 BaudRate 波特率，ByteSize 数据位，Parity 校验位，StopBits 停止位

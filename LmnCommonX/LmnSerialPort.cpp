@@ -1,15 +1,15 @@
 #include "LmnSerialPort.h"
 
 
-CSerialPort::CSerialPort() {
+CLmnSerialPort::CLmnSerialPort() {
 	m_hComm = 0;
 }
 
-CSerialPort::~CSerialPort() {
+CLmnSerialPort::~CLmnSerialPort() {
 	CloseUartPort();
 }
 
-BOOL  CSerialPort::OpenUartPort(const char *UartPortName, DWORD BaudRate /*= 9600*/, BYTE ByteSize /*= 8*/, BYTE Parity /*= NOPARITY*/, BYTE StopBits /*= ONESTOPBIT*/ ) {
+BOOL  CLmnSerialPort::OpenUartPort(const char *UartPortName, DWORD BaudRate /*= 9600*/, BYTE ByteSize /*= 8*/, BYTE Parity /*= NOPARITY*/, BYTE StopBits /*= ONESTOPBIT*/ ) {
 
 	if (0 == UartPortName) {
 		return FALSE;
@@ -49,7 +49,7 @@ BOOL  CSerialPort::OpenUartPort(const char *UartPortName, DWORD BaudRate /*= 960
 	return TRUE;
 }
 
-BOOL  CSerialPort::CloseUartPort() {
+BOOL  CLmnSerialPort::CloseUartPort() {
 	// 如果已经打开串口
 	if (0 != m_hComm) {
 		CloseHandle(m_hComm);
@@ -58,7 +58,7 @@ BOOL  CSerialPort::CloseUartPort() {
 	return TRUE;
 }
 
-BOOL  CSerialPort::InitUartPort(HANDLE hComm, DWORD BaudRate, BYTE ByteSize, BYTE Parity, BYTE StopBits) {
+BOOL  CLmnSerialPort::InitUartPort(HANDLE hComm, DWORD BaudRate, BYTE ByteSize, BYTE Parity, BYTE StopBits) {
 	BOOL bResult = true;
 
 	//设置接收缓冲区和输出缓冲区的大小  
@@ -124,7 +124,7 @@ BOOL  CSerialPort::InitUartPort(HANDLE hComm, DWORD BaudRate, BYTE ByteSize, BYT
 	return bResult;
 }
 
-BOOL  CSerialPort::WriteUartPort(HANDLE hComm, const void * WriteBuf, DWORD ToWriteDataLen, DWORD *WritedDataLen) {
+BOOL  CLmnSerialPort::WriteUartPort(HANDLE hComm, const void * WriteBuf, DWORD ToWriteDataLen, DWORD *WritedDataLen) {
 	DWORD     dwError = 0;
 	COMSTAT   ComStat;
 	if (0 == hComm) {
@@ -141,7 +141,7 @@ BOOL  CSerialPort::WriteUartPort(HANDLE hComm, const void * WriteBuf, DWORD ToWr
 	return TRUE;
 }
 
-BOOL  CSerialPort::ReadUartPort(HANDLE hComm, void *RcvBuf, DWORD ToRcvDataLen, DWORD *RcvedDataLen, LPOVERLAPPED lpOverlapped) {
+BOOL  CLmnSerialPort::ReadUartPort(HANDLE hComm, void *RcvBuf, DWORD ToRcvDataLen, DWORD *RcvedDataLen, LPOVERLAPPED lpOverlapped) {
 	BOOL bResult = TRUE;
 	DWORD dwTempRcvedDataLen = 0;
 	DWORD dwError;
@@ -186,7 +186,7 @@ BOOL  CSerialPort::ReadUartPort(HANDLE hComm, void *RcvBuf, DWORD ToRcvDataLen, 
 }
 
 
-BOOL  CSerialPort::Write( const void * WriteBuf, DWORD & WriteDataLen ) {
+BOOL  CLmnSerialPort::Write( const void * WriteBuf, DWORD & WriteDataLen ) {
 	// 如果没有打卡串口
 	if (0 == m_hComm) {
 		return FALSE;
@@ -203,7 +203,7 @@ BOOL  CSerialPort::Write( const void * WriteBuf, DWORD & WriteDataLen ) {
 	return WriteUartPort(m_hComm, WriteBuf, WriteDataLen, &WriteDataLen);
 }
 
-BOOL  CSerialPort::Read(void *RcvBuf, DWORD & RcvDataLen) {
+BOOL  CLmnSerialPort::Read(void *RcvBuf, DWORD & RcvDataLen) {
 	// 如果没有打卡串口
 	if (0 == m_hComm) {
 		return FALSE;
