@@ -121,7 +121,7 @@ const char * CLmnOdbc::GetSysErrMsg() const {
 }
 
 // 连接数据库
-int CLmnOdbc::ConnectDb(const char * szOdbcStr /*= 0*/) {
+int CLmnOdbc::ConnectDb(const char * szOdbcStr /*= 0*/, BOOL bAutoCommit /*= TRUE*/) {
 	ClearSysStatus();
 
 	if ( 0 != szOdbcStr ) {
@@ -150,9 +150,17 @@ int CLmnOdbc::ConnectDb(const char * szOdbcStr /*= 0*/) {
 	//连接数据库
 	result = SQLDriverConnect( m_hdbc, NULL, (SQLCHAR *)szOdbcStr, SQL_NTS, ConnStrOut, sizeof(ConnStrOut), (SQLSMALLINT *)0, SQL_DRIVER_NOPROMPT );
 	// 数据库连接失败
-	if ( SQL_SUCCESS != result ) {		
+	if (SQL_ERROR == result  ) {
 		return ERROR_CONNECTION_FAILED;
 		
+	}
+
+	if ( !bAutoCommit ) {
+		result = SQLSetConnectAttr( m_hdbc, SQL_ATTR_AUTOCOMMIT,( SQLPOINTER)SQL_AUTOCOMMIT_OFF, SQL_IS_POINTER );
+		if (SQL_ERROR == result) {
+			SQLDisconnect(m_hdbc);
+			return ERROR_CONNECTION_FAILED;
+		}
 	}
 	
 	m_eDbStatus = STATUS_OPEN;
@@ -202,7 +210,7 @@ void CLmnOdbc::OpenRecordSet(const char * szSql) {
 	}
 
 	retcode = SQLExecDirect( m_hstmt, (SQLCHAR*)szSql, SQL_NTS );
-	if (SQL_SUCCESS != retcode) {
+	if (SQL_ERROR == retcode) {
 		GetDBError(SQL_HANDLE_STMT, m_hstmt);
 		SQLFreeHandle(SQL_HANDLE_STMT, m_hstmt);
 		m_hstmt = 0;
@@ -292,7 +300,7 @@ void CLmnOdbc::Execute(const char * szSql) {
 	}
 
 	retcode = SQLExecDirect(m_hstmt, (SQLCHAR*)szSql, SQL_NTS);
-	if (SQL_SUCCESS != retcode) {
+	if (SQL_ERROR == retcode) {
 		GetDBError(SQL_HANDLE_STMT, m_hstmt);
 		SQLFreeHandle(SQL_HANDLE_STMT, m_hstmt);
 		m_hstmt = 0;
@@ -301,4 +309,23 @@ void CLmnOdbc::Execute(const char * szSql) {
 
 	SQLFreeHandle(SQL_HANDLE_STMT, m_hstmt);
 	m_hstmt = 0;
+}
+
+// 提交事务
+void CLmnOdbc::EndTran(BOOL bCommit /*= TRUE*/) {
+	ClearSysStatus();
+	if (m_eDbStatus == STATUS_CLOSE) {
+		throw CLmnOdbcException(ERROR_DISCONNECTED);
+	}
+
+	SQLRETURN retcode = SQL_SUCCESS;
+	if ( bCommit )
+		retcode = SQLEndTran(SQL_HANDLE_DBC, m_hdbc, SQL_COMMIT );
+	else 
+		retcode = SQLEndTran(SQL_HANDLE_DBC, m_hdbc, SQL_ROLLBACK);
+
+	if (SQL_ERROR == retcode) {
+		GetDBError(SQL_HANDLE_DBC, m_hdbc);
+		throw CLmnOdbcException(ERROR_END_TRANSACTION);
+	}
 }

@@ -34,6 +34,7 @@ public:
 		ERROR_FAILED_TO_EXECUTE,
 		ERROR_FAILED_TO_FETCH,
 		ERROR_FAILED_TO_GET_DATA,
+		ERROR_END_TRANSACTION,
 		ERROR_RECORDSET_EOF,
 	};	
 
@@ -42,7 +43,7 @@ public:
 	const char * GetSysErrMsg() const;
 
 	// 连接数据库
-	int ConnectDb(const char * szOdbcStr = 0);
+	int ConnectDb(const char * szOdbcStr = 0, BOOL bAutoCommit = TRUE);
 	// 断开数据库
 	void DisconnectDb();
 
@@ -54,6 +55,8 @@ public:
 	void GetFieldValue( int nColumnIndex, char * szValue, DWORD dwValueSize, BOOL * pbIsNull = 0 );
 	// 移动记录集指针
 	BOOL MoveNext();
+	// 提交事务
+	void EndTran(BOOL bCommit = TRUE);
 
 	// 执行，同OpenRecordSet
 	void Execute(const char * szSql);
