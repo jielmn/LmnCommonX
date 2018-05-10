@@ -755,6 +755,7 @@ DWORD  FileConfigEx::SetConfig(const char * szConfigName, const char * szConfigV
 
 				delete[] pItem->szValue;
 				pItem->szValue = szValue;
+				m_bChanged = TRUE;
 				return 0;
 			}
 		}
