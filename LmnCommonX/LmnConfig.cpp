@@ -279,6 +279,12 @@ DWORD  FileConfig::SetConfig ( const char * szConfigName, const char * szConfigV
 	PHashNode pNode = GetHashtableNode( m_pHtable, szConfigName );
 	if ( 0 != pNode ) {
 		assert( pNode->pData );
+
+		// 如果值没有改变
+		if (0 == strcmp(szConfigValue, (char *)pNode->pData)) {
+			return 0;
+		}
+
 		delete[] (char *)pNode->pData;
 
 		dwLen = strlen(szConfigValue);
@@ -341,6 +347,12 @@ DWORD  FileConfig::SetConfig ( const char * szConfigName, DWORD dwConfigValue )
 	PHashNode pNode = GetHashtableNode( m_pHtable, szConfigName );
 	if ( 0 != pNode ) {
 		assert( pNode->pData );
+
+		// 如果值没有改变
+		if (0 == strcmp(buf, (char *)pNode->pData)) {
+			return 0;
+		}
+
 		delete[] (char *)pNode->pData;
 
 		dwLen = strlen(buf);
@@ -742,6 +754,12 @@ DWORD  FileConfigEx::SetConfig(const char * szConfigName, const char * szConfigV
 
 		if (pItem->nType == LINE_TYPE_KEY_VALUE) {
 			assert(pItem->szKey && pItem->szValue);
+
+			// 如果值没有改变
+			if ( 0 == strcmp(szConfigValue, pItem->szValue) ) {
+				return 0;
+			}
+
 			// 如果找到key
 			if (0 == StrICmp(pItem->szKey, szConfigName)) {
 				szValue = new char[dwValueLen + 1];
