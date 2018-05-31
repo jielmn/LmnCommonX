@@ -838,7 +838,7 @@ TEST( Container, Hashtable ) {
 
 	int ret = 0;
 	ret = DeinitHashtable( pHashtable );
-	ASSERT_EQ( LMNX_OK, 0 );
+	ASSERT_EQ( LMNX_OK, ret );
 }
 
 

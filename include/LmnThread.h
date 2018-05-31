@@ -17,6 +17,7 @@ namespace LmnToolkits {
 
 	class MessageHandler {
 	public:
+		virtual ~MessageHandler() {}
 		virtual void OnMessage( DWORD dwMessageId, const MessageData * pMessageData ) = 0;
 		// 是否可由Thread系统用delete方法删除以回收内存
 		virtual BOOL CanBeFreed() { return true; }

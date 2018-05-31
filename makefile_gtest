@@ -35,7 +35,7 @@ AR              := ar
 
 
 # 其他选项，例如：-Wall
-MISC_FLAGS           := -Wall
+MISC_FLAGS           := -Wall -Wno-conversion-null -Wno-delete-non-virtual-dtor
 
 # ==================================================================================
 
