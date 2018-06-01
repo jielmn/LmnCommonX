@@ -10,6 +10,7 @@
 #include "LmnConfig.h"
 #include "LmnThread.h"
 #include "sigslot.h"
+#include "md5.h"
 #include "gtest/gtest.h"
 
 TEST( String, StrTrim )
@@ -1304,6 +1305,25 @@ TEST( SIG_SLOT, SIG_SLOT ) {
 
 	delete sig0;
 	delete b;
+}
+
+TEST(MD5, MD5) {
+	MD5Context context;
+	unsigned char digest[16];
+	const unsigned char * pData = (const unsigned char*)"123";
+
+	MD5Init(&context);
+	MD5Update(&context, pData, 3);
+	MD5Final(digest, &context);
+
+	ASSERT_EQ( 0, memcmp("\x20\x2c\xb9\x62\xac\x59\x07\x5b\x96\x4b\x07\x15\x2d\x23\x4b\x70", digest, 16) );
+
+	pData = (const unsigned char*)"456789";
+	MD5Init(&context);
+	MD5Update(&context, pData, 6);
+	MD5Final(digest, &context);
+
+	ASSERT_EQ(0, memcmp("\xe3\x5c\xf7\xb6\x64\x49\xdf\x56\x5f\x93\xc6\x07\xd5\xa8\x1d\x09", digest, 16));
 }
 
 int main(int argc, char* argv[])

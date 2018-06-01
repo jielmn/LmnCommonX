@@ -93,6 +93,7 @@
     <ClCompile Include="LmnSerialPort.cpp" />
     <ClCompile Include="LmnString.cpp" />
     <ClCompile Include="LmnThread.cpp" />
+    <ClCompile Include="md5c.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\LmnCommon.h" />
@@ -105,6 +106,7 @@
     <ClInclude Include="..\include\LmnString.h" />
     <ClInclude Include="..\include\LmnTemplates.h" />
     <ClInclude Include="..\include\LmnThread.h" />
+    <ClInclude Include="..\include\md5.h" />
     <ClInclude Include="..\include\sigslot.h" />
     <ClInclude Include="Inner.h" />
   </ItemGroup>
