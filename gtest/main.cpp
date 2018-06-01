@@ -1184,6 +1184,21 @@ TEST( MISC, COMMON )
 	DWORD dwDiff = dwEndTick - dwStartTick;
 	ASSERT_TRUE( dwDiff >= (DWORD)950 && dwDiff <= (DWORD)1050 ) << "dwDiff = " << dwDiff << "ms";
 	
+
+	char szDir[256];
+	char szFileName[256];
+	char szPostFix[16];
+	int ret = ParseFileName("abc/efg/123.png", szDir, sizeof(szDir), szFileName, sizeof(szFileName), szPostFix, sizeof(szPostFix));
+	ASSERT_EQ(0, ret);
+#ifdef WIN32
+	ASSERT_EQ(0, strcmp(szDir,"abc\\efg") );
+#else
+	ASSERT_EQ(0, strcmp(szDir, "abc/efg"));
+#endif
+	ASSERT_EQ(0, strcmp(szFileName, "123"));
+	ASSERT_EQ(0, strcmp(szPostFix, "png"));
+
+
 }
 
 
@@ -1325,6 +1340,7 @@ TEST(MD5, MD5) {
 
 	ASSERT_EQ(0, memcmp("\xe3\x5c\xf7\xb6\x64\x49\xdf\x56\x5f\x93\xc6\x07\xd5\xa8\x1d\x09", digest, 16));
 }
+
 
 int main(int argc, char* argv[])
 {
