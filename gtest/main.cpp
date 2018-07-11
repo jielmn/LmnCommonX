@@ -11,6 +11,7 @@
 #include "LmnThread.h"
 #include "sigslot.h"
 #include "md5.h"
+#include "LmnTelSvr.h"
 #include "gtest/gtest.h"
 
 TEST( String, StrTrim )
@@ -1339,14 +1340,35 @@ TEST(MD5, MD5) {
 	MD5Final(digest, &context);
 
 	ASSERT_EQ(0, memcmp("\xe3\x5c\xf7\xb6\x64\x49\xdf\x56\x5f\x93\xc6\x07\xd5\xa8\x1d\x09", digest, 16));
+
+
+	JTelSvrPrint("md5 test finished!");
+	LmnSleep(1000);
+	JTelSvrPrint("md5 test finished 1!");
+	LmnSleep(1000);
+	JTelSvrPrint("md5 test finished 2!");
+}
+
+
+void test_1 (int nCnt, void * args[]) {
+	JTelSvrPrint("nCnt = %d", nCnt);
+	for (int i = 0; i < nCnt; i++) {
+		JTelSvrPrint("arg %d = %d", i+1, (int)args[i] );
+	}
+	JTelSvrPrint("sum = %d", (int)args[0] + (int)args[1] );
+	return;
 }
 
 
 int main(int argc, char* argv[])
 {
+	JTelSvrRegCommand("test1", "this is test 1.", test_1, JTEL_ARG_TYPE_INT, JTEL_ARG_TYPE_INT, 0);
+	JTelSvrStart(1101);
+
 	testing::InitGoogleTest(&argc, argv);
 	int r = RUN_ALL_TESTS();
 
 	getchar();
+	JTelSvrStop();
 	return r;
 }

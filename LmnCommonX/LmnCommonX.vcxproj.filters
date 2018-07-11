@@ -51,6 +51,9 @@
     <ClCompile Include="md5c.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="LmnTelSvr.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Inner.h">
@@ -90,6 +93,9 @@
       <Filter>头文件\include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\md5.h">
+      <Filter>头文件\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\LmnTelSvr.h">
       <Filter>头文件\include</Filter>
     </ClInclude>
   </ItemGroup>
