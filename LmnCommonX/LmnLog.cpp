@@ -114,3 +114,14 @@ DWORD  FileLog::Output ( LOG_SEVERITY dwSeverity, const char * szFormat, ... )
 
 	return 0;
 }
+
+DWORD   FileLog::Flush() {
+	if (!m_bInited) {
+		return LMNX_NOT_INITED;
+	}
+
+	assert(0 != m_fp);
+	fflush(m_fp);
+
+	return 0;
+}

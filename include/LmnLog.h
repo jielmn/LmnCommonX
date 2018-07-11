@@ -18,6 +18,8 @@ public:
 
 	// 输出日志(不要超出8K)
 	virtual DWORD     Output ( LOG_SEVERITY dwSeverity, const char * szFormat, ... ) = 0;
+
+	virtual DWORD     Flush() = 0;
 };
 
 
@@ -37,6 +39,8 @@ public:
 
 	// 输出日志(不要超出8K)
 	DWORD     Output ( LOG_SEVERITY dwSeverity, const char * szFormat, ... );
+
+	DWORD     Flush();
 
 private:
 	FILE *        m_fp;
