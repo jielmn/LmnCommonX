@@ -753,15 +753,15 @@ DWORD  FileConfigEx::SetConfig(const char * szConfigName, const char * szConfigV
 		assert(pItem);
 
 		if (pItem->nType == LINE_TYPE_KEY_VALUE) {
-			assert(pItem->szKey && pItem->szValue);
-
-			// 如果值没有改变
-			if ( 0 == strcmp(szConfigValue, pItem->szValue) ) {
-				return 0;
-			}
+			assert(pItem->szKey && pItem->szValue);			
 
 			// 如果找到key
 			if (0 == StrICmp(pItem->szKey, szConfigName)) {
+				// 如果值没有改变
+				if (0 == strcmp(szConfigValue, pItem->szValue)) {
+					return 0;
+				}
+
 				szValue = new char[dwValueLen + 1];
 				if (0 == szValue) {
 					return LMNX_SYSTEM_ERROR;
