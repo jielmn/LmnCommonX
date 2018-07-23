@@ -28,7 +28,7 @@ enum JTelError
 /**************************************************************/
 // 功能: 启动telnet服务
 /**************************************************************/
-int JTelSvrStart( unsigned short swPort );
+int JTelSvrStart( unsigned short swPort, unsigned short swTryNextRange = 0 );
 
 /**************************************************************/
 // 功能: 关闭telnet服务

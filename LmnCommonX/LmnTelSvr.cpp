@@ -1816,7 +1816,7 @@ static void bye(int nCnt, void * args[])
     return;
 }
 
-int JTelSvrStart( unsigned short swPort )
+int JTelSvrStart( unsigned short swPort, unsigned short swTryNextRange /*= 0*/ )
 {
 
 #ifdef WIN32
@@ -1841,34 +1841,98 @@ int JTelSvrStart( unsigned short swPort )
 
     sockaddr_in tSockArr;
 
-    // 现在我们来为sockaddr_in结构赋值。
-    tSockArr.sin_family      = AF_INET;               // 地址族
-    tSockArr.sin_addr.s_addr = INADDR_ANY;            // 网际IP地址
-    tSockArr.sin_port        = htons( swPort );       // 使用的端口
+	if ( swTryNextRange <= 1 ) {
+		// 现在我们来为sockaddr_in结构赋值。
+		tSockArr.sin_family = AF_INET;               // 地址族
+		tSockArr.sin_addr.s_addr = INADDR_ANY;            // 网际IP地址
+		tSockArr.sin_port = htons(swPort);       // 使用的端口
 
-    // 由socket函数创建我们的SOCKET。
-    s_tSvrSocket = socket( AF_INET,SOCK_STREAM, 0 );
+												 // 由socket函数创建我们的SOCKET。
+		s_tSvrSocket = socket(AF_INET, SOCK_STREAM, 0);
 
-    // 如果socket()函数失败，我们就退出。
-    if( INVALID_SOCKET == s_tSvrSocket )
-    {
-        return JTEL_ERROR_FAILED_TO_SOCKET;
-    }
+		// 如果socket()函数失败，我们就退出。
+		if (INVALID_SOCKET == s_tSvrSocket)
+		{
+			return JTEL_ERROR_FAILED_TO_SOCKET;
+		}
 
-    // bind将我们刚创建的套接字和sockaddr_in结构联系起来。
-    // 它主要使用本地地址及一个特定的端口来连接套接字。
-    // 如果它返回非零值，就表示出现错误。
-    if( 0 != bind( s_tSvrSocket, (sockaddr*)&tSockArr, sizeof(tSockArr)) )
-    {
-        return JTEL_ERROR_FAILED_TO_BIND;
-    }
+		// bind将我们刚创建的套接字和sockaddr_in结构联系起来。
+		// 它主要使用本地地址及一个特定的端口来连接套接字。
+		// 如果它返回非零值，就表示出现错误。
+		if (0 != bind(s_tSvrSocket, (sockaddr*)&tSockArr, sizeof(tSockArr)))
+		{
+			return JTEL_ERROR_FAILED_TO_BIND;
+		}
 
-    // listen命令套接字监听来自客户端的连接。
-    // 第二个参数是最大连接数。
-    if( 0 != listen( s_tSvrSocket,10 ) )
-    {
-        return JTEL_ERROR_FAILED_TO_LISTEN;
-    }
+		// listen命令套接字监听来自客户端的连接。
+		// 第二个参数是最大连接数。
+		if (0 != listen(s_tSvrSocket, 10))
+		{
+			return JTEL_ERROR_FAILED_TO_LISTEN;
+		}
+	}
+	else {
+		unsigned int dwIndex = 0;
+		int ret = -1;
+
+		do 
+		{
+			// 现在我们来为sockaddr_in结构赋值。
+			tSockArr.sin_family      = AF_INET;                 // 地址族
+			tSockArr.sin_addr.s_addr = INADDR_ANY;              // 网际IP地址
+			tSockArr.sin_port        = htons(swPort+ dwIndex);    // 使用的端口
+
+			// 由socket函数创建我们的SOCKET。
+			s_tSvrSocket = socket(AF_INET, SOCK_STREAM, 0);
+
+			// 如果socket()函数失败，我们就退出。
+			if (INVALID_SOCKET == s_tSvrSocket)
+			{
+				if (dwIndex < swTryNextRange ) {
+					dwIndex++;
+					continue;
+				}
+				else {
+					break;
+				}
+			}
+
+			// bind将我们刚创建的套接字和sockaddr_in结构联系起来。
+			// 它主要使用本地地址及一个特定的端口来连接套接字。
+			// 如果它返回非零值，就表示出现错误。
+			if (0 != bind(s_tSvrSocket, (sockaddr*)&tSockArr, sizeof(tSockArr)))
+			{
+				if (dwIndex < swTryNextRange) {
+					dwIndex++;
+					continue;
+				}
+				else {
+					break;
+				}
+			}
+
+			// listen命令套接字监听来自客户端的连接。
+			// 第二个参数是最大连接数。
+			if (0 != listen(s_tSvrSocket, 10))
+			{
+				if (dwIndex < swTryNextRange) {
+					dwIndex++;
+					continue;
+				}
+				else {
+					break;
+				}
+			}
+
+			ret = 0;
+			break;
+		} while ( TRUE );
+
+		if ( 0 != ret ) {
+			return ret;
+		}
+	}
+    
 
 	LmnInitLock( &s_lock );
 
