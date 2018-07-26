@@ -15,13 +15,13 @@ public:
 	// 读取配置项
 	virtual DWORD     GetConfig ( const char * szConfigName, char * szConfigValue, DWORD dwConfigValueSize, const char * szDefault = 0 ) = 0;
 	// 设置配置项
-	virtual DWORD     SetConfig ( const char * szConfigName, const char * szConfigValue ) = 0;
+	virtual DWORD     SetConfig ( const char * szConfigName, const char * szConfigValue, const char * szDefault = 0 ) = 0;
 	virtual const char * operator [] ( const char * szConfigName ) = 0;
 
 	// 读取配置项
 	virtual DWORD     GetConfig ( const char * szConfigName, DWORD & dwConfigValue, DWORD dwDefault = 0 ) = 0;
 	// 设置配置项
-	virtual DWORD     SetConfig ( const char * szConfigName, DWORD dwConfigValue ) = 0;
+	virtual DWORD     SetConfig ( const char * szConfigName, DWORD dwConfigValue, DWORD * pdwDefault = 0 ) = 0;
 
 	// 重新加载文件
 	virtual DWORD     Reload() = 0;
@@ -44,11 +44,11 @@ public:
 	// 读取配置项
 	DWORD       GetConfig ( const char * szConfigName, char * szConfigValue, DWORD dwConfigValueSize, const char * szDefault = 0 );
 	// 设置配置项
-	DWORD       SetConfig ( const char * szConfigName, const char * szConfigValue );
+	DWORD       SetConfig ( const char * szConfigName, const char * szConfigValue, const char * szDefault = 0 );
 	const char * operator [] ( const char * szConfigName );
 
 	DWORD       GetConfig ( const char * szConfigName, DWORD & dwConfigValue, DWORD dwDefault = 0 );
-	DWORD       SetConfig ( const char * szConfigName, DWORD dwConfigValue );
+	DWORD       SetConfig ( const char * szConfigName, DWORD dwConfigValue, DWORD * pdwDefault = 0 );
 
 	// 重新加载文件
 	DWORD       Reload();
@@ -99,11 +99,12 @@ public:
 	// 读取配置项
 	DWORD       GetConfig(const char * szConfigName, char * szConfigValue, DWORD dwConfigValueSize, const char * szDefault = 0);
 	// 设置配置项
-	DWORD       SetConfig(const char * szConfigName, const char * szConfigValue);
+	DWORD       SetConfig( const char * szConfigName, const char * szConfigValue, const char * szDefault = 0 );
 	const char * operator [] (const char * szConfigName);
 
 	DWORD       GetConfig(const char * szConfigName, DWORD & dwConfigValue, DWORD dwDefault = 0);
-	DWORD       SetConfig(const char * szConfigName, DWORD dwConfigValue);
+	// 保存的格式是int类型
+	DWORD       SetConfig(const char * szConfigName, DWORD dwConfigValue, DWORD * pdwDefault = 0);
 
 	// 重新加载文件
 	DWORD       Reload();

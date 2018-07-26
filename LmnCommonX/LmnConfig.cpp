@@ -266,7 +266,7 @@ DWORD  FileConfig::GetConfig ( const char * szConfigName, char * szConfigValue, 
 	return 0;
 }
 
-DWORD  FileConfig::SetConfig ( const char * szConfigName, const char * szConfigValue )
+DWORD  FileConfig::SetConfig ( const char * szConfigName, const char * szConfigValue, const char * szDefault /*= 0*/ )
 {
 	if ( 0 == szConfigName || 0 == szConfigValue ) {
 		return LMNX_WRONG_PARAMS;
@@ -331,7 +331,7 @@ DWORD  FileConfig::GetConfig ( const char * szConfigName, DWORD & dwConfigValue,
 	return 0;
 }
 
-DWORD  FileConfig::SetConfig ( const char * szConfigName, DWORD dwConfigValue )
+DWORD  FileConfig::SetConfig ( const char * szConfigName, DWORD dwConfigValue, DWORD * pdwDefault /*= 0*/)
 {
 	if ( 0 == szConfigName ) {
 		return LMNX_WRONG_PARAMS;
@@ -394,6 +394,7 @@ typedef struct tagConfigItem {
 	char *  szKey;
 	char *  szValue;
 	char *  szRightComment;       // key value格式，右边的注释
+	char *  szDefaultValue;       // 缺省值。用在保存的时候，判断是否写文件
 }ConfigItem_;
 
 static void ClearConfigItem_(ConfigItem_ * pItem) {
@@ -417,6 +418,11 @@ static void ClearConfigItem_(ConfigItem_ * pItem) {
 	if (pItem->szRightComment) {
 		delete[] pItem->szRightComment;
 		pItem->szRightComment = 0;
+	}
+
+	if (pItem->szDefaultValue) {
+		delete[] pItem->szDefaultValue;
+		pItem->szDefaultValue = 0;
 	}
 }
 
@@ -602,6 +608,34 @@ static  DWORD AppendCfgItem2List_( PList pList, ConfigItem_ * pItem ) {
 	return 0;
 }
 
+// 更改缺省值
+static void  UpdateDefaultValue( ConfigItem_ * pItem, const char * szDefault ) {
+	assert(pItem);
+	if ( 0 == szDefault ) {
+		if (0 != pItem->szDefaultValue) {
+			delete[] pItem->szDefaultValue;
+			pItem->szDefaultValue = 0;
+		}
+	}
+	else {
+		DWORD dwDefaultLen = strlen(szDefault);
+		if (0 == pItem->szDefaultValue) {
+			pItem->szDefaultValue = new char[dwDefaultLen + 1];
+			strcpy(pItem->szDefaultValue, szDefault);
+		}
+		else {
+			if (0 != strcmp(pItem->szDefaultValue, szDefault)) {
+				DWORD dwDefaultBufLen = strlen(pItem->szDefaultValue);
+				if (dwDefaultBufLen < dwDefaultLen) {
+					delete[] pItem->szDefaultValue;
+					pItem->szDefaultValue = new char[dwDefaultLen + 1];
+				}
+				strcpy(pItem->szDefaultValue, szDefault);
+			}
+		}
+	}
+}
+
 
 //  FileConfigEx
 FileConfigEx::FileConfigEx() {
@@ -658,6 +692,10 @@ DWORD  FileConfigEx::Init(const char * szCfgFileName /*= 0*/)
 		// 读取一行配置
 		fgets(buf, sizeof(buf) - 1, fp);
 		DWORD dwLineLen = strlen(buf);
+		if ( 0 == dwLineLen ) {
+			continue;
+		}
+
 		if ( dwLineLen > 0 &&  buf[dwLineLen - 1] == '\n' ) {
 			buf[dwLineLen - 1] = '\0';
 		}
@@ -737,7 +775,7 @@ DWORD   FileConfigEx::GetConfig(const char * szConfigName, char * szConfigValue,
 }
 
 // 设置配置项
-DWORD  FileConfigEx::SetConfig(const char * szConfigName, const char * szConfigValue) {
+DWORD  FileConfigEx::SetConfig(const char * szConfigName, const char * szConfigValue, const char * szDefault /*= 0*/ ) {
 	if (0 == szConfigName || 0 == szConfigValue) {
 		return LMNX_WRONG_PARAMS;
 	}
@@ -759,6 +797,7 @@ DWORD  FileConfigEx::SetConfig(const char * szConfigName, const char * szConfigV
 			if (0 == StrICmp(pItem->szKey, szConfigName)) {
 				// 如果值没有改变
 				if (0 == strcmp(szConfigValue, pItem->szValue)) {
+					UpdateDefaultValue(pItem, szDefault);
 					return 0;
 				}
 
@@ -774,6 +813,7 @@ DWORD  FileConfigEx::SetConfig(const char * szConfigName, const char * szConfigV
 				delete[] pItem->szValue;
 				pItem->szValue = szValue;
 				m_bChanged = TRUE;
+				UpdateDefaultValue(pItem, szDefault);
 				return 0;
 			}
 		}
@@ -809,6 +849,7 @@ DWORD  FileConfigEx::SetConfig(const char * szConfigName, const char * szConfigV
 	memcpy(pItem->szValue, szConfigValue, dwValueLen);
 	pItem->szValue[dwValueLen] = '\0';
 	StrTrim(pItem->szValue);
+	UpdateDefaultValue(pItem, szDefault);
 
 	pNode = Insert2ListTail(m_pList, pItem);
 	if (0 == pNode) {
@@ -874,10 +915,18 @@ DWORD   FileConfigEx::GetConfig(const char * szConfigName, DWORD & dwConfigValue
 	return 0;
 }
 
-DWORD   FileConfigEx::SetConfig(const char * szConfigName, DWORD dwConfigValue) {
+DWORD   FileConfigEx::SetConfig(const char * szConfigName, DWORD dwConfigValue, DWORD * pdwDefault /*= 0*/ ) {
 	char szValue[64] = {0};
-	SNPRINTF(szValue, sizeof(szValue), "%lu", dwConfigValue);
-	return SetConfig(szConfigName, szValue);
+	SNPRINTF(szValue, sizeof(szValue), "%d", (int)dwConfigValue);
+
+	if ( 0 == pdwDefault ) {
+		return SetConfig( szConfigName, szValue );
+	}
+	else {
+		char szDefault[64] = { 0 };
+		SNPRINTF(szDefault, sizeof(szDefault), "%d", (int)*pdwDefault);
+		return SetConfig(szConfigName, szValue, szDefault);
+	}
 }
 
 // 重新加载文件
@@ -940,21 +989,25 @@ DWORD   FileConfigEx::Save() {
 		if (pItem->nType == LINE_TYPE_TEXT) {
 			assert(pItem->szOriginalText);
 			SNPRINTF(buf, sizeof(buf) - 1, "%s\r\n", pItem->szOriginalText);
+			fwrite(buf, 1, strlen(buf), fp);
 		}
 		else {
 			assert(pItem->szKey && pItem->szValue);
-			StrReplaceAll(szKey,   sizeof(szKey),   pItem->szKey,  "#", "##");
-			StrReplaceAll(szValue, sizeof(szValue), pItem->szValue, "#", "##");
 
-			if (0 == pItem->szRightComment) {				
-				SNPRINTF(buf, sizeof(buf) - 1, "%s = %s\r\n", szKey, szValue);
-			}
-			else {
-				SNPRINTF(buf, sizeof(buf) - 1, "%s = %s #%s\r\n", szKey, szValue, pItem->szRightComment);
-			}
+			if (   0 == pItem->szDefaultValue 
+				|| 0 != strcmp( pItem->szDefaultValue, pItem->szValue)  ) {
+				StrReplaceAll(szKey, sizeof(szKey), pItem->szKey, "#", "##");
+				StrReplaceAll(szValue, sizeof(szValue), pItem->szValue, "#", "##");
+				if (0 == pItem->szRightComment) {
+					SNPRINTF(buf, sizeof(buf) - 1, "%s = %s\r\n", szKey, szValue);
+				}
+				else {
+					SNPRINTF(buf, sizeof(buf) - 1, "%s = %s #%s\r\n", szKey, szValue, pItem->szRightComment);
+				}
+				fwrite(buf, 1, strlen(buf), fp);
+			}			
 		}
-		fwrite(buf, 1, strlen(buf), fp);
-		
+				
 		pNode = GetNextListNode(pNode);
 	}
 
