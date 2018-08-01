@@ -54,6 +54,9 @@
     <ClCompile Include="LmnTelSvr.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="LmnExcel.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Inner.h">
@@ -96,6 +99,9 @@
       <Filter>头文件\include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\LmnTelSvr.h">
+      <Filter>头文件\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\LmnExcel.h">
       <Filter>头文件\include</Filter>
     </ClInclude>
   </ItemGroup>

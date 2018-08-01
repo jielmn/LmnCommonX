@@ -1,0 +1,302 @@
+#include <assert.h>
+#include "LmnExcel.h"
+
+#define  MAX_EXCEL_LINE_LENGTH           1024
+#define  MAX_EXCEL_COLUMN_LENGTH         8
+#define  MAX_EXCEL_GRID_LENGTH           16
+#define  MAX_RANGE_LENGTH                32
+
+// AutoWrap() - Automation helper function...
+static HRESULT AutoWrap(int autoType, VARIANT *pvResult, IDispatch *pDisp, LPOLESTR ptName, int cArgs...) {
+	// Begin variable-argument list...
+	va_list marker;
+	va_start(marker, cArgs);
+
+	if (!pDisp) {
+		fprintf(stderr, "NULL IDispatch passed to AutoWrap()");
+		return -1;
+	}
+
+	// Variables used...
+	DISPPARAMS dp = { NULL, NULL, 0, 0 };
+	DISPID dispidNamed = DISPID_PROPERTYPUT;
+	DISPID dispID;
+	HRESULT hr;
+	char buf[200];
+	char szName[200];
+
+	// Convert down to ANSI
+	WideCharToMultiByte(CP_ACP, 0, ptName, -1, szName, 256, NULL, NULL);
+
+	// Get DISPID for name passed...
+	hr = pDisp->GetIDsOfNames(IID_NULL, &ptName, 1, LOCALE_USER_DEFAULT, &dispID);
+	if (FAILED(hr)) {
+		sprintf(buf, "IDispatch::GetIDsOfNames(\"%s\") failed w/err 0x%08lx", szName, hr);
+		fprintf(stderr, buf);
+		return hr;
+	}
+
+	// Allocate memory for arguments...
+	VARIANT *pArgs = new VARIANT[cArgs + 1];
+	// Extract arguments...
+	for (int i = 0; i < cArgs; i++) {
+		pArgs[i] = va_arg(marker, VARIANT);
+	}
+
+	// Build DISPPARAMS
+	dp.cArgs = cArgs;
+	dp.rgvarg = pArgs;
+
+	// Handle special-case for property-puts!
+	if (autoType & DISPATCH_PROPERTYPUT) {
+		dp.cNamedArgs = 1;
+		dp.rgdispidNamedArgs = &dispidNamed;
+	}
+
+	// Make the call!
+	hr = pDisp->Invoke(dispID, IID_NULL, LOCALE_SYSTEM_DEFAULT, autoType, &dp, pvResult, NULL, NULL);
+	if (FAILED(hr)) {
+		sprintf(buf, "IDispatch::Invoke(\"%s\"=%08lx) failed w/err 0x%08lx", szName, dispID, hr);
+		fprintf(stderr, buf);
+		return hr;
+	}
+	// End variable-argument section...
+	va_end(marker);
+	delete[] pArgs;
+	return hr;
+}
+
+// 整形形式的column转为excel形式的column，例如 A  XFD等
+static char *  ColIndex2Excel(char * szColumn, DWORD dwColumnSize, DWORD dwColIndex ) {
+	assert(dwColumnSize >= MAX_EXCEL_COLUMN_LENGTH);
+
+	DWORD dwRet = 0;
+	DWORD dwReminder = 0;
+	DWORD pos = 0;
+	char  szTemp[MAX_EXCEL_COLUMN_LENGTH] = { 0 };
+
+	do 
+	{
+		if (dwRet > 0) {
+			dwColIndex = dwRet - 1;
+		}
+
+		dwRet = dwColIndex / 26;
+		dwReminder = dwColIndex % 26;
+		szTemp[pos] = (char)('A' + dwReminder);
+		pos++;
+	} while ( dwRet > 0 );
+	
+	for (DWORD i = 0; i < pos; i++) {
+		szColumn[i] = szTemp[pos - i - 1];
+	}
+
+	return szColumn;
+}
+
+static char *  RowColIndex2Excel(char * szGrid, DWORD dwGridSize, DWORD dwRowIndex, DWORD dwColIndex) {
+	char szColumn[MAX_EXCEL_COLUMN_LENGTH] = { 0 };
+	ColIndex2Excel(szColumn, sizeof(szColumn), dwColIndex);
+	SNPRINTF(szGrid, dwGridSize, "%s%lu", szColumn, dwRowIndex + 1);
+	return szGrid;
+}
+
+
+
+BOOL  CExcel::IfExcelInstalled() {
+	CLSID clsid;
+	HRESULT hr = CLSIDFromProgID(L"Excel.Application", &clsid);
+	if (FAILED(hr)) {
+		return FALSE;
+	}	
+	return TRUE;
+}
+
+
+CExcel::CExcel( BOOL bVisible /*= FALSE*/ ) {
+	m_bInited = FALSE;
+	HRESULT hr = CLSIDFromProgID( L"Excel.Application", &m_clsid );
+	if (FAILED(hr)) {
+		return;
+	}
+
+	hr = CoCreateInstance( m_clsid, NULL, CLSCTX_LOCAL_SERVER, IID_IDispatch, (void **)&m_pXlApp );
+	if ( FAILED(hr) ) {
+		return;
+	}
+
+	VARIANT x;
+	if (bVisible) {
+		x.vt = VT_I4;
+		x.lVal = 1;
+		AutoWrap( DISPATCH_PROPERTYPUT, NULL, m_pXlApp, L"Visible", 1, x );
+	}
+
+	VARIANT result;
+	VariantInit(&result);
+	AutoWrap(DISPATCH_PROPERTYGET, &result, m_pXlApp, L"Workbooks", 0);
+	m_pXlBooks = result.pdispVal;
+
+	VariantInit(&result);
+	AutoWrap(DISPATCH_PROPERTYGET, &result, m_pXlBooks, L"Add", 0);
+	m_pXlBook = result.pdispVal;
+	
+	VariantInit(&result);
+	AutoWrap(DISPATCH_PROPERTYGET, &result, m_pXlApp, L"ActiveSheet", 0);
+	m_pXlSheet = result.pdispVal;
+
+	m_bInited = TRUE;
+}
+
+CExcel::~CExcel() {
+	if ( !m_bInited ) {
+		return;
+	}
+
+	m_pXlSheet->Release();
+	m_pXlBook->Release();
+	m_pXlBooks->Release();
+	m_pXlApp->Release();
+}
+
+int  CExcel::WriteGrid( DWORD dwRowIndex, DWORD dwColIndex, const char * szValue ) {
+	if ( 0 == szValue ) {
+		return 0;
+	}
+
+	if ( !m_bInited ) {
+		return -1;
+	}
+
+	VARIANT arr;
+	arr.vt = VT_ARRAY | VT_VARIANT;
+	SAFEARRAYBOUND sab[2];
+	sab[0].lLbound = 1; sab[0].cElements = 1;
+	sab[1].lLbound = 1; sab[1].cElements = 1;
+	arr.parray = SafeArrayCreate(VT_VARIANT, 2, sab);
+
+	WCHAR szTmp[MAX_EXCEL_LINE_LENGTH];
+	MultiByteToWideChar(CP_ACP, 0, szValue, -1, szTmp, MAX_EXCEL_LINE_LENGTH);
+
+	VARIANT tmp;
+	tmp.vt = VT_BSTR;
+	tmp.bstrVal = SysAllocString(szTmp);
+	long indices[] = { 1,1 };
+	SafeArrayPutElement(arr.parray, indices, (void *)&tmp);
+	VariantClear(&tmp);
+
+	char szGrid[MAX_EXCEL_GRID_LENGTH] = { 0 };
+	RowColIndex2Excel(szGrid, sizeof(szGrid), dwRowIndex, dwColIndex);
+	MultiByteToWideChar(CP_ACP, 0, szGrid, -1, szTmp, MAX_EXCEL_LINE_LENGTH);
+
+	IDispatch * pXlRange = 0;
+	VARIANT parm;
+	parm.vt = VT_BSTR;
+	parm.bstrVal = ::SysAllocString(szTmp);
+
+	VARIANT result;
+	VariantInit(&result);
+	AutoWrap(DISPATCH_PROPERTYGET, &result, m_pXlSheet, L"Range", 1, parm);
+	VariantClear(&parm);
+
+	pXlRange = result.pdispVal;
+
+	AutoWrap(DISPATCH_PROPERTYPUT, NULL, pXlRange, L"Value", 1, arr);
+	VariantClear(&arr);
+
+	pXlRange->Release();
+	return 0;
+}
+
+int  CExcel::WriteRange( DWORD dwStartRowIndex, DWORD dwStartColIndex,
+	                     DWORD dwEndRowIndex, DWORD dwEndColIndex, 
+	                     const std::vector<const char *> & vValues ) 
+{
+	if (!m_bInited) {
+		return -1;
+	}
+
+	if ( dwStartRowIndex > dwEndRowIndex ) {
+		return -1;
+	}
+
+	if (dwStartColIndex > dwEndColIndex) {
+		return -1;
+	}
+
+	DWORD  dwRows = dwEndRowIndex - dwStartRowIndex + 1;
+	DWORD  dwCols = dwEndColIndex - dwStartColIndex + 1;
+
+	VARIANT arr;
+	arr.vt = VT_ARRAY | VT_VARIANT;
+	SAFEARRAYBOUND sab[2];
+	sab[0].lLbound = 1; sab[0].cElements = dwRows;
+	sab[1].lLbound = 1; sab[1].cElements = dwCols;
+	arr.parray = SafeArrayCreate(VT_VARIANT, 2, sab);
+
+	WCHAR wszTmp[MAX_EXCEL_LINE_LENGTH];
+	std::vector<const char *>::const_iterator it;
+	it = vValues.begin();
+
+	for (DWORD i = 0; i < dwRows && it != vValues.end(); i++) {
+		for (DWORD j = 0; j < dwCols && it != vValues.end(); j++, it++) {
+			MultiByteToWideChar(CP_ACP, 0, *it, -1, wszTmp, MAX_EXCEL_LINE_LENGTH);
+
+			VARIANT tmp;
+			tmp.vt = VT_BSTR;
+			tmp.bstrVal = SysAllocString(wszTmp);
+			long indices[] = { (long)(i+1), (long)(j+1) };
+			SafeArrayPutElement(arr.parray, indices, (void *)&tmp);
+			VariantClear(&tmp);
+		}
+	}
+
+	char szStartGrid[MAX_EXCEL_GRID_LENGTH] = { 0 };
+	RowColIndex2Excel(szStartGrid, sizeof(szStartGrid), dwStartRowIndex, dwStartColIndex);
+
+	char szEndGrid[MAX_EXCEL_GRID_LENGTH] = { 0 };
+	RowColIndex2Excel(szEndGrid, sizeof(szEndGrid), dwEndRowIndex, dwEndColIndex);
+
+	char szRange[MAX_RANGE_LENGTH];
+	SNPRINTF(szRange, sizeof(szRange), "%s:%s", szStartGrid, szEndGrid);
+	MultiByteToWideChar(CP_ACP, 0, szRange, -1, wszTmp, MAX_EXCEL_LINE_LENGTH);
+
+	IDispatch * pXlRange = 0;
+	VARIANT parm;
+	parm.vt = VT_BSTR;
+	parm.bstrVal = ::SysAllocString(wszTmp);
+
+	VARIANT result;
+	VariantInit(&result);
+	AutoWrap(DISPATCH_PROPERTYGET, &result, m_pXlSheet, L"Range", 1, parm);
+	VariantClear(&parm);
+
+	pXlRange = result.pdispVal;
+
+	AutoWrap(DISPATCH_PROPERTYPUT, NULL, pXlRange, L"Value", 1, arr);
+	VariantClear(&arr);
+
+	pXlRange->Release();
+	return 0;
+}
+
+int  CExcel::SaveAs(const char * szFilePath) {
+	if (!m_bInited) {
+		return -1;
+	}
+
+	if (0 == szFilePath) {
+		return -1;
+	}
+
+	VARIANT filename;
+	filename.vt = VT_BSTR;
+	filename.bstrVal = SysAllocString(L"d:\\test.xls");
+
+	VARIANT fileType;
+	fileType.vt = VT_VARIANT;
+	fileType.llVal = 56;//
+
+	AutoWrap(DISPATCH_METHOD, NULL, m_pXlSheet, L"SaveAs", 1, filename, fileType); //保存
+	return 0;
+}

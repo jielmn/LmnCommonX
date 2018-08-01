@@ -87,6 +87,7 @@
     <ClCompile Include="LmnCommon.cpp" />
     <ClCompile Include="LmnConfig.cpp" />
     <ClCompile Include="LmnContainer.cpp" />
+    <ClCompile Include="LmnExcel.cpp" />
     <ClCompile Include="LmnFile.cpp" />
     <ClCompile Include="LmnLog.cpp" />
     <ClCompile Include="LmnOdbc.cpp" />
@@ -100,6 +101,7 @@
     <ClInclude Include="..\include\LmnCommon.h" />
     <ClInclude Include="..\include\LmnConfig.h" />
     <ClInclude Include="..\include\LmnContainer.h" />
+    <ClInclude Include="..\include\LmnExcel.h" />
     <ClInclude Include="..\include\LmnFile.h" />
     <ClInclude Include="..\include\LmnLog.h" />
     <ClInclude Include="..\include\LmnOdbc.h" />
