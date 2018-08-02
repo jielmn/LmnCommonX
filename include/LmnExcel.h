@@ -13,6 +13,7 @@ public:
 	int  WriteRange( DWORD dwStartRowIndex, DWORD dwStartColIndex, 
 		             DWORD dwEndRowIndex,   DWORD dwEndColIndex, const std::vector<const char *> & vValues );
 	int  SaveAs(const char * szFilePath);
+	int  Quit();
 
 	static BOOL  IfExcelInstalled();
 

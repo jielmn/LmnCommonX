@@ -18,12 +18,12 @@ int test_excel() {
 		return -1;
 	}
 
-	CExcel a(TRUE);
-	for (int i = 0; i < 1000; i++) {
-		for (int j = 0; j < 3; j++) {
-			a.WriteGrid(i, j, "hello");
-		}
-	}
+	//CExcel a(TRUE);
+	//for (int i = 0; i < 1000; i++) {
+	//	for (int j = 0; j < 3; j++) {
+	//		a.WriteGrid(i, j, "hello");
+	//	}
+	//}
 
 	CExcel b;
 	std::vector<const char *> v;
@@ -34,13 +34,14 @@ int test_excel() {
 			v.push_back(p);
 		}
 	}
-	b.WriteRange(0, 0, 999, 2, v);
-	b.SaveAs("123");
+	b.WriteRange(0, 0, 9, 2, v);
+	b.SaveAs("d:\\test\\a.xlsx");
 
 	std::vector<const char *>::iterator it = v.begin();
 	for (; it != v.end(); it++) {
 		delete[] * it;
 	}
+	b.Quit();
 
 	CoUninitialize();
 	printf("end testing excel.\n");

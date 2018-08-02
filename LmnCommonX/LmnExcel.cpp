@@ -58,6 +58,7 @@ static HRESULT AutoWrap(int autoType, VARIANT *pvResult, IDispatch *pDisp, LPOLE
 	if (FAILED(hr)) {
 		sprintf(buf, "IDispatch::Invoke(\"%s\"=%08lx) failed w/err 0x%08lx", szName, dispID, hr);
 		fprintf(stderr, buf);
+		delete[] pArgs;
 		return hr;
 	}
 	// End variable-argument section...
@@ -289,14 +290,36 @@ int  CExcel::SaveAs(const char * szFilePath) {
 		return -1;
 	}
 
+	WCHAR wszTmp[MAX_EXCEL_LINE_LENGTH];
+	MultiByteToWideChar(CP_ACP, 0, szFilePath, -1, wszTmp, MAX_EXCEL_LINE_LENGTH);
+
 	VARIANT filename;
 	filename.vt = VT_BSTR;
-	filename.bstrVal = SysAllocString(L"d:\\test.xls");
+	filename.bstrVal = SysAllocString(wszTmp);
 
-	VARIANT fileType;
-	fileType.vt = VT_VARIANT;
-	fileType.llVal = 56;//
+	VARIANT a;
+	a.vt = VT_INT;
+	a.llVal = 0;
+	AutoWrap(DISPATCH_PROPERTYPUT, NULL, m_pXlApp, L"DisplayAlerts", 1, a);
+	
 
-	AutoWrap(DISPATCH_METHOD, NULL, m_pXlSheet, L"SaveAs", 1, filename, fileType); //±£´æ
+	AutoWrap(DISPATCH_METHOD, NULL, m_pXlSheet, L"SaveAs", 1, filename); //±£´æ
+	VariantClear(&filename);
+	return 0;
+}
+
+int  CExcel::Quit() {
+	if (!m_bInited) {
+		return -1;
+	}
+	// Set .Saved property of workbook to TRUE so we aren't prompted
+	// to save when we tell Excel to quit...
+	VARIANT x;
+	x.vt = VT_I4;
+	x.lVal = 1;
+	AutoWrap(DISPATCH_PROPERTYPUT, NULL, m_pXlBook, L"Saved", 1, x);
+
+	// Tell Excel to quit (i.e. App.Quit)
+	AutoWrap(DISPATCH_METHOD, NULL, m_pXlApp, L"Quit", 0);
 	return 0;
 }
