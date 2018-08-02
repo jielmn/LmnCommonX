@@ -241,7 +241,13 @@ int  CExcel::WriteRange( DWORD dwStartRowIndex, DWORD dwStartColIndex,
 
 	for (DWORD i = 0; i < dwRows && it != vValues.end(); i++) {
 		for (DWORD j = 0; j < dwCols && it != vValues.end(); j++, it++) {
-			MultiByteToWideChar(CP_ACP, 0, *it, -1, wszTmp, MAX_EXCEL_LINE_LENGTH);
+			if (*it == 0) {
+				wszTmp[0] = L'\0';
+			}
+			else {
+				MultiByteToWideChar(CP_ACP, 0, *it, -1, wszTmp, MAX_EXCEL_LINE_LENGTH);
+			}
+			
 
 			VARIANT tmp;
 			tmp.vt = VT_BSTR;

@@ -34,7 +34,7 @@ int test_excel() {
 			v.push_back(p);
 		}
 	}
-	b.WriteRange(0, 0, 9, 2, v);
+	b.WriteRange(0, 0, 3, 2, v);
 	b.SaveAs("d:\\test\\a.xlsx");
 
 	std::vector<const char *>::iterator it = v.begin();
