@@ -309,8 +309,11 @@ int  CExcel::SaveAs(const char * szFilePath) {
 	AutoWrap(DISPATCH_PROPERTYPUT, NULL, m_pXlApp, L"DisplayAlerts", 1, a);
 	
 
-	AutoWrap(DISPATCH_METHOD, NULL, m_pXlSheet, L"SaveAs", 1, filename); //±£´æ
+	HRESULT hr = AutoWrap(DISPATCH_METHOD, NULL, m_pXlSheet, L"SaveAs", 1, filename); //±£´æ
 	VariantClear(&filename);
+	if (FAILED(hr)) {
+		return -1;
+	}
 	return 0;
 }
 
