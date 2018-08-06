@@ -75,6 +75,8 @@ namespace LmnToolkits {
 				EraseArray(m_DelayMessageQueue, i);
 				if (pMessage->CanBeFreed())
 					delete pMessage;
+				assert(dwSize > 0);
+				dwSize--;
 			}
 			else {
 				i++;
@@ -82,7 +84,7 @@ namespace LmnToolkits {
 		}
 
 		dwSize = GetArraySize(m_MessageQueue);
-		for (DWORD i = 0; i < dwSize; ++i) {
+		for (DWORD i = 0; i < dwSize; ) {
 			const void * pData = 0;
 			GetFromArray(m_MessageQueue, i, &pData);
 			Message * pMessage = (Message *)pData;
@@ -92,6 +94,8 @@ namespace LmnToolkits {
 				EraseArray(m_MessageQueue, i);
 				if (pMessage->CanBeFreed())
 					delete pMessage;
+				assert(dwSize > 0);
+				dwSize--;
 			}
 			else {
 				i++;
@@ -262,6 +266,7 @@ namespace LmnToolkits {
 				// 如果定时器消息ID相同
 				if ( pMessageItem->m_dwMessageId == dwMessageID ) {
 					EraseArray( m_DelayMessageQueue, i );
+					assert(dwSize > 0);
 					dwSize--;
 				}
 				else {
