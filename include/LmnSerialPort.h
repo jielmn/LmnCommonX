@@ -6,6 +6,11 @@
 class   CLmnSerialPort
 {
 public:
+	enum PortStatus {
+		OPEN = 0,
+		CLOSE
+	};
+
 	CLmnSerialPort();
 	virtual ~CLmnSerialPort();
 
@@ -18,6 +23,8 @@ public:
 
 	virtual BOOL  Write( const void * WriteBuf, DWORD & WriteDataLen  );
 	virtual BOOL  Read( void *RcvBuf, DWORD & RcvDataLen );
+
+	PortStatus  GetStatus() const;
 
 private:
 	virtual BOOL  InitUartPort( HANDLE hComm, DWORD BaudRate, BYTE ByteSize, BYTE Parity, BYTE StopBits );

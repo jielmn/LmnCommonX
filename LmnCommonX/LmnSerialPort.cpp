@@ -219,3 +219,12 @@ BOOL  CLmnSerialPort::Read(void *RcvBuf, DWORD & RcvDataLen) {
 
 	return ReadUartPort( m_hComm, RcvBuf, RcvDataLen, &RcvDataLen, 0);
 }
+
+CLmnSerialPort::PortStatus  CLmnSerialPort::GetStatus() const {
+	if (0 == m_hComm) {
+		return CLOSE;
+	}
+	else {
+		return OPEN;
+	}
+}
