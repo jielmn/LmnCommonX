@@ -171,6 +171,11 @@ DWORD   FileConfig::Save() {
 	return 0;
 }
 
+DWORD   FileConfig::ClearConfig() {
+	Clear();
+	return 0;
+}
+
 
 
 DWORD  FileConfig::Deinit()
@@ -1012,5 +1017,10 @@ DWORD   FileConfigEx::Save() {
 	}
 
 	fclose(fp);
+	return 0;
+}
+
+DWORD   FileConfigEx::ClearConfig() {
+	Clear();
 	return 0;
 }

@@ -27,6 +27,8 @@ public:
 	virtual DWORD     Reload() = 0;
 	// 保存配置到文件(用在SetConfig后，需要保存配置的)
 	virtual DWORD     Save() = 0;
+
+	virtual DWORD     ClearConfig() = 0;
 };
 
 
@@ -54,6 +56,8 @@ public:
 	DWORD       Reload();
 	// 保存配置到文件(用在SetConfig后，需要保存配置的)
 	DWORD       Save();
+
+	DWORD     ClearConfig();
 
 private:
 	void          Clear();
@@ -110,6 +114,8 @@ public:
 	DWORD       Reload();
 	// 保存配置到文件(用在SetConfig后，需要保存配置的)
 	DWORD       Save();
+
+	DWORD     ClearConfig();
 
 private:
 	void          Clear();
