@@ -168,6 +168,7 @@ DWORD   FileConfig::Save() {
 	}
 	fclose(fp);
 
+	m_bChanged = FALSE;
 	return 0;
 }
 
@@ -1017,6 +1018,8 @@ DWORD   FileConfigEx::Save() {
 	}
 
 	fclose(fp);
+
+	m_bChanged = FALSE;
 	return 0;
 }
 
