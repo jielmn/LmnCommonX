@@ -25,6 +25,7 @@ public:
 	virtual BOOL  Read( void *RcvBuf, DWORD & RcvDataLen );
 
 	PortStatus  GetStatus() const;
+	int         GetPort() const;
 
 private:
 	virtual BOOL  InitUartPort( HANDLE hComm, DWORD BaudRate, BYTE ByteSize, BYTE Parity, BYTE StopBits );
@@ -33,6 +34,7 @@ private:
 
 private:
 	HANDLE     m_hComm;                           // ´®¿Ú¾ä±ú
+	int        m_nComPort;
 };
 
 

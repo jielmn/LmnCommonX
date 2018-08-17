@@ -3,6 +3,7 @@
 
 CLmnSerialPort::CLmnSerialPort() {
 	m_hComm = 0;
+	m_nComPort = 0;
 }
 
 CLmnSerialPort::~CLmnSerialPort() {
@@ -46,6 +47,7 @@ BOOL  CLmnSerialPort::OpenUartPort(const char *UartPortName, DWORD BaudRate /*= 
 	}
 
 	m_hComm = hComm;
+	sscanf(UartPortName + 3, "%d", &m_nComPort);
 	return TRUE;
 }
 
@@ -54,6 +56,7 @@ BOOL  CLmnSerialPort::CloseUartPort() {
 	if (0 != m_hComm) {
 		CloseHandle(m_hComm);
 		m_hComm = 0;
+		m_nComPort = 0;
 	}
 	return TRUE;
 }
@@ -227,4 +230,8 @@ CLmnSerialPort::PortStatus  CLmnSerialPort::GetStatus() const {
 	else {
 		return OPEN;
 	}
+}
+
+int  CLmnSerialPort::GetPort() const {
+	return m_nComPort;
 }
