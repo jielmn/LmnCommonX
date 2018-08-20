@@ -12,7 +12,7 @@ namespace LmnToolkits {
 		MessageData() {}
 		virtual ~MessageData(){}
 		// 是否可由Thread系统用delete方法删除以回收内存
-		virtual  BOOL CanBeFreed() { return true; }
+		virtual  BOOL CanBeFreed() { return true; }		
 	};
 
 	class MessageHandler {
@@ -25,9 +25,9 @@ namespace LmnToolkits {
 
 	class Message {
 	public:
-		Message() : m_phandler(0), m_dwMessageId(0), m_pData(0), m_bTimeTriggerd(FALSE), m_dwTime(0) {}
-		Message( MessageHandler * pHandler, DWORD dwMessageId, MessageData * pData, DWORD dwTriggerTime = 0 ) : 
-		m_phandler(pHandler), m_dwMessageId(dwMessageId), m_pData(pData) {
+		Message() : m_phandler(0), m_dwMessageId(0), m_pData(0), m_bTimeTriggerd(FALSE), m_dwTime(0), m_dwPriority(0) {}
+		Message( MessageHandler * pHandler, DWORD dwMessageId, MessageData * pData, DWORD dwTriggerTime = 0, DWORD dwPriority = 0 ) : 
+		m_phandler(pHandler), m_dwMessageId(dwMessageId), m_pData(pData), m_dwPriority(dwPriority) {
 			if ( dwTriggerTime > 0 ) {
 				m_bTimeTriggerd = TRUE;
 				m_dwTime = dwTriggerTime;
@@ -54,7 +54,8 @@ namespace LmnToolkits {
 		DWORD            m_dwMessageId;
 		MessageData *    m_pData;
 		BOOL             m_bTimeTriggerd;
-		DWORD            m_dwTime;
+		DWORD            m_dwTime;		
+		DWORD            m_dwPriority;
 	};
 
 
@@ -70,10 +71,12 @@ namespace LmnToolkits {
 		virtual int Stop();
 
 		// ID 为0的消息默认为退出线程
-		virtual int PostMessage( MessageHandler * phandler, DWORD dwMessageID = MESSAGE_ID_CLOSE_THREAD, MessageData * pdata = 0 );
-		virtual int PostDelayMessage( DWORD dwDelayTime, MessageHandler * phandler, DWORD dwMessageID = MESSAGE_ID_CLOSE_THREAD, MessageData * pdata = 0, BOOL bDropSameMsg = FALSE );
+		virtual int PostMessage( MessageHandler * phandler, DWORD dwMessageID = MESSAGE_ID_CLOSE_THREAD, MessageData * pdata = 0, DWORD dwPriority = 0);
+		virtual int PostDelayMessage( DWORD dwDelayTime, MessageHandler * phandler, DWORD dwMessageID = MESSAGE_ID_CLOSE_THREAD, MessageData * pdata = 0, BOOL bDropSameMsg = FALSE, DWORD dwPriority = 0 );
 
 		virtual void DeleteMessages( DWORD dwMessageId = 0 );
+
+		virtual  DWORD  GetMessagesCount();
 	protected:
 		virtual int Run();
 		virtual int GetMessage( Message * & pMessage );
@@ -88,6 +91,13 @@ namespace LmnToolkits {
 		LmnLockType   m_lock;
 		BOOL          m_bLoop;
 		DWORD         m_dwIdleSleepTime;
+	};
+
+	class  PriorityThread : public Thread {
+	public:
+		virtual ~PriorityThread();
+	protected:
+		virtual int GetMessage(Message * & pMessage);
 	};
 
 

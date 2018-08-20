@@ -214,8 +214,8 @@ namespace LmnToolkits {
 	}
 
 
-	int Thread::PostMessage( MessageHandler * phandler, DWORD dwMessageID /*= THREAD_ID_CLOSE_THREAD*/, MessageData * pdata /*= 0*/ ){
-		Message * pMessage = new Message( phandler, dwMessageID, pdata );
+	int Thread::PostMessage( MessageHandler * phandler, DWORD dwMessageID /*= THREAD_ID_CLOSE_THREAD*/, MessageData * pdata /*= 0*/, DWORD dwPriority /*= 0*/ ){
+		Message * pMessage = new Message( phandler, dwMessageID, pdata, 0, dwPriority );
 		if ( 0 == pMessage ) {
 			return LMNX_SYSTEM_ERROR;
 		}
@@ -230,13 +230,13 @@ namespace LmnToolkits {
 		return 0;
 	}
 
-	int Thread::PostDelayMessage( DWORD dwDelayTime, MessageHandler * phandler, DWORD dwMessageID /*= THREAD_ID_CLOSE_THREAD*/, MessageData * pdata /*= 0*/, BOOL bDropSameMsg /*= FALSE*/ ){
+	int Thread::PostDelayMessage( DWORD dwDelayTime, MessageHandler * phandler, DWORD dwMessageID /*= THREAD_ID_CLOSE_THREAD*/, MessageData * pdata /*= 0*/, BOOL bDropSameMsg /*= FALSE*/, DWORD dwPriority /*= 0*/){
 		if ( 0 == dwDelayTime ) {
 			return PostMessage( phandler, dwMessageID, pdata );
 		}
 
 		DWORD dwCurTime = LmnGetTickCount();
-		Message * pMessage = new Message( phandler, dwMessageID, pdata, dwCurTime + dwDelayTime );
+		Message * pMessage = new Message( phandler, dwMessageID, pdata, dwCurTime + dwDelayTime, dwPriority );
 		if ( 0 == pMessage ) {
 			return LMNX_SYSTEM_ERROR;
 		}
@@ -321,6 +321,107 @@ namespace LmnToolkits {
 			return LMNX_SYSTEM_ERROR;
 		}
 
+		return 0;
+	}
+
+	DWORD  Thread::GetMessagesCount(){
+
+		LmnLock(&m_lock);		
+		DWORD dwDelaySize = GetArraySize(m_DelayMessageQueue);
+		DWORD dwSize      = GetArraySize(m_MessageQueue);
+		LmnUnlock(&m_lock);
+
+		return dwDelaySize + dwSize;
+	}
+
+
+	PriorityThread::~PriorityThread() {
+
+	}
+
+	int PriorityThread::GetMessage(Message * & pMessage) {
+		DWORD dwCurTime = LmnGetTickCount();
+
+		DWORD dwSize = GetArraySize(m_DelayMessageQueue);
+		DWORD dwDelayItemIndex = -1;
+		DWORD dwMaxPriority = 0;
+
+		for (DWORD i = 0; i < dwSize; i++) {
+			const void * pData = 0;
+			GetFromArray(m_DelayMessageQueue, i, &pData);
+			Message * pMessageItem = (Message *)pData;
+			assert(pMessageItem && pMessageItem->m_bTimeTriggerd);
+
+			// 时间已到
+			if ( pMessageItem->m_dwTime <= dwCurTime ) {
+
+				if ( pMessageItem->m_dwPriority > 0 ) {
+					if ( pMessageItem->m_dwPriority > dwMaxPriority ) {
+						dwDelayItemIndex = i;
+						dwMaxPriority = pMessageItem->m_dwPriority;
+						pMessage = pMessageItem;
+					}
+				}
+				else {
+					if (dwDelayItemIndex == -1) {
+						dwDelayItemIndex = i;
+						dwMaxPriority = pMessageItem->m_dwPriority;
+						pMessage = pMessageItem;
+					}
+				}
+			}
+		}
+		
+		DWORD dwItemIndex = -1;
+		dwSize = GetArraySize(m_MessageQueue);
+
+		for (DWORD i = 0; i < dwSize; i++) {
+			const void * pData = 0;
+			GetFromArray(m_MessageQueue, 0, &pData);
+			Message * pMessageItem = (Message *)pData;
+			assert(pMessageItem);
+
+
+			if (pMessageItem->m_dwPriority > 0) {
+				if (pMessageItem->m_dwPriority > dwMaxPriority) {
+					dwItemIndex = i;
+					dwMaxPriority = pMessageItem->m_dwPriority;
+					pMessage = pMessageItem;
+				}
+			}
+			else {
+				if ( dwDelayItemIndex == -1 && dwItemIndex == -1 ) {
+					dwItemIndex = i;
+					dwMaxPriority = pMessageItem->m_dwPriority;
+					pMessage = pMessageItem;
+				}
+			}
+		}
+
+		if ( dwMaxPriority > 0 ) {
+			if ( dwItemIndex != -1 ) {
+				EraseArray(m_MessageQueue, dwItemIndex);
+				return 0;
+			}
+			else {
+				assert( dwDelayItemIndex != -1 );
+				EraseArray(m_DelayMessageQueue, dwDelayItemIndex);
+				return 0;
+			}
+		}
+		else {
+			if (dwDelayItemIndex != -1) {
+				EraseArray(m_DelayMessageQueue, dwDelayItemIndex);
+				return 0;
+			}
+			else if (dwItemIndex != -1) {
+				EraseArray(m_MessageQueue, dwItemIndex);
+				return 0;
+			}
+		}
+
+		// 延时消息和正常消息队列里都没有
+		pMessage = 0;
 		return 0;
 	}
 
