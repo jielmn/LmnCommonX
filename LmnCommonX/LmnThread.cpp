@@ -214,13 +214,34 @@ namespace LmnToolkits {
 	}
 
 
-	int Thread::PostMessage( MessageHandler * phandler, DWORD dwMessageID /*= THREAD_ID_CLOSE_THREAD*/, MessageData * pdata /*= 0*/, DWORD dwPriority /*= 0*/ ){
+	int Thread::PostMessage( MessageHandler * phandler, DWORD dwMessageID /*= THREAD_ID_CLOSE_THREAD*/, MessageData * pdata /*= 0*/, BOOL bDropSameMsg /*= FALSE*/, DWORD dwPriority /*= 0*/ ){
 		Message * pMessage = new Message( phandler, dwMessageID, pdata, 0, dwPriority );
 		if ( 0 == pMessage ) {
 			return LMNX_SYSTEM_ERROR;
 		}
 
 		CFuncLock theLock( &m_lock );
+
+		DWORD dwSize = GetArraySize(m_MessageQueue);
+		if (bDropSameMsg) {
+			for (DWORD i = 0; i < dwSize; ) {
+				const void * pData = 0;
+				GetFromArray(m_MessageQueue, i, &pData);
+				Message * pMessageItem = (Message *)pData;
+				assert(pMessageItem);
+
+				// 如果定时器消息ID相同
+				if (pMessageItem->m_dwMessageId == dwMessageID) {
+					EraseArray(m_MessageQueue, i);
+					assert(dwSize > 0);
+					dwSize--;
+				}
+				else {
+					i++;
+				}
+			}
+		}
+
 		DWORD dwRet = Append2Array( m_MessageQueue, pMessage );
 		if ( (DWORD)-1 == dwRet ) {
 			delete pMessage;

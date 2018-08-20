@@ -71,7 +71,7 @@ namespace LmnToolkits {
 		virtual int Stop();
 
 		// ID 为0的消息默认为退出线程
-		virtual int PostMessage( MessageHandler * phandler, DWORD dwMessageID = MESSAGE_ID_CLOSE_THREAD, MessageData * pdata = 0, DWORD dwPriority = 0);
+		virtual int PostMessage( MessageHandler * phandler, DWORD dwMessageID = MESSAGE_ID_CLOSE_THREAD, MessageData * pdata = 0, BOOL bDropSameMsg = FALSE, DWORD dwPriority = 0);
 		virtual int PostDelayMessage( DWORD dwDelayTime, MessageHandler * phandler, DWORD dwMessageID = MESSAGE_ID_CLOSE_THREAD, MessageData * pdata = 0, BOOL bDropSameMsg = FALSE, DWORD dwPriority = 0 );
 
 		virtual void DeleteMessages( DWORD dwMessageId = 0 );
