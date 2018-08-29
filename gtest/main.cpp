@@ -1020,6 +1020,7 @@ TEST(CONFIG, FILE_CONFIG1)
 	int nRet = 0;
 	char szValue[256];
 	DWORD dwValue = 0;
+	BOOL  bValue = FALSE;
 
 
 	IConfig * pCfg = new FileConfigEx();
@@ -1038,6 +1039,9 @@ TEST(CONFIG, FILE_CONFIG1)
 	nRet = pCfg->SetConfig("test2", 100);
 	ASSERT_EQ(0, nRet);
 
+	nRet = pCfg->SetBooleanConfig("test3", TRUE);
+	ASSERT_EQ(0, nRet);
+
 	const char * pResult = pCfg->operator []("abc");
 	ASSERT_FALSE(pResult == 0);
 	ASSERT_EQ(0, strcmp(pResult, ""));
@@ -1045,6 +1049,10 @@ TEST(CONFIG, FILE_CONFIG1)
 	pResult = pCfg->operator []("test1");
 	ASSERT_FALSE(pResult == 0);
 	ASSERT_EQ(0, strcmp(pResult, "world"));
+
+	pResult = pCfg->operator []("test3");
+	ASSERT_FALSE(pResult == 0);
+	ASSERT_EQ(0, strcmp(pResult, "true"));
 
 	nRet = pCfg->Deinit();
 	ASSERT_EQ(0, nRet);
@@ -1065,6 +1073,10 @@ TEST(CONFIG, FILE_CONFIG1)
 	nRet = pCfg->GetConfig("test2", dwValue, 10);
 	ASSERT_EQ(0, nRet);
 	ASSERT_EQ((DWORD)100, dwValue);
+
+	nRet = pCfg->GetBooleanConfig("test3", bValue, FALSE);
+	ASSERT_EQ(0, nRet);
+	ASSERT_EQ(TRUE, bValue);
 
 	pCfg->Reload();
 

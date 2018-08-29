@@ -23,6 +23,10 @@ public:
 	// 设置配置项
 	virtual DWORD     SetConfig ( const char * szConfigName, DWORD dwConfigValue, DWORD * pdwDefault = 0 ) = 0;
 
+	// 读取BOOL配置
+	virtual DWORD     GetBooleanConfig(const char * szConfigName, BOOL & bConfigValue, BOOL bDefault = FALSE) = 0;
+	virtual DWORD     SetBooleanConfig(const char * szConfigName, BOOL bConfigValue, BOOL * pbDefault = 0) = 0;
+
 	// 重新加载文件
 	virtual DWORD     Reload() = 0;
 	// 保存配置到文件(用在SetConfig后，需要保存配置的)
@@ -51,6 +55,9 @@ public:
 
 	DWORD       GetConfig ( const char * szConfigName, DWORD & dwConfigValue, DWORD dwDefault = 0 );
 	DWORD       SetConfig ( const char * szConfigName, DWORD dwConfigValue, DWORD * pdwDefault = 0 );
+
+	DWORD     GetBooleanConfig(const char * szConfigName, BOOL & bConfigValue, BOOL bDefault = FALSE);
+	DWORD     SetBooleanConfig(const char * szConfigName, BOOL bConfigValue, BOOL * pbDefault = 0);
 
 	// 重新加载文件
 	DWORD       Reload();
@@ -109,6 +116,9 @@ public:
 	DWORD       GetConfig(const char * szConfigName, DWORD & dwConfigValue, DWORD dwDefault = 0);
 	// 保存的格式是int类型
 	DWORD       SetConfig(const char * szConfigName, DWORD dwConfigValue, DWORD * pdwDefault = 0);
+
+	DWORD     GetBooleanConfig(const char * szConfigName, BOOL & bConfigValue, BOOL bDefault = FALSE);
+	DWORD     SetBooleanConfig(const char * szConfigName, BOOL bConfigValue, BOOL * pbDefault = 0);
 
 	// 重新加载文件
 	DWORD       Reload();

@@ -384,6 +384,53 @@ DWORD  FileConfig::SetConfig ( const char * szConfigName, DWORD dwConfigValue, D
 }
 
 
+DWORD  FileConfig::GetBooleanConfig(const char * szConfigName, BOOL & bConfigValue, BOOL bDefault /*= FALSE*/) {
+	char buf[32];
+	DWORD dwRet = GetConfig( szConfigName, buf, sizeof(buf) );
+	if ( 0 != dwRet ) {
+		return dwRet;
+	}
+	else {
+		if ( buf[0] == '\0' ) {
+			bConfigValue = bDefault;
+		}
+		else if ( 0 == StrICmp(buf, "true") ) {
+			bConfigValue = TRUE;
+		}
+		else {
+			bConfigValue = FALSE;
+		}
+		return 0;
+	}	
+}
+
+DWORD  FileConfig::SetBooleanConfig(const char * szConfigName, BOOL bConfigValue, BOOL * pbDefault /*= 0*/) {
+	const char * pValue = 0;
+	const char * pDefalut = 0;
+
+	if ( bConfigValue ) {
+		pValue = "true";
+	}
+	else {
+		pValue = "false";
+	}
+
+	if ( 0 == pDefalut ) {
+		pDefalut = "false";
+	}
+	else {
+		if (*pbDefault) {
+			pDefalut = "true";
+		}
+		else {
+			pDefalut = "false";
+		}
+	}
+
+	DWORD dwRet = SetConfig( szConfigName, pValue, pDefalut );
+	return dwRet;
+}
+
 
 
 
@@ -1026,4 +1073,52 @@ DWORD   FileConfigEx::Save() {
 DWORD   FileConfigEx::ClearConfig() {
 	Clear();
 	return 0;
+}
+
+
+DWORD  FileConfigEx::GetBooleanConfig(const char * szConfigName, BOOL & bConfigValue, BOOL bDefault /*= FALSE*/) {
+	char buf[32];
+	DWORD dwRet = GetConfig(szConfigName, buf, sizeof(buf));
+	if (0 != dwRet) {
+		return dwRet;
+	}
+	else {
+		if (buf[0] == '\0') {
+			bConfigValue = bDefault;
+		}
+		else if (0 == StrICmp(buf, "true")) {
+			bConfigValue = TRUE;
+		}
+		else {
+			bConfigValue = FALSE;
+		}
+		return 0;
+	}
+}
+
+DWORD  FileConfigEx::SetBooleanConfig(const char * szConfigName, BOOL bConfigValue, BOOL * pbDefault /*= 0*/) {
+	const char * pValue = 0;
+	const char * pDefalut = 0;
+
+	if (bConfigValue) {
+		pValue = "true";
+	}
+	else {
+		pValue = "false";
+	}
+
+	if (0 == pDefalut) {
+		pDefalut = "false";
+	}
+	else {
+		if (*pbDefault) {
+			pDefalut = "true";
+		}
+		else {
+			pDefalut = "false";
+		}
+	}
+
+	DWORD dwRet = SetConfig(szConfigName, pValue, pDefalut);
+	return dwRet;
 }
