@@ -10,7 +10,7 @@ public:
 
 	// szFileName, 日志文件名
 	// szTimeFormat, 时间日期格式
-	virtual DWORD     Init( const char * szFileName = 0, const char * szTimeFormat = 0, LOG_SEVERITY dwSeverityLevel = LOG_SEVERITY_INFO ) = 0;
+	virtual DWORD     Init( const char * szFileName = 0, const char * szTimeFormat = 0, LOG_SEVERITY dwSeverityLevel = LOG_SEVERITY_INFO, BOOL bAppend = FALSE ) = 0;
 	virtual DWORD     Deinit() = 0;
 
 	virtual DWORD     GetSeverity() = 0;
@@ -31,7 +31,7 @@ public:
 	// 默认格式是[%O %Y-%m-%d %H:%M:%S]
 	// %O:    输出字符串
 	// %Y-%m-%d %H:%M:%S, 时间日期的通用格式字符
-	DWORD     Init( const char * szFileName = 0, const char * szTimeFormat = 0, LOG_SEVERITY dwSeverity = LOG_SEVERITY_INFO );
+	DWORD     Init( const char * szFileName = 0, const char * szTimeFormat = 0, LOG_SEVERITY dwSeverity = LOG_SEVERITY_INFO, BOOL bAppend = FALSE );
 	DWORD     Deinit();
 
 	DWORD     GetSeverity();

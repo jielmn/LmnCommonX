@@ -13,7 +13,8 @@ FileLog::FileLog()
 	m_dwSeverity = LOG_SEVERITY_INFO;
 }
 
-DWORD FileLog::Init( const char * szFileName /*= 0*/, const char * szTimeFormat /*= 0*/, LOG_SEVERITY dwSeverity /* = LOG_SEVERITY_INFO */ )
+DWORD FileLog::Init( const char * szFileName /*= 0*/, const char * szTimeFormat /*= 0*/,
+	LOG_SEVERITY dwSeverity /* = LOG_SEVERITY_INFO */, BOOL bAppend /*= FALSE*/ )
 {
 	if ( m_bInited ) {
 		return LMNX_ALREADY_INITED;
@@ -24,7 +25,12 @@ DWORD FileLog::Init( const char * szFileName /*= 0*/, const char * szTimeFormat 
 		szFileName = "LmnLog.log";
 	}
 
-	m_fp = fopen(szFileName,"wb");
+	if ( bAppend ) {
+		m_fp = fopen(szFileName, "ab");
+	}
+	else {
+		m_fp = fopen(szFileName, "wb");
+	}
 	if ( 0 == m_fp ) {
 		return LMNX_FAIL_OPEN_FILE;
 	}

@@ -919,6 +919,12 @@ TEST( STRING, SPLIT )
 
 TEST( LOG, FILELOG )
 {
+//#ifdef WIN32
+//	system("del test.log");
+//#else
+//	system("rm -fr test.log");
+//#endif
+
 	int nRet = 0;
 	ILog * log = new FileLog();
 	nRet = log->Init("test.log","[%Y-%m-%d %H:%M:%S %O] ");
