@@ -47,18 +47,19 @@ public:
 	// 断开数据库
 	void DisconnectDb();
 
-	// 打开记录集
-	void OpenRecordSet(const char * szSql);
+	// 获得exception后，可以通过GetSysStatus, GetSysErrMsg获取错误信息
+	// 打开记录集  throw exception
+	void OpenRecordSet(const char * szSql); 
 	// 关闭记录集
 	void CloseRecordSet();
-	// 获取数据
+	// 获取数据  throw exception
 	void GetFieldValue( int nColumnIndex, char * szValue, DWORD dwValueSize, BOOL * pbIsNull = 0 );
-	// 移动记录集指针
+	// 移动记录集指针 throw exception
 	BOOL MoveNext();
-	// 提交事务
+	// 提交事务 throw exception
 	void EndTran(BOOL bCommit = TRUE);
 
-	// 执行，同OpenRecordSet
+	// 执行，同OpenRecordSet并且CloseRecordSet  throw exception
 	void Execute(const char * szSql);
 
 public:
