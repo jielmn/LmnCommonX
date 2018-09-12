@@ -1334,25 +1334,31 @@ DWORD  CalcReqBufLen( DWORD dwReqLen )
 }
 
 
-CLmnString::CLmnString() {
+CLmnString::CLmnString() : m_str(0), m_dwStrSize(0), m_dwStrLen(0) {
 	Init();
 }
 
-CLmnString::CLmnString(const char * s) {
+CLmnString::CLmnString(const char * s) : m_str(0), m_dwStrSize(0), m_dwStrLen(0) {
 	Init( s );
 }
 
-CLmnString::CLmnString(const char * s,DWORD dwLen) {
+CLmnString::CLmnString(const char * s,DWORD dwLen) : m_str(0), m_dwStrSize(0), m_dwStrLen(0) {
 	Init(s,dwLen);
 }
 
-CLmnString::CLmnString(int n){
+CLmnString::CLmnString(int n) : m_str(0), m_dwStrSize(0), m_dwStrLen(0) {
 	char buf[256];
-	SNPRINTF( buf, sizeof(buf), "%d", n );
-	Init( buf );
+	SNPRINTF(buf, sizeof(buf), "%d", n);
+	Init(buf);
 }
 
-CLmnString::CLmnString(const CLmnString & obj){
+CLmnString::CLmnString(DWORD n) : m_str(0), m_dwStrSize(0), m_dwStrLen(0) {
+	char buf[256];
+	SNPRINTF(buf, sizeof(buf), "%lu", n);
+	Init(buf);
+}
+
+CLmnString::CLmnString(const CLmnString & obj) : m_str(0), m_dwStrSize(0), m_dwStrLen(0)  {
 	Init( obj.m_str );
 }
 
@@ -1372,58 +1378,73 @@ void  CLmnString::Clear() {
 void  CLmnString::Init( const char * s /* = 0 */ ) {
 
 	if ( 0 == s ) {
-		m_str = new char[CSTRING_INITIAL_BLOCK_SIZE];
-		if ( 0 != m_str ) {
-			memset( m_str, 0, CSTRING_INITIAL_BLOCK_SIZE );
-			m_dwStrSize = CSTRING_INITIAL_BLOCK_SIZE;
-		} else {
-			m_dwStrSize = 0;
-		}
-		m_dwStrLen = 0;
+		ReAlloc(CSTRING_INITIAL_BLOCK_SIZE);
 	} else {
 		DWORD dwLen    = strlen(s);
-		DWORD dwReqLen = CalcReqBufLen( dwLen + 1 );
+		ReAlloc(dwLen + 1);
 
-		m_str = new char[dwReqLen];
-		if ( 0 != m_str ) {
-			// memset( m_str, 0, dwReqLen );
-			memcpy( m_str, s, dwLen + 1 );
-			m_dwStrSize = dwReqLen;
-			m_dwStrLen  = dwLen;
-		} else {
-			m_dwStrSize = 0;
-			m_dwStrLen = 0;
+		if ( m_dwStrSize > dwLen ) {
+			memcpy(m_str, s, dwLen);
+			m_dwStrLen = dwLen;
 		}
+		else {
+			if (m_dwStrSize > 0) {
+				memcpy( m_str, s, m_dwStrSize - 1 );
+				m_dwStrLen = m_dwStrSize - 1;
+			}			
+		}			
 	}
 }
 
 void  CLmnString::Init( const char * s, DWORD dwSpanLen ) {
 
 	if ( 0 == s ) {
-		m_str = new char[CSTRING_INITIAL_BLOCK_SIZE];
-		if ( 0 != m_str ) {
-			memset( m_str, 0, CSTRING_INITIAL_BLOCK_SIZE );
-			m_dwStrSize = CSTRING_INITIAL_BLOCK_SIZE;
-		} else {
-			m_dwStrSize = 0;
-		}
-		m_dwStrLen = 0;
+		ReAlloc(CSTRING_INITIAL_BLOCK_SIZE);
 	} else {
 		DWORD dwStrLen = strlen(s);
 		DWORD dwLen = dwStrLen < dwSpanLen ? dwStrLen : dwSpanLen;
-		DWORD dwReqLen = CalcReqBufLen( dwLen + 1 );
+		ReAlloc(dwLen + 1);
 
-		m_str = new char[dwReqLen];
-		if ( 0 != m_str ) {
-			memset( m_str, 0, dwReqLen );
-			memcpy( m_str, s, dwLen );
-			m_dwStrSize = dwReqLen;
-			m_dwStrLen  = dwLen;
-		} else {
-			m_dwStrSize = 0;
-			m_dwStrLen = 0;
+		if (m_dwStrSize > dwLen) {
+			memcpy(m_str, s, dwLen);
+			m_dwStrLen = dwLen;
+		}
+		else {
+			if (m_dwStrSize > 0) {
+				memcpy(m_str, s, m_dwStrSize - 1);
+				m_dwStrLen = m_dwStrSize - 1;
+			}
 		}
 	}
+}
+
+// 重新分配内存
+void  CLmnString::ReAlloc(DWORD dwLen) {
+	DWORD dwReqLen = CalcReqBufLen(dwLen);
+	// 如果旧缓冲长度不够用
+	if ( dwReqLen > m_dwStrSize ) {
+		char * pOld = m_str;
+		m_str = new char[dwReqLen];
+		// 分配成功
+		if (0 != m_str) {			
+			// 释放旧内存
+			if ( m_dwStrSize > 0 ) {
+				assert(pOld);
+				delete[] pOld;
+			}
+			m_dwStrSize = dwReqLen;				
+		}
+		// 分配失败
+		else {
+			m_str = pOld;
+		}
+	}
+
+	if ( m_dwStrSize > 0 ) {
+		assert(m_str);
+		memset(m_str, 0, m_dwStrSize);
+	}
+	m_dwStrLen = 0;
 }
 
 CLmnString & CLmnString::operator = ( const CLmnString & obj ) {
@@ -1453,7 +1474,10 @@ CLmnString & CLmnString::operator += ( const CLmnString & obj ){
 			memcpy( m_str + m_dwStrLen, obj.m_str, obj.m_dwStrLen + 1 );
 			m_dwStrSize  = dwReqLen;
 			m_dwStrLen  += obj.m_dwStrLen;
-			// 分配内存失败
+
+			if ( pOld )
+				delete[] pOld;
+		// 分配内存失败
 		} else {
 			m_str = pOld;
 		}
@@ -1466,16 +1490,29 @@ CLmnString & CLmnString::operator += ( const CLmnString & obj ){
 	return *this;
 }
 
-CLmnString   CLmnString::operator +  ( int n ){
+CLmnString   CLmnString::operator +  (int n) {
 	CLmnString ret;
 	ret += *this;
 	ret += n;
 	return ret;
 }
 
-CLmnString & CLmnString::operator += ( int n ){
+CLmnString & CLmnString::operator += (int n) {
 	char buf[256];
-	SNPRINTF( buf, sizeof(buf), "%d", n );
+	SNPRINTF(buf, sizeof(buf), "%d", n);
+	return this->operator +=(buf);
+}
+
+CLmnString   CLmnString::operator +  (DWORD n) {
+	CLmnString ret;
+	ret += *this;
+	ret += n;
+	return ret;
+}
+
+CLmnString & CLmnString::operator += (DWORD n) {
+	char buf[256];
+	SNPRINTF(buf, sizeof(buf), "%lu", n);
 	return this->operator +=(buf);
 }
 
@@ -1492,9 +1529,195 @@ CLmnString & CLmnString::Trim(){
 	return *this;
 }
 
+CLmnString & CLmnString::Format(const char * szFormat, ...) {
+	if (0 == szFormat) {
+		return *this;
+	}
+
+	va_list arg_ptr;
+
+	// 先计算长度
+	va_start(arg_ptr, szFormat);
+	int nReqMinSize = vsnprintf(0, 0, szFormat, arg_ptr);
+	va_end(arg_ptr);
+
+	ReAlloc(nReqMinSize + 1);
+
+	va_start(arg_ptr, szFormat);
+	vsnprintf( m_str, m_dwStrSize, szFormat, arg_ptr );
+	va_end(arg_ptr);
+
+	m_dwStrLen = strlen(m_str);
+
+	return *this;
+}
+
 DWORD   CLmnString::GetLength() const {
 	return m_dwStrLen;
 }
+
+BOOL  CLmnString::IsEmpty() const {
+	return m_dwStrLen == 0;
+}
+
+CLmnString & CLmnString::MakeUpper() {
+	Str2Upper(m_str);
+	return *this;
+}
+
+CLmnString & CLmnString::MakeLower() {
+	Str2Lower(m_str);
+	return *this;
+}
+
+CLmnString & CLmnString::MakeReverse() {
+	DWORD  dwHalf = m_dwStrLen / 2;
+	char tmp = 0;
+	for ( DWORD i = 0; i < dwHalf; i++ ) {
+		tmp = m_str[i];
+		m_str[i] = m_str[m_dwStrLen - 1 - i];
+		m_str[m_dwStrLen - 1 - i] = tmp;
+	}
+	return *this;
+}
+
+int CLmnString::Find(const char * szFindStr, DWORD dwStartIndex /*= 0*/) {
+	if ( dwStartIndex >= m_dwStrLen ) {
+		return -1;
+	}
+
+	if ( 0 == szFindStr ) {
+		return -1;
+	}
+
+	const char * pFind = strstr( m_str + dwStartIndex, szFindStr );
+	if ( 0 == pFind ) {
+		return -1;
+	}
+
+	return pFind - m_str;
+}
+
+int CLmnString::ReverseFind(const char * szFindStr) {
+	if ( 0 == szFindStr ) {
+		return -1;
+	}
+
+	CLmnString s(*this);
+	s.MakeReverse();
+
+	CLmnString f = szFindStr;
+	f.MakeReverse();
+
+	int nPos = s.Find(f);
+	// 没有找到
+	if ( nPos == -1 ) {
+		return -1;
+	}
+
+	return  m_dwStrLen - nPos - f.GetLength();
+}
+
+CLmnString & CLmnString::Replace(const char * szReplacedStr, const char * szReplaceWithStr) {
+
+	if ( 0 == szReplacedStr ) {
+		return *this;
+	}
+
+	if (szReplacedStr[0] == '\0') {
+		return *this;
+	}
+
+	if ( 0 == m_dwStrLen ) {
+		return *this;
+	}
+
+	if (0 == szReplaceWithStr) {
+		szReplaceWithStr = "";
+	}
+
+	CLmnString replaced(szReplacedStr);
+	CLmnString replaceWith(szReplaceWithStr);
+	CLmnString s(*this);
+
+	// 如果内存可能不够用
+	if ( replaced.GetLength() < replaceWith.GetLength() ) {
+		DWORD  max_replaced_cnt = (m_dwStrLen - 1) / replaced.GetLength() + 1;
+		ReAlloc( max_replaced_cnt * replaceWith.GetLength() );
+	}
+	
+	StrReplaceAll( m_str, m_dwStrSize, s, szReplacedStr, szReplaceWithStr );
+	m_dwStrLen = strlen(m_str);
+	return *this;
+}
+
+CLmnString & CLmnString::Remove(const char * szRemoveStr) {
+	return Replace(szRemoveStr, "");
+}
+
+CLmnString & CLmnString::Delete(DWORD dwStartIndex, DWORD dwCount /*= 1*/) {
+	if ( dwStartIndex >= m_dwStrLen ) {
+		return *this;
+	}	
+
+	if ( dwStartIndex + dwCount > m_dwStrLen) {
+		dwCount = m_dwStrLen - dwStartIndex;
+	}
+
+	if (0 == dwCount) {
+		return *this;
+	}
+
+	memmove(m_str + dwStartIndex, m_str + dwStartIndex + dwCount, m_dwStrLen - (dwStartIndex + dwCount) + 1 );
+	m_dwStrLen -= dwCount;
+	return *this;
+}
+
+CLmnString CLmnString::Mid(DWORD dwStartIndex, DWORD dwCount /*= -1*/) {
+	if ( dwStartIndex >= m_dwStrLen ) {
+		return CLmnString();
+	}
+
+	if ( dwCount == -1 ) {
+		dwCount = m_dwStrLen - dwStartIndex;
+	}
+	else if (dwStartIndex + dwCount > m_dwStrLen) {
+		dwCount = m_dwStrLen - dwStartIndex;
+	}
+
+	CLmnString r( m_str + dwStartIndex, dwCount );
+	return r;
+}
+
+char CLmnString::GetAt(DWORD dwStartIndex) const {
+	if ( dwStartIndex >= m_dwStrLen ) {
+		return '\0';
+	}
+
+	return m_str[dwStartIndex];
+}
+
+int  CLmnString::SetAt(DWORD dwStartIndex, char ch) {
+	if (dwStartIndex >= m_dwStrLen) {
+		return -1;
+	}
+	m_str[dwStartIndex] = ch;
+	return 0;
+}
+
+//char CLmnString::operator [] (DWORD dwStartIndex) const {
+//	return GetAt(dwStartIndex);
+//}
+
+bool operator == (const CLmnString & a, const CLmnString & b) {
+	return 0 == strcmp(a, b);
+}
+
+bool operator != (const CLmnString & a, const CLmnString & b) {
+	return !(a == b);
+}
+
+
 
 
 

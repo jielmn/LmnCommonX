@@ -132,6 +132,7 @@ public:
 	CLmnString(const char * s);
 	CLmnString(const char * s,DWORD dwLen);
 	CLmnString(int n);
+	CLmnString(DWORD n);
 	CLmnString(const CLmnString & obj );
 	~CLmnString();
 
@@ -140,21 +141,42 @@ public:
 	CLmnString & operator += ( const CLmnString & obj );
 	CLmnString   operator +  ( int n );
 	CLmnString & operator += ( int n );
+	CLmnString   operator +  (DWORD n);
+	CLmnString & operator += (DWORD n);
 
 	operator char *() const;
 
 	CLmnString & Trim();
+	CLmnString & Format(const char * szFormat,...);
+	CLmnString & MakeUpper(); 
+	CLmnString & MakeLower();
+	CLmnString & MakeReverse();
+	int Find(const char * szFindStr, DWORD dwStartIndex = 0);
+	int ReverseFind(const char * szFindStr);
+	CLmnString & Replace(const char * szReplacedStr, const char * szReplaceWithStr);
+	CLmnString & Remove(const char * szRemoveStr);
+	CLmnString & Delete(DWORD dwStartIndex, DWORD dwCount = 1);
+	CLmnString Mid(DWORD dwStartIndex, DWORD dwCount = -1);
+	char GetAt( DWORD dwStartIndex ) const; 
+	int  SetAt( DWORD dwStartIndex, char ch);
+	//char operator [] (DWORD dwStartIndex) const;
 
 	DWORD  GetLength() const;
+	BOOL   IsEmpty() const;
 private:
 	void  Clear();
 	void  Init( const char * s = 0 );
 	void  Init( const char * s, DWORD dwLen );
+	// 重新分配内存
+	void  ReAlloc(DWORD dwLen);
 
 	char *   m_str;                                // 字符串
 	DWORD    m_dwStrSize;                          // 字符内存大小
 	DWORD    m_dwStrLen;                           // 字符串长度
 };
+
+bool operator == (const CLmnString & a, const CLmnString & b);
+bool operator != (const CLmnString & a, const CLmnString & b);
 
 
 class  SplitString {

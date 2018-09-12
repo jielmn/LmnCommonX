@@ -865,8 +865,72 @@ TEST( STRING, LMNSTRING )
 
 	t = "nice ";
 	t += 123;
-	ASSERT_EQ( 0, strcmp( t, "nice 123" ) );
+	ASSERT_EQ(0, strcmp(t, "nice 123"));
 	ASSERT_EQ((DWORD)8, t.GetLength());
+
+	CLmnString c = "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678";
+	t.Format("%s", (const char *)c );
+	ASSERT_EQ(0, strcmp(t, c));
+	ASSERT_EQ((DWORD)128, t.GetLength());
+	ASSERT_EQ(FALSE, t.IsEmpty());
+
+	t = "AbC";
+	t.MakeUpper();
+	ASSERT_EQ(0, strcmp(t, "ABC"));
+	ASSERT_EQ((DWORD)3, t.GetLength());
+
+	t.MakeReverse();
+	ASSERT_EQ(0, strcmp(t, "CBA"));
+	ASSERT_EQ((DWORD)3, t.GetLength());
+
+	t = "1234";
+	t.MakeReverse();
+	ASSERT_EQ(0, strcmp(t, "4321"));
+	ASSERT_EQ((DWORD)4, t.GetLength());
+
+	s = "43211";
+	ASSERT_TRUE(s!=t);
+
+	int nPos = t.Find("321");
+	ASSERT_EQ(1, nPos);
+
+	nPos = t.Find("321", 2);
+	ASSERT_EQ(-1, nPos);
+
+	t = "3214321abc";
+	nPos = t.ReverseFind("321");
+	ASSERT_EQ(4, nPos);
+
+	c = "abcdefg";
+	t.Replace("321", c);
+	CLmnString d;
+	d.Format("%s4%sabc", (const char *)c, (const char *)c);
+	ASSERT_EQ(0, strcmp(t, d));
+	ASSERT_EQ(18, t.GetLength());
+
+	t.Remove(c);
+	ASSERT_EQ(0, strcmp(t, "4abc"));
+	ASSERT_EQ(4, t.GetLength());
+
+	t.Delete(1, 3);
+	ASSERT_EQ(0, strcmp(t, "4"));
+	ASSERT_EQ(1, t.GetLength());
+
+	t = "123xyz123";
+	d = t.Mid(3, 4);
+	ASSERT_EQ(0, strcmp(d, "xyz1"));
+	ASSERT_EQ(4, d.GetLength());
+
+	d = t.Mid(3);
+	ASSERT_EQ(0, strcmp(d, "xyz123"));
+	ASSERT_EQ(6, d.GetLength());
+
+	ASSERT_EQ('x', d.GetAt(0) );
+	ASSERT_EQ('y', d.GetAt(1));
+	ASSERT_EQ('z', d.GetAt(2));
+	ASSERT_EQ('1', d.GetAt(3));
+
+	char a = d[0];
 }
 
 TEST( STRING, SPLIT )
