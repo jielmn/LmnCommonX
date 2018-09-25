@@ -2855,9 +2855,10 @@ DWORD   CDataBuf::GetReadPos() const
 
 void   CDataBuf::Reform()
 {
-	if ( m_dwRPos > 0 && GetDataLength() > 0 )
+	if ( m_dwRPos > 0 )
 	{
-		memmove( m_pData, m_pData + m_dwRPos, GetDataLength() );
+		if ( GetDataLength() > 0 )
+			memmove( m_pData, m_pData + m_dwRPos, GetDataLength() );
 
 		m_dwDataLen -= m_dwRPos;
 		m_dwRPos = 0;
