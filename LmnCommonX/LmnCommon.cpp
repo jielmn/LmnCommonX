@@ -1496,7 +1496,8 @@ char * Utf8ToAnsi( char * szAnsi, unsigned int dwAnsiSize, const char * szUtf8 )
         return szAnsi;
     }
 
-    LmnLock( &s_CharsetLock );
+    //LmnLock( &s_CharsetLock );
+	CFuncLock lock(&s_CharsetLock);
 
 #ifdef WIN32	
     WCHAR wszStr[MAX_CHARSET_CONVERT_BUFFER_SIZE] = {0};
@@ -1604,7 +1605,8 @@ char * AnsiToUtf8( char * szUtf8, unsigned int dwUtf8Size, const char * szAnsi )
         return szUtf8;
     }
 
-    LmnLock( &s_CharsetLock );
+    //LmnLock( &s_CharsetLock );
+	CFuncLock lock(&s_CharsetLock);
 
 #ifdef WIN32	
     WCHAR wszStr[MAX_CHARSET_CONVERT_BUFFER_SIZE] = {0};
