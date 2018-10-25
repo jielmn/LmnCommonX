@@ -301,6 +301,14 @@ static  SelectChoiceCb   s_pfnSelect          = 0;
 static  PList            s_pMenusList         = 0;
 
 
+void clean_stdin()
+{
+	int c;
+	do {
+		c = getchar();
+	} while (c != '\n' && c != EOF);
+}
+
 // 初始化菜单系统
 int InitConsole( SelectChoiceCb pfnSelect, HandleChoiceCb  pfnHandleChoice )
 {
@@ -485,10 +493,9 @@ int  DisplayConsoleMenu( ConsoleMenuHandle hConsoleMenu )
 		{
 			printf("\nInvalid input! \n");
 
-			fflush( stdin );
-			printf("PREESS ANY KEY TO CONTINUE!");
-			getchar();
-			fflush( stdin );
+			clean_stdin();
+			printf("PREESS ENTER TO CONTINUE!");
+			clean_stdin();
 			printf("\n");
 		}
 		else
@@ -517,10 +524,9 @@ int  DisplayConsoleMenu( ConsoleMenuHandle hConsoleMenu )
 			{
 				s_pfnHandleChoice( hConsoleMenu, pMenu_->pArg, dwChoice );
 
-				fflush( stdin );
-				printf("PREESS ANY KEY TO CONTINUE!");
-				getchar();
-				fflush( stdin );
+				clean_stdin();
+				printf("PREESS ENTER TO CONTINUE!");
+				clean_stdin();
 				printf("\n");
 			}
 		}
