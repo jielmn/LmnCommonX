@@ -100,6 +100,13 @@ namespace LmnToolkits {
 		virtual int GetMessage(Message * & pMessage);
 	};
 
+	// 模拟线程，防止PriorityThread，优先级高的消息总是先处理
+	class  SimThread : public Thread {
+	public:
+		virtual ~SimThread();
+	protected:
+		virtual int GetMessage(Message * & pMessage);
+	};
 
 	class ThreadManager {
 	public:

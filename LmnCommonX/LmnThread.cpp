@@ -447,7 +447,110 @@ namespace LmnToolkits {
 	}
 
 
+	SimThread::~SimThread() {
 
+	}
+
+	int SimThread::GetMessage(Message * & pMessage) {
+		DWORD dwCurTime = LmnGetTickCount();
+
+		DWORD dwSize = GetArraySize(m_DelayMessageQueue);
+		DWORD dwDelayItemIndex = -1;
+		DWORD dwMaxPriority = 0;
+		BOOL  bPriority = ( GetRand(1, 10) <= 8 ? TRUE : FALSE );
+
+		for (DWORD i = 0; i < dwSize; i++) {
+			const void * pData = 0;
+			GetFromArray(m_DelayMessageQueue, i, &pData);
+			Message * pMessageItem = (Message *)pData;
+			assert(pMessageItem && pMessageItem->m_bTimeTriggerd);
+
+			// 时间已到
+			if (pMessageItem->m_dwTime <= dwCurTime) {
+
+				// 如果忽略掉优先级(总是给低优先级一点机会)
+				if ( !bPriority ) {
+					pMessage = pMessageItem;
+					EraseArray(m_DelayMessageQueue, i);
+					return 0;
+				}
+				else {
+					if (pMessageItem->m_dwPriority > 0) {
+						if (pMessageItem->m_dwPriority > dwMaxPriority) {
+							dwDelayItemIndex = i;
+							dwMaxPriority = pMessageItem->m_dwPriority;
+							pMessage = pMessageItem;
+						}
+					}
+					else {
+						if (dwDelayItemIndex == -1) {
+							dwDelayItemIndex = i;
+							dwMaxPriority = pMessageItem->m_dwPriority;
+							pMessage = pMessageItem;
+						}
+					}
+				}
+			}
+		}
+
+		DWORD dwItemIndex = -1;
+		dwSize = GetArraySize(m_MessageQueue);
+
+		for (DWORD i = 0; i < dwSize; i++) {
+			const void * pData = 0;
+			GetFromArray(m_MessageQueue, 0, &pData);
+			Message * pMessageItem = (Message *)pData;
+			assert(pMessageItem);
+
+			if (!bPriority) {
+				pMessage = pMessageItem;
+				EraseArray(m_MessageQueue, i);
+				return 0;
+			}
+			else {
+				if (pMessageItem->m_dwPriority > 0) {
+					if (pMessageItem->m_dwPriority > dwMaxPriority) {
+						dwItemIndex = i;
+						dwMaxPriority = pMessageItem->m_dwPriority;
+						pMessage = pMessageItem;
+					}
+				}
+				else {
+					if (dwDelayItemIndex == -1 && dwItemIndex == -1) {
+						dwItemIndex = i;
+						dwMaxPriority = pMessageItem->m_dwPriority;
+						pMessage = pMessageItem;
+					}
+				}
+			}			
+		}
+
+		if (dwMaxPriority > 0) {
+			if (dwItemIndex != -1) {
+				EraseArray(m_MessageQueue, dwItemIndex);
+				return 0;
+			}
+			else {
+				assert(dwDelayItemIndex != -1);
+				EraseArray(m_DelayMessageQueue, dwDelayItemIndex);
+				return 0;
+			}
+		}
+		else {
+			if (dwDelayItemIndex != -1) {
+				EraseArray(m_DelayMessageQueue, dwDelayItemIndex);
+				return 0;
+			}
+			else if (dwItemIndex != -1) {
+				EraseArray(m_MessageQueue, dwItemIndex);
+				return 0;
+			}
+		}
+
+		// 延时消息和正常消息队列里都没有
+		pMessage = 0;
+		return 0;
+	}
 
 
 	ThreadManager * ThreadManager::m_instance = 0;
