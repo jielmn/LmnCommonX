@@ -178,6 +178,9 @@ BOOL  CLmnSerialPort::ReadUartPort(HANDLE hComm, void *RcvBuf, DWORD ToRcvDataLe
 					}
 				}
 			}
+			else {
+				bResult = FALSE;
+			}
 		}
 	}
 	else
