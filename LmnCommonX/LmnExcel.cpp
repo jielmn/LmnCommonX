@@ -332,3 +332,117 @@ int  CExcel::Quit() {
 	AutoWrap(DISPATCH_METHOD, NULL, m_pXlApp, L"Quit", 0);
 	return 0;
 }
+
+
+BOOL CExcelEx::IfExcelInstalled() {
+	CLSID clsid;
+	HRESULT hr = CLSIDFromProgID(L"Excel.Application", &clsid);
+	if (FAILED(hr)) {
+		return FALSE;
+	}
+	return TRUE;
+}
+
+CExcelEx::CExcelEx(const char * szFilePath /*= 0*/, BOOL bVisible /*= FALSE*/ ) {
+	HRESULT hr = m_pApp.CreateInstance( L"Excel.Application", 0, CLSCTX_LOCAL_SERVER );
+	if ( FAILED(hr) ) {
+		return;
+	}
+
+	if ( bVisible )
+		m_pApp->Visible = VARIANT_TRUE;
+	else 
+		m_pApp->Visible = VARIANT_FALSE;
+
+	m_pApp->UserControl = FALSE;
+	m_pWorkBooks = m_pApp->Workbooks;
+
+	if ( 0 == szFilePath ) {
+		m_pWorkBook = m_pWorkBooks->Add(vtMissing);
+	}
+	else {
+		try {
+			m_pWorkBook = m_pWorkBooks->Open(szFilePath);
+		}
+		// 打开文件失败
+		catch (_com_error & ) {
+			m_pWorkBooks->Release();
+			m_pApp->Release();
+			return;
+		}
+	}
+
+	m_pSheets = m_pWorkBook->GetWorksheets();
+	m_pWorkSheet = m_pSheets->GetItem(_variant_t(1));
+	m_pWorkSheet->Activate();
+
+	m_pRange = m_pWorkSheet->GetCells();
+}
+
+CExcelEx::~CExcelEx() {
+	if (m_pRange) {
+		m_pRange->Release();
+	}
+
+	if ( m_pWorkSheet ) {
+		m_pWorkSheet->Release();
+	}
+
+	if ( m_pSheets ) {
+		m_pSheets->Release();
+	}
+
+	if (m_pWorkBook) {
+		m_pWorkBook->Release();
+	}
+
+	if (m_pWorkBooks) {
+		m_pWorkBooks->Release();
+	}
+
+	if (m_pApp) {
+		m_pApp->Release();
+	}
+}
+
+int  CExcelEx::WriteGrid(DWORD dwRowIndex, DWORD dwColIndex, const char * szValue) {
+	if ( 0 == m_pRange ) {
+		return -1;
+	}
+	m_pRange->Item[dwRowIndex + 1][dwColIndex + 1] = szValue;
+	return 0;
+}
+
+int  CExcelEx::PrintChart( DWORD dwStartRowIndex, DWORD dwStartColIndex,
+	                       DWORD dwEndRowIndex, DWORD dwEndColIndex ) {
+	if ( 0 == m_pRange ) {
+		return -1;
+	}
+
+	char szStartGrid[MAX_EXCEL_GRID_LENGTH] = { 0 };
+	RowColIndex2Excel(szStartGrid, sizeof(szStartGrid), dwStartRowIndex, dwStartColIndex);
+
+	char szEndGrid[MAX_EXCEL_GRID_LENGTH] = { 0 };
+	RowColIndex2Excel(szEndGrid, sizeof(szEndGrid), dwEndRowIndex, dwEndColIndex);
+
+	Excel::_ChartPtr pChart = m_pWorkBook->Charts->Add();
+	pChart->PutChartType(Excel::xlXYScatterLinesNoMarkers);
+	pChart->GetChartArea()->Width = 750;
+	pChart->GetChartArea()->Height = 440;
+	Excel::RangePtr pRange = m_pWorkSheet->Range[szStartGrid][szEndGrid];
+	Excel::PageSetupPtr pageSetup = pChart->GetPageSetup();
+	pageSetup->Orientation = Excel::xlLandscape;
+	pageSetup->PutPaperSize(Excel::xlPaperA4);
+	pChart->SetSourceData(pRange);
+	pChart->ChartTitle->PutText("123567");
+	Excel::LegendPtr lengend = pChart->GetLegend();
+	lengend->Delete();
+
+	pChart->PrintPreview();
+
+	lengend->Release();
+	pRange->Release();
+	pageSetup->Release();
+	pChart->Release();
+	return 0;
+}
