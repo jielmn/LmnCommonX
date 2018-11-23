@@ -26,6 +26,15 @@ private:
 	IDispatch *          m_pXlSheet;
 };
 
+#ifdef GetFirstChild
+#undef GetFirstChild
+#endif
+
+#ifdef GetNextSibling
+#undef GetNextSibling
+#endif
+
+#pragma warning(disable:4192)
 
 #import "../Office2007/MSO.DLL"     rename("DocumentProperties", "DocumentPropertiesXL")  rename( "RGB", "MSORGB" ) no_namespace
 #import "../Office2007/VBE6EXT.OLB" no_namespace   
@@ -37,8 +46,12 @@ public:
 	CExcelEx(const char * szFilePath = 0, BOOL bVisible = FALSE);	
 	~CExcelEx();
 	int  WriteGrid(DWORD dwRowIndex, DWORD dwColIndex, const char * szValue);
-	int  PrintChart( DWORD dwStartRowIndex, DWORD dwStartColIndex,
-		             DWORD dwEndRowIndex,   DWORD dwEndColIndex );
+	// 两列数据
+	int  PrintChartWithTwoColumns( DWORD dwStartRowIndex, DWORD dwStartColIndex,
+		           DWORD dwEndRowIndex, const char * szTitle = 0, DWORD dwWidth = 0, DWORD dwHeight = 0,
+	               BOOL bHorizontal = TRUE );
+	int  Save();
+	int  Quit();
 
 private:
 	Excel::_ApplicationPtr   m_pApp;

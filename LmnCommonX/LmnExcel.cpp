@@ -368,6 +368,7 @@ CExcelEx::CExcelEx(const char * szFilePath /*= 0*/, BOOL bVisible /*= FALSE*/ ) 
 		catch (_com_error & ) {
 			m_pWorkBooks->Release();
 			m_pApp->Release();
+			m_pApp = 0;
 			return;
 		}
 	}
@@ -413,8 +414,9 @@ int  CExcelEx::WriteGrid(DWORD dwRowIndex, DWORD dwColIndex, const char * szValu
 	return 0;
 }
 
-int  CExcelEx::PrintChart( DWORD dwStartRowIndex, DWORD dwStartColIndex,
-	                       DWORD dwEndRowIndex, DWORD dwEndColIndex ) {
+int  CExcelEx::PrintChartWithTwoColumns( DWORD dwStartRowIndex, DWORD dwStartColIndex,
+	                       DWORD dwEndRowIndex, const char * szTitle /*= 0*/, 
+	                       DWORD dwWidth /*= 0*/, DWORD dwHeight /*= 0*/, BOOL bHorizontal /*= TRUE */ ) {
 	if ( 0 == m_pRange ) {
 		return -1;
 	}
@@ -423,26 +425,91 @@ int  CExcelEx::PrintChart( DWORD dwStartRowIndex, DWORD dwStartColIndex,
 	RowColIndex2Excel(szStartGrid, sizeof(szStartGrid), dwStartRowIndex, dwStartColIndex);
 
 	char szEndGrid[MAX_EXCEL_GRID_LENGTH] = { 0 };
+	DWORD dwEndColIndex = dwStartColIndex + 1;
 	RowColIndex2Excel(szEndGrid, sizeof(szEndGrid), dwEndRowIndex, dwEndColIndex);
 
 	Excel::_ChartPtr pChart = m_pWorkBook->Charts->Add();
 	pChart->PutChartType(Excel::xlXYScatterLinesNoMarkers);
-	pChart->GetChartArea()->Width = 750;
-	pChart->GetChartArea()->Height = 440;
+
+	if (0 == dwWidth) {
+		if (bHorizontal)
+			dwWidth = 750;
+		else
+			dwWidth = 480;
+	}
+
+	if (0 == dwHeight) {
+		if (bHorizontal)
+			dwHeight = 440;
+		else
+			dwHeight = 670;
+	}
+
+	pChart->GetChartArea()->Width = dwWidth;
+	pChart->GetChartArea()->Height = dwHeight;
 	Excel::RangePtr pRange = m_pWorkSheet->Range[szStartGrid][szEndGrid];
 	Excel::PageSetupPtr pageSetup = pChart->GetPageSetup();
-	pageSetup->Orientation = Excel::xlLandscape;
+	if (bHorizontal)
+		pageSetup->Orientation = Excel::xlLandscape;
+	else 
+		pageSetup->Orientation = Excel::xlPortrait;
 	pageSetup->PutPaperSize(Excel::xlPaperA4);
-	pChart->SetSourceData(pRange);
-	pChart->ChartTitle->PutText("123567");
+	pChart->SetSourceData(pRange, _variant_t(2));
+	if (0 == szTitle) {
+		pChart->ChartTitle->PutText("");
+	}
+	else {
+		pChart->ChartTitle->PutText(szTitle);
+	}	
 	Excel::LegendPtr lengend = pChart->GetLegend();
 	lengend->Delete();
 
-	pChart->PrintPreview();
+	pageSetup->CenterHorizontally = VARIANT_TRUE;
+	pageSetup->CenterVertically = VARIANT_TRUE;
+
+	//pChart->PrintPreview();
+	pChart->PrintOut();
 
 	lengend->Release();
 	pRange->Release();
 	pageSetup->Release();
 	pChart->Release();
+	return 0;
+}
+
+int  CExcelEx::Save() {
+	if (m_pApp == 0) {
+		return -1;
+	}
+
+	m_pApp->Save();
+	return 0;
+}
+
+int  CExcelEx::Quit() {
+	if (m_pApp == 0) {
+		return -1;
+	}
+
+	m_pApp->PutDisplayAlerts(FALSE);
+	m_pApp->Quit();
+
+	m_pRange->Release();
+	m_pRange = 0;
+
+	m_pWorkSheet->Release();
+	m_pWorkSheet = 0;
+
+	m_pSheets->Release();
+	m_pSheets = 0;
+
+	m_pWorkBook->Release();
+	m_pWorkBook = 0;
+
+	m_pWorkBooks->Release();
+	m_pWorkBooks = 0;
+
+	m_pApp->Release();
+	m_pApp = 0;
 	return 0;
 }

@@ -56,18 +56,20 @@ int test_excel_1() {
 		return -1;
 	}
 
-	CExcelEx b(0, TRUE);
+	CExcelEx b(0, FALSE);
 	b.WriteGrid(0, 0, "14:27:54");
 	b.WriteGrid(0, 1, "10");
 	b.WriteGrid(1, 0, "14:28:08");
 	b.WriteGrid(1, 1, "20");
-	//b.WriteGrid(2, 0, "3");
-	//b.WriteGrid(2, 1, "30");
-	//b.WriteGrid(3, 0, "4");
-	//b.WriteGrid(3, 1, "40");
-	//b.WriteGrid(4, 0, "5");
-	//b.WriteGrid(4, 1, "50");
-	b.PrintChart(0, 0, 1, 1);
+
+	//b.WriteGrid(0, 0, "5");
+	//b.WriteGrid(0, 1, "10.0");
+	//b.WriteGrid(1, 0, "15");
+	//b.WriteGrid(1, 1, "20.0");
+	
+	b.PrintChartWithTwoColumns(0, 0, 1, "hello", 0, 0, TRUE );
+	b.Quit();
+	b.PrintChartWithTwoColumns(0, 0, 1, "hello", 0, 0, TRUE);
 
 	printf("end testing excel.\n");
 	return 0;
