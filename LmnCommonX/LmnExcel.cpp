@@ -416,7 +416,8 @@ int  CExcelEx::WriteGrid(DWORD dwRowIndex, DWORD dwColIndex, const char * szValu
 
 int  CExcelEx::PrintChartWithTwoColumns( DWORD dwStartRowIndex, DWORD dwStartColIndex,
 	                       DWORD dwEndRowIndex, const char * szTitle /*= 0*/, 
-	                       DWORD dwWidth /*= 0*/, DWORD dwHeight /*= 0*/, BOOL bHorizontal /*= TRUE */ ) {
+	                       DWORD dwWidth /*= 0*/, DWORD dwHeight /*= 0*/, BOOL bHorizontal /*= TRUE */, 
+	                       double * pdYAxeMin /*= 0*/ ) {
 	if ( 0 == m_pRange ) {
 		return -1;
 	}
@@ -467,9 +468,13 @@ int  CExcelEx::PrintChartWithTwoColumns( DWORD dwStartRowIndex, DWORD dwStartCol
 	pageSetup->CenterHorizontally = VARIANT_TRUE;
 	pageSetup->CenterVertically = VARIANT_TRUE;
 
+	Excel::AxisPtr axe = pChart->Axes(Excel::xlValue, Excel::xlPrimary);
+	if (pdYAxeMin)
+		axe->MinimumScale = *pdYAxeMin;
 	//pChart->PrintPreview();
 	pChart->PrintOut();
 
+	axe->Release();
 	lengend->Release();
 	pRange->Release();
 	pageSetup->Release();

@@ -49,7 +49,7 @@ public:
 	// 两列数据
 	int  PrintChartWithTwoColumns( DWORD dwStartRowIndex, DWORD dwStartColIndex,
 		           DWORD dwEndRowIndex, const char * szTitle = 0, DWORD dwWidth = 0, DWORD dwHeight = 0,
-	               BOOL bHorizontal = TRUE );
+	               BOOL bHorizontal = TRUE, double * pdYAxeMin = 0 );
 	int  Save();
 	int  Quit();
 

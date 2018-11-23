@@ -58,9 +58,11 @@ int test_excel_1() {
 
 	CExcelEx b(0, FALSE);
 	b.WriteGrid(0, 0, "14:27:54");
-	b.WriteGrid(0, 1, "10");
+	b.WriteGrid(0, 1, "32.01");
 	b.WriteGrid(1, 0, "14:28:08");
-	b.WriteGrid(1, 1, "20");
+	b.WriteGrid(1, 1, "34.1");
+	b.WriteGrid(2, 0, "14:29:08");
+	b.WriteGrid(2, 1, "32.52");
 
 	//b.WriteGrid(0, 0, "5");
 	//b.WriteGrid(0, 1, "10.0");
