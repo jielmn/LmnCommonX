@@ -583,7 +583,8 @@ int  CExcelEx::PrintChartWithMultiSeries( Series * series_data, DWORD dwSeriesCn
 		dwIndex++;
 	}
 
-	pChart->PrintPreview();
+	//pChart->PrintPreview();
+	pChart->PrintOut();
 
 	axe->Release();
 	pageSetup->Release();

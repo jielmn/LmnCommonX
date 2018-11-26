@@ -4,10 +4,18 @@
 
 #include "LmnCommon.h"
 #include "LmnExcel.h"
-
+#include <time.h>
 //#pragma comment(lib,"User32.lib")
 #pragma comment(lib,"ole32.lib")
 #pragma comment(lib,"Oleaut32.lib")
+
+char * Time2String(char * szDest, DWORD dwDestSize, const time_t * t) {
+	struct tm  tmp;
+	localtime_s(&tmp, t);
+
+	_snprintf_s(szDest, dwDestSize, dwDestSize, "%02d:%02d:%02d", tmp.tm_hour, tmp.tm_min, tmp.tm_sec);
+	return szDest;
+}
 
 int test_excel() {
 	printf("testing excel......\n");
@@ -86,35 +94,44 @@ int test_excel_2() {
 	}
 
 	CExcelEx b(0, TRUE);
-	b.WriteGrid(0, 0, "14:27:54");
-	b.WriteGrid(0, 1, "32.01");
-	b.WriteGrid(1, 0, "14:28:08");
-	b.WriteGrid(1, 1, "34.1");
-	b.WriteGrid(2, 0, "14:29:08");
-	b.WriteGrid(2, 1, "32.52");
 
-	b.WriteGrid(0, 3, "14:29:54");
-	b.WriteGrid(0, 4, "33.01");
-	b.WriteGrid(1, 3, "14:30:08");
-	b.WriteGrid(1, 4, "35.1");
-	b.WriteGrid(2, 3, "14:31:08");
-	b.WriteGrid(2, 4, "33.52");
+	time_t t = time(0);
+	char buf[8192];
+
+	DWORD max_points_cnt = 100;
+	for ( DWORD i = 0; i < max_points_cnt; i++ ) {
+		Time2String(buf, sizeof(buf), &t);
+		b.WriteGrid(i, 0, buf );
+
+		DWORD d = GetRand(3200, 3900);
+		SNPRINTF(buf, sizeof(buf), "%.2f", d / 100.0);
+		b.WriteGrid(i, 1, buf);
+
+		Time2String(buf, sizeof(buf), &t);
+		b.WriteGrid(i, 2, buf);
+
+		d = GetRand(3200, 3900);
+		SNPRINTF(buf, sizeof(buf), "%.2f", d / 100.0);
+		b.WriteGrid(i, 3, buf);
+
+		t += 10;
+	}
 
 	CExcelEx::Series a[2];
 	a[0].dwStartRowIndex = 0;
 	a[0].dwStartColIndex = 0;
-	a[0].dwEndRowIndex   = 2;
+	a[0].dwEndRowIndex   = max_points_cnt-1;
 	STRNCPY(a[0].szName, "胸口", sizeof(a[0].szName));
-	a[0].bEmpty = TRUE;
+	a[0].bEmpty = FALSE;
 
 	a[1].dwStartRowIndex = 0;
-	a[1].dwStartColIndex = 3;
-	a[1].dwEndRowIndex = 2;
+	a[1].dwStartColIndex = 2;
+	a[1].dwEndRowIndex = max_points_cnt-1;
 	STRNCPY(a[1].szName, "腋下", sizeof(a[1].szName));
 	a[1].bEmpty = FALSE;
 
-
-	b.PrintChartWithMultiSeries( a, 2, "商目", 0, 0, TRUE);
+	double f = 30.0;
+	b.PrintChartWithMultiSeries( a, 2, "商目", 0, 0, TRUE, &f);
 	//b.Quit();
 
 	printf("end testing excel.\n");
