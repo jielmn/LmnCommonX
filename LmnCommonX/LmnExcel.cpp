@@ -102,6 +102,13 @@ static char *  RowColIndex2Excel(char * szGrid, DWORD dwGridSize, DWORD dwRowInd
 	return szGrid;
 }
 
+static char *  RowColIndex2Excel$(char * szGrid, DWORD dwGridSize, DWORD dwRowIndex, DWORD dwColIndex) {
+	char szColumn[MAX_EXCEL_COLUMN_LENGTH] = { 0 };
+	ColIndex2Excel(szColumn, sizeof(szColumn), dwColIndex);
+	SNPRINTF(szGrid, dwGridSize, "$%s$%lu", szColumn, dwRowIndex + 1);
+	return szGrid;
+}
+
 
 
 BOOL  CExcel::IfExcelInstalled() {
@@ -479,6 +486,103 @@ int  CExcelEx::PrintChartWithTwoColumns( DWORD dwStartRowIndex, DWORD dwStartCol
 	pRange->Release();
 	pageSetup->Release();
 	pChart->Release();
+	return 0;
+}
+
+int  CExcelEx::PrintChartWithMultiSeries( Series * series_data, DWORD dwSeriesCnt, const char * szTitle /*= 0*/,
+	           DWORD dwWidth /*= 0*/, DWORD dwHeight /*= 0*/, BOOL bHorizontal /*= TRUE*/, double * pdYAxeMin /*= 0*/) {
+	if (0 == m_pRange) {
+		return -1;
+	}
+
+	Excel::_ChartPtr pChart = m_pWorkBook->Charts->Add();
+	pChart->PutChartType(Excel::xlXYScatterLinesNoMarkers);
+
+	// 宽高
+	if (0 == dwWidth) {
+		if (bHorizontal)
+			dwWidth = 750;
+		else
+			dwWidth = 480;
+	}
+
+	if (0 == dwHeight) {
+		if (bHorizontal)
+			dwHeight = 440;
+		else
+			dwHeight = 670;
+	}
+	pChart->GetChartArea()->Width = dwWidth;
+	pChart->GetChartArea()->Height = dwHeight;
+
+	//横版
+	Excel::PageSetupPtr pageSetup = pChart->GetPageSetup();
+	if (bHorizontal)
+		pageSetup->Orientation = Excel::xlLandscape;
+	else
+		pageSetup->Orientation = Excel::xlPortrait;
+
+	// A4
+	pageSetup->PutPaperSize(Excel::xlPaperA4);
+
+	// 居中
+	pageSetup->CenterHorizontally = VARIANT_TRUE;
+	pageSetup->CenterVertically = VARIANT_TRUE;
+
+	// 标题
+	if (0 == szTitle) {
+		pChart->ChartTitle->PutText("");
+	}
+	else {
+		pChart->ChartTitle->PutText(szTitle);
+	}
+
+	Excel::AxisPtr axe = pChart->Axes(Excel::xlValue, Excel::xlPrimary);
+	if (pdYAxeMin)
+		axe->MinimumScale = *pdYAxeMin;
+
+	Excel::SeriesCollectionPtr series = pChart->SeriesCollection();
+	for ( DWORD i = 0; i < dwSeriesCnt; i++ ) {
+		Excel::SeriesPtr s;
+		if ( i > 0 ) {
+			s = series->NewSeries();
+		}
+		else {
+			s = series->Item(_variant_t(1));
+		}
+
+		DWORD dwEndColIndex = series_data[i].dwStartColIndex + 1;
+		char szXGridStart[MAX_EXCEL_GRID_LENGTH] = { 0 };
+		RowColIndex2Excel$(szXGridStart, sizeof(szXGridStart), series_data[i].dwStartRowIndex,
+			                series_data[i].dwStartColIndex );
+
+		char szXGridEnd[MAX_EXCEL_GRID_LENGTH] = { 0 };
+		RowColIndex2Excel$(szXGridEnd, sizeof(szXGridEnd), series_data[i].dwEndRowIndex,
+			               series_data[i].dwStartColIndex);
+
+		char szYGridStart[MAX_EXCEL_GRID_LENGTH] = { 0 };
+		RowColIndex2Excel(szYGridStart, sizeof(szYGridStart), series_data[i].dwStartRowIndex, dwEndColIndex);
+
+		char szYGridEnd[MAX_EXCEL_GRID_LENGTH] = { 0 };
+		RowColIndex2Excel(szYGridEnd, sizeof(szYGridEnd), series_data[i].dwEndRowIndex, dwEndColIndex);
+
+		char szRange[64];
+		std::string sWorkSheetName = m_pWorkSheet->GetName();
+		SNPRINTF(szRange, sizeof(szRange), "='%s'!%s:%s", sWorkSheetName.c_str(), szXGridStart, szXGridEnd);
+		s->PutXValues(szRange);
+
+		SNPRINTF(szRange, sizeof(szRange), "='%s'!%s:%s", sWorkSheetName.c_str(), szYGridStart, szYGridEnd);
+		s->PutValues(szRange);
+
+		s->PutName(series_data[i].szName);
+	}
+
+	pChart->PrintPreview();
+
+	axe->Release();
+	pageSetup->Release();
+	pChart->Release();
+
 	return 0;
 }
 

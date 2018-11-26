@@ -42,14 +42,23 @@ private:
 
 class   CExcelEx {
 public:
+	typedef struct tagSeries {
+		DWORD    dwStartRowIndex;
+		DWORD    dwStartColIndex;
+		DWORD    dwEndRowIndex;
+		char     szName[64];
+	}Series;
+
 	static BOOL  IfExcelInstalled();
 	CExcelEx(const char * szFilePath = 0, BOOL bVisible = FALSE);	
 	~CExcelEx();
 	int  WriteGrid(DWORD dwRowIndex, DWORD dwColIndex, const char * szValue);
-	// 两列数据
+	// 两列数据(一个系列)
 	int  PrintChartWithTwoColumns( DWORD dwStartRowIndex, DWORD dwStartColIndex,
 		           DWORD dwEndRowIndex, const char * szTitle = 0, DWORD dwWidth = 0, DWORD dwHeight = 0,
 	               BOOL bHorizontal = TRUE, double * pdYAxeMin = 0 );
+	int  PrintChartWithMultiSeries( Series * series_data, DWORD dwSeriesCnt, const char * szTitle = 0, 
+					DWORD dwWidth = 0, DWORD dwHeight = 0, BOOL bHorizontal = TRUE, double * pdYAxeMin = 0 );
 	int  Save();
 	int  Quit();
 
