@@ -542,9 +542,14 @@ int  CExcelEx::PrintChartWithMultiSeries( Series * series_data, DWORD dwSeriesCn
 		axe->MinimumScale = *pdYAxeMin;
 
 	Excel::SeriesCollectionPtr series = pChart->SeriesCollection();
+	DWORD  dwIndex = 0;
 	for ( DWORD i = 0; i < dwSeriesCnt; i++ ) {
+		if ( series_data[i].bEmpty ) {
+			continue;
+		}
+
 		Excel::SeriesPtr s;
-		if ( i > 0 ) {
+		if ( dwIndex > 0 ) {
 			s = series->NewSeries();
 		}
 		else {
@@ -575,6 +580,7 @@ int  CExcelEx::PrintChartWithMultiSeries( Series * series_data, DWORD dwSeriesCn
 		s->PutValues(szRange);
 
 		s->PutName(series_data[i].szName);
+		dwIndex++;
 	}
 
 	pChart->PrintPreview();

@@ -47,6 +47,7 @@ public:
 		DWORD    dwStartColIndex;
 		DWORD    dwEndRowIndex;
 		char     szName[64];
+		BOOL     bEmpty;
 	}Series;
 
 	static BOOL  IfExcelInstalled();

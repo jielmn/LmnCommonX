@@ -105,11 +105,13 @@ int test_excel_2() {
 	a[0].dwStartColIndex = 0;
 	a[0].dwEndRowIndex   = 2;
 	STRNCPY(a[0].szName, "胸口", sizeof(a[0].szName));
+	a[0].bEmpty = TRUE;
 
 	a[1].dwStartRowIndex = 0;
 	a[1].dwStartColIndex = 3;
 	a[1].dwEndRowIndex = 2;
 	STRNCPY(a[1].szName, "腋下", sizeof(a[1].szName));
+	a[1].bEmpty = FALSE;
 
 
 	b.PrintChartWithMultiSeries( a, 2, "商目", 0, 0, TRUE);
