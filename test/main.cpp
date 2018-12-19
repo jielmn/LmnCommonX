@@ -150,8 +150,12 @@ int test_excel_3()
 	CExcelEx b(0, TRUE);
 	CExcelEx c(0, TRUE);
 
-	b.AddSheet();
-	b.AddSheet();
+	int n = b.GetSheetCount();
+	if (n < 3) {
+		for (int i = n; i < 3; i++) {
+			b.AddSheet();
+		}
+	}
 
 	b.WriteGridEx(1, 0, 0, "123");
 	b.WriteGridEx(1, 1, 1, "456");

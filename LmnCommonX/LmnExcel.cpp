@@ -630,6 +630,11 @@ int  CExcelEx::Quit() {
 	return 0;
 }
 
+int  CExcelEx::GetSheetCount() {
+	long n = m_pSheets->GetCount();
+	return n;
+}
+
 int  CExcelEx::AddSheet() {
 	long n = m_pSheets->GetCount();
 	Excel::_WorksheetPtr  pWorkSheet = m_pSheets->GetItem(_variant_t(n));

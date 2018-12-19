@@ -63,6 +63,7 @@ public:
 	int  Save();
 	int  Quit();
 
+	int  GetSheetCount();
 	int  AddSheet();
 	int  WriteGridEx( int nSheetIndex, DWORD dwRowIndex, DWORD dwColIndex, const char * szValue );
 	int  SaveAs(const char * szName);
