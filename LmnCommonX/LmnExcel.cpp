@@ -629,3 +629,29 @@ int  CExcelEx::Quit() {
 	m_pApp = 0;
 	return 0;
 }
+
+int  CExcelEx::AddSheet() {
+	long n = m_pSheets->GetCount();
+	Excel::_WorksheetPtr  pWorkSheet = m_pSheets->GetItem(_variant_t(n));
+
+	VARIANT varSheet;
+	varSheet.vt = VT_DISPATCH;
+	varSheet.pdispVal = pWorkSheet;
+
+	m_pSheets->Add( vtMissing, varSheet );
+
+	pWorkSheet->Release();
+	return 0;
+}
+
+int  CExcelEx::WriteGridEx( int nSheetIndex, DWORD dwRowIndex,
+	              DWORD dwColIndex, const char * szValue) {
+	Excel::_WorksheetPtr  pWorkSheet =  m_pSheets->GetItem(_variant_t(nSheetIndex));
+	Excel::RangePtr  pRange = pWorkSheet->GetCells();
+
+	pRange->Item[dwRowIndex + 1][dwColIndex + 1] = szValue;
+
+	pRange->Release();
+	pWorkSheet->Release();
+	return 0;
+}

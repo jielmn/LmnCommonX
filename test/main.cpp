@@ -138,10 +138,38 @@ int test_excel_2() {
 	return 0;
 }
 
+int test_excel_3()
+{
+	printf("testing excel......\n");
+
+	if (!CExcelEx::IfExcelInstalled()) {
+		printf("excel not installed!\n");
+		return -1;
+	}
+
+	CExcelEx b(0, TRUE);
+	b.AddSheet();
+	b.AddSheet();
+
+	b.WriteGridEx(1, 0, 0, "123");
+	b.WriteGridEx(1, 1, 1, "456");
+
+	b.WriteGridEx(2, 0, 0, "abc");
+	b.WriteGridEx(2, 1, 1, "xyz");
+
+	b.WriteGridEx(3, 0, 0, "1c");
+	b.WriteGridEx(3, 1, 1, "3z");
+	
+	printf("end testing excel.\n");
+	return 0;
+}
+
 int main()
 {
 	CoInitialize(NULL);
-	test_excel_2();
+
+	test_excel_3();
+
 	CoUninitialize();
 
 	getchar();

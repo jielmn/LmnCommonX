@@ -9,6 +9,7 @@ namespace LmnToolkits {
 
 		m_ThredHandle = 0;
 		m_bLoop = FALSE;
+		m_bAllDoneFlag = FALSE;
 		LmnInitLock( &m_lock );
 	}
 
@@ -151,8 +152,23 @@ namespace LmnToolkits {
 					delete pMessage;				
 				// 没有消息
 			} else {
-				//LmnSleep( 100 );
-				LmnSleep(m_dwIdleSleepTime);
+
+				// 是否没有消息就跳出循环
+				if (m_bAllDoneFlag)
+				{
+					LmnLock(&m_lock);
+					DWORD dwDelaySize = GetArraySize(m_DelayMessageQueue);					
+					LmnUnlock(&m_lock);
+
+					// 如果延时消息也没有了
+					if ( 0 == dwDelaySize ) {						
+						break;
+					}
+				}
+				else {
+					//LmnSleep( 100 );
+					LmnSleep(m_dwIdleSleepTime);
+				}				
 			}
 
 		}
@@ -173,6 +189,22 @@ namespace LmnToolkits {
 		// 如果是当前线程，能走到Stop，说明Run这一步已经退出了
 		m_ThredHandle = 0;
 
+
+		return 0;
+	}
+
+	int Thread::AllDoneStop() {
+		if (0 == m_ThredHandle) {
+			return LMNX_THREAD_NOT_RUNNING;
+		}
+
+		m_bAllDoneFlag = TRUE;
+		// 如果非当前线程
+		if ((LmnThrdType)-1 != m_ThredHandle) {
+			LmnWait4Thrd(m_ThredHandle);
+		}
+		// 如果是当前线程，能走到Stop，说明Run这一步已经退出了
+		m_ThredHandle = 0;
 
 		return 0;
 	}

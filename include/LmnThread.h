@@ -69,6 +69,7 @@ namespace LmnToolkits {
 
 		virtual int Start(BOOL bCreateSubThread = TRUE, DWORD dwIdleSleepTime = 100 );
 		virtual int Stop();
+		virtual int AllDoneStop();
 
 		// ID 为0的消息默认为退出线程
 		virtual int PostMessage( MessageHandler * phandler, DWORD dwMessageID = MESSAGE_ID_CLOSE_THREAD, MessageData * pdata = 0, BOOL bDropSameMsg = FALSE, DWORD dwPriority = 0);
@@ -91,6 +92,7 @@ namespace LmnToolkits {
 		LmnLockType   m_lock;
 		BOOL          m_bLoop;
 		DWORD         m_dwIdleSleepTime;
+		BOOL          m_bAllDoneFlag;
 	};
 
 	class  PriorityThread : public Thread {

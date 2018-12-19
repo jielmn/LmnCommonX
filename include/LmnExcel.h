@@ -63,6 +63,9 @@ public:
 	int  Save();
 	int  Quit();
 
+	int  AddSheet();
+	int  WriteGridEx( int nSheetIndex, DWORD dwRowIndex, DWORD dwColIndex, const char * szValue );
+
 private:
 	Excel::_ApplicationPtr   m_pApp;
 	Excel::WorkbooksPtr      m_pWorkBooks;
