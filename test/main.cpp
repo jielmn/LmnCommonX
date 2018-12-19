@@ -148,6 +148,8 @@ int test_excel_3()
 	}
 
 	CExcelEx b(0, TRUE);
+	CExcelEx c(0, TRUE);
+
 	b.AddSheet();
 	b.AddSheet();
 
@@ -159,7 +161,14 @@ int test_excel_3()
 
 	b.WriteGridEx(3, 0, 0, "1c");
 	b.WriteGridEx(3, 1, 1, "3z");
+
+	b.SaveAs("d:\\123.xlsx");
+	b.Quit();
 	
+	c.WriteGridEx(1, 0, 0, "aaad123");
+	c.SaveAs("d:\\456.xlsx");
+	c.Quit();
+
 	printf("end testing excel.\n");
 	return 0;
 }

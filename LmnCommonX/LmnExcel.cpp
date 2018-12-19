@@ -640,7 +640,7 @@ int  CExcelEx::AddSheet() {
 
 	m_pSheets->Add( vtMissing, varSheet );
 
-	pWorkSheet->Release();
+	//pWorkSheet->Release();
 	return 0;
 }
 
@@ -651,7 +651,19 @@ int  CExcelEx::WriteGridEx( int nSheetIndex, DWORD dwRowIndex,
 
 	pRange->Item[dwRowIndex + 1][dwColIndex + 1] = szValue;
 
-	pRange->Release();
-	pWorkSheet->Release();
+	//pRange->Release();
+	//pWorkSheet->Release();
+	return 0;
+}
+
+int  CExcelEx::SaveAs(const char * szName) {
+	_variant_t  covTrue((short)TRUE);
+	_variant_t  covFalse((short)FALSE);
+	_variant_t  covOptional((long)DISP_E_PARAMNOTFOUND, VT_ERROR);
+
+	//ÆäËû´úÂë
+	m_pWorkBook->SaveAs( _variant_t(szName),vtMissing,vtMissing,vtMissing,
+		vtMissing,vtMissing, Excel::xlExclusive );
+
 	return 0;
 }
