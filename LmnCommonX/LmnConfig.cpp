@@ -1107,7 +1107,7 @@ DWORD  FileConfigEx::SetBooleanConfig(const char * szConfigName, BOOL bConfigVal
 		pValue = "false";
 	}
 
-	if (0 == pDefalut) {
+	if (0 == pbDefault) {
 		pDefalut = "false";
 	}
 	else {
