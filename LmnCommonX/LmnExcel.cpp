@@ -351,6 +351,13 @@ BOOL CExcelEx::IfExcelInstalled() {
 }
 
 CExcelEx::CExcelEx(const char * szFilePath /*= 0*/, BOOL bVisible /*= FALSE*/ ) {
+	m_pApp = 0;
+	m_pWorkBooks = 0;
+	m_pWorkBook = 0;
+	m_pSheets = 0;
+	m_pWorkSheet = 0;
+	m_pRange = 0;
+
 	HRESULT hr = m_pApp.CreateInstance( L"Excel.Application", 0, CLSCTX_LOCAL_SERVER );
 	if ( FAILED(hr) ) {
 		return;
@@ -631,11 +638,18 @@ int  CExcelEx::Quit() {
 }
 
 int  CExcelEx::GetSheetCount() {
+	if ( 0 == m_pSheets ) {
+		return -1;
+	}
 	long n = m_pSheets->GetCount();
 	return n;
 }
 
 int  CExcelEx::AddSheet() {
+	if (0 == m_pSheets) {
+		return -1;
+	}
+
 	long n = m_pSheets->GetCount();
 	Excel::_WorksheetPtr  pWorkSheet = m_pSheets->GetItem(_variant_t(n));
 
@@ -651,6 +665,10 @@ int  CExcelEx::AddSheet() {
 
 int  CExcelEx::WriteGridEx( int nSheetIndex, DWORD dwRowIndex,
 	              DWORD dwColIndex, const char * szValue) {
+	if (0 == m_pSheets) {
+		return -1;
+	}
+
 	Excel::_WorksheetPtr  pWorkSheet =  m_pSheets->GetItem(_variant_t(nSheetIndex));
 	Excel::RangePtr  pRange = pWorkSheet->GetCells();
 
@@ -665,6 +683,10 @@ int  CExcelEx::SaveAs(const char * szName) {
 	_variant_t  covTrue((short)TRUE);
 	_variant_t  covFalse((short)FALSE);
 	_variant_t  covOptional((long)DISP_E_PARAMNOTFOUND, VT_ERROR);
+
+	if (0 == m_pWorkBook) {
+		return -1;
+	}
 
 	//ÆäËû´úÂë
 	m_pWorkBook->SaveAs( _variant_t(szName),vtMissing,vtMissing,vtMissing,
