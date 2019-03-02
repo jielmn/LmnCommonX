@@ -57,6 +57,15 @@
     <ClCompile Include="LmnExcel.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="LmnHttp.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="LmnSeli.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="LmnSslAdapter.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Inner.h">
@@ -102,6 +111,15 @@
       <Filter>头文件\include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\LmnExcel.h">
+      <Filter>头文件\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\LmnHttp.h">
+      <Filter>头文件\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\LmnSeli.h">
+      <Filter>头文件\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\LmnSslAdapter.h">
       <Filter>头文件\include</Filter>
     </ClInclude>
   </ItemGroup>

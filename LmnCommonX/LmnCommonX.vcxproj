@@ -89,9 +89,12 @@
     <ClCompile Include="LmnContainer.cpp" />
     <ClCompile Include="LmnExcel.cpp" />
     <ClCompile Include="LmnFile.cpp" />
+    <ClCompile Include="LmnHttp.cpp" />
     <ClCompile Include="LmnLog.cpp" />
     <ClCompile Include="LmnOdbc.cpp" />
+    <ClCompile Include="LmnSeli.cpp" />
     <ClCompile Include="LmnSerialPort.cpp" />
+    <ClCompile Include="LmnSslAdapter.cpp" />
     <ClCompile Include="LmnString.cpp" />
     <ClCompile Include="LmnTelSvr.cpp" />
     <ClCompile Include="LmnThread.cpp" />
@@ -103,9 +106,12 @@
     <ClInclude Include="..\include\LmnContainer.h" />
     <ClInclude Include="..\include\LmnExcel.h" />
     <ClInclude Include="..\include\LmnFile.h" />
+    <ClInclude Include="..\include\LmnHttp.h" />
     <ClInclude Include="..\include\LmnLog.h" />
     <ClInclude Include="..\include\LmnOdbc.h" />
+    <ClInclude Include="..\include\LmnSeli.h" />
     <ClInclude Include="..\include\LmnSerialPort.h" />
+    <ClInclude Include="..\include\LmnSslAdapter.h" />
     <ClInclude Include="..\include\LmnString.h" />
     <ClInclude Include="..\include\LmnTelSvr.h" />
     <ClInclude Include="..\include\LmnTemplates.h" />
