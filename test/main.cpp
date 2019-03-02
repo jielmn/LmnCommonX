@@ -3,11 +3,17 @@
 #endif
 
 #include "LmnCommon.h"
+#include "LmnHttp.h"
 #include "LmnExcel.h"
 #include <time.h>
 //#pragma comment(lib,"User32.lib")
 #pragma comment(lib,"ole32.lib")
 #pragma comment(lib,"Oleaut32.lib")
+#pragma comment(lib,"Ws2_32.lib")
+#pragma comment(lib,"Setupapi.lib")
+#pragma comment(lib,"Secur32.lib")
+#pragma comment(lib,"Crypt32.lib")
+
 
 char * Time2String(char * szDest, DWORD dwDestSize, const time_t * t) {
 	struct tm  tmp;
@@ -177,14 +183,30 @@ int test_excel_3()
 	return 0;
 }
 
+
+
+void OnHttp(int nError, DWORD dwCode, const char * szData, DWORD dwDataLen,
+	const char * szHeader, DWORD dwHeaderLen, void * context) {
+	int b = 100;
+}
+
+int  test_http_1() {
+	InitHttpStack(OnHttp);
+	std::string strUrl = "localhost/test/a.data";
+
+	CHttpRequest request(strUrl, CHttpRequest::HTTP_METHOD_POST);
+	request.SetOptions("Range:bytes=0-");
+	CHttp::GetInstance()->AddRequest(request, (void *)1);
+	return 0;
+}
+
 int main()
 {
 	CoInitialize(NULL);
 
-	test_excel_3();
+	test_http_1();
 
 	CoUninitialize();
-
 	getchar();
 	return 0;
 }

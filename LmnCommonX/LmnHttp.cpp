@@ -30,6 +30,7 @@
 CHttp * CHttp::s_pInstance = 0;
 DWORD   CHttpTransfer::s_dwId = 0;
 
+#define  HTTP_RSP_EASY_READ_FLAG
 static HttpCallback  s_http_callback = 0;
 
 
@@ -324,10 +325,19 @@ void  CHttpTransfer::Reconnect()
                 CHttpTransaction * pTransaction = *it;
                 if ( s_http_callback )
                 {
+#ifndef HTTP_RSP_EASY_READ_FLAG
                     s_http_callback( 0, pTransaction->m_response.GetHttpState(), 
                                      pTransaction->m_response.GetData(), pTransaction->m_response.GetDataSize(), 
                                      (char *)pTransaction->m_TotalHeader.GetData(),  pTransaction->m_TotalHeader.GetDataLength(),
                                      pTransaction->m_pContext );
+#else
+					pTransaction->m_response.AppendData("\0", 1);
+					pTransaction->m_TotalHeader.Append("\0", 1);
+					s_http_callback(0, pTransaction->m_response.GetHttpState(),
+						pTransaction->m_response.GetData(), pTransaction->m_response.GetDataSize()-1,
+						(char *)pTransaction->m_TotalHeader.GetData(), pTransaction->m_TotalHeader.GetDataLength()-1,
+						pTransaction->m_pContext);
+#endif
                 }
             }
 
@@ -377,10 +387,19 @@ void  CHttpTransfer::Reconnect()
                 CHttpTransaction * pTransaction = *it;
                 if ( s_http_callback )
                 {
+#ifndef HTTP_RSP_EASY_READ_FLAG
                     s_http_callback( 0, pTransaction->m_response.GetHttpState(), 
                         pTransaction->m_response.GetData(), pTransaction->m_response.GetDataSize(), 
                         (char *)pTransaction->m_TotalHeader.GetData(),  pTransaction->m_TotalHeader.GetDataLength(),
                         pTransaction->m_pContext );
+#else
+					pTransaction->m_response.AppendData("\0", 1);
+					pTransaction->m_TotalHeader.Append("\0", 1);
+					s_http_callback(0, pTransaction->m_response.GetHttpState(),
+							pTransaction->m_response.GetData(), pTransaction->m_response.GetDataSize()-1,
+							(char *)pTransaction->m_TotalHeader.GetData(), pTransaction->m_TotalHeader.GetDataLength()-1,
+							pTransaction->m_pContext);
+#endif
                 }
             }
 
@@ -554,10 +573,19 @@ void  CHttpTransfer::OnEventClose( int nErr /*= 0*/ )
 
             if ( s_http_callback )
             {
+#ifndef HTTP_RSP_EASY_READ_FLAG
                 s_http_callback( nErr, pTransaction->m_response.GetHttpState(), 
                     pTransaction->m_response.GetData(), pTransaction->m_response.GetDataSize(), 
                     (char *)pTransaction->m_TotalHeader.GetData(),  pTransaction->m_TotalHeader.GetDataLength(),
                     pTransaction->m_pContext );
+#else
+				pTransaction->m_response.AppendData("\0", 1);
+				pTransaction->m_TotalHeader.Append("\0", 1);
+				s_http_callback(nErr, pTransaction->m_response.GetHttpState(),
+					pTransaction->m_response.GetData(), pTransaction->m_response.GetDataSize()-1,
+					(char *)pTransaction->m_TotalHeader.GetData(), pTransaction->m_TotalHeader.GetDataLength()-1,
+					pTransaction->m_pContext);
+#endif
             }
         }
 
@@ -583,10 +611,19 @@ void  CHttpTransfer::OnEventClose( int nErr /*= 0*/ )
         {
             if ( s_http_callback )
             {
+#ifndef HTTP_RSP_EASY_READ_FLAG
                 s_http_callback( 0, pTransaction->m_response.GetHttpState(), 
                     pTransaction->m_response.GetData(), pTransaction->m_response.GetDataSize(), 
                     (char *)pTransaction->m_TotalHeader.GetData(),  pTransaction->m_TotalHeader.GetDataLength(),
                     pTransaction->m_pContext );
+#else
+				pTransaction->m_response.AppendData("\0", 1);
+				pTransaction->m_TotalHeader.Append("\0", 1);
+				s_http_callback(0, pTransaction->m_response.GetHttpState(),
+					pTransaction->m_response.GetData(), pTransaction->m_response.GetDataSize()-1,
+					(char *)pTransaction->m_TotalHeader.GetData(), pTransaction->m_TotalHeader.GetDataLength()-1,
+					pTransaction->m_pContext);
+#endif
             }
 
             delete pTransaction;
@@ -717,12 +754,19 @@ void  CHttpTransfer::OnEventRead( )
             {
                 pTransaction->m_eState = CHttpTransaction::TRANSACTION_STATE_OK;
 
-                
+#ifndef HTTP_RSP_EASY_READ_FLAG
                 // 通知上层
                 s_http_callback( 0, pResponse->GetHttpState(), pResponse->GetData(), pResponse->GetDataSize(), 
                     (char *)pTransaction->m_TotalHeader.GetData(),  pTransaction->m_TotalHeader.GetDataLength(),
                     pTransaction->m_pContext );
                 // END 通知上层
+#else
+				pResponse->AppendData("\0", 1);
+				pTransaction->m_TotalHeader.Append("\0", 1);
+				s_http_callback(0, pResponse->GetHttpState(), pResponse->GetData(), pResponse->GetDataSize() - 1,
+					(char *)pTransaction->m_TotalHeader.GetData(), pTransaction->m_TotalHeader.GetDataLength() - 1,
+					pTransaction->m_pContext);
+#endif
 
                 // 回收内存
                 delete  pTransaction;
