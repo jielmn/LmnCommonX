@@ -66,6 +66,9 @@
     <ClCompile Include="LmnSslAdapter.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="LmnWebSocket.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Inner.h">
@@ -120,6 +123,9 @@
       <Filter>头文件\include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\LmnSslAdapter.h">
+      <Filter>头文件\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\LmnWebSocket.h">
       <Filter>头文件\include</Filter>
     </ClInclude>
   </ItemGroup>
