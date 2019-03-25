@@ -5,6 +5,7 @@
 #include "LmnCommon.h"
 #include "LmnHttp.h"
 #include "LmnExcel.h"
+#include "LmnWebSocket.h"
 #include <time.h>
 //#pragma comment(lib,"User32.lib")
 #pragma comment(lib,"ole32.lib")
@@ -184,29 +185,64 @@ int test_excel_3()
 }
 
 
+static bool  is_http_test_finish = false;
 
 void OnHttp(int nError, DWORD dwCode, const char * szData, DWORD dwDataLen,
 	const char * szHeader, DWORD dwHeaderLen, void * context) {
-	int b = 100;
+	printf("error = %d, code = %lu \n", nError, dwCode);
+
+	if (szData)
+		printf(szData);
+
+	printf("\n===========================================\n");
+
+	if (szHeader)
+		printf(szHeader);
+
+	is_http_test_finish = true;
 }
 
 int  test_http_1() {
+
+	is_http_test_finish = false;
 	InitHttpStack(OnHttp);
-	std::string strUrl = "localhost/test/a.data";
+	std::string strUrl = "localhost:8080/test/a.data";
 
 	CHttpRequest request(strUrl, CHttpRequest::HTTP_METHOD_POST);
 	request.SetOptions("Range:bytes=0-");
 	CHttp::GetInstance()->AddRequest(request, (void *)1);
+
+	while (true) {
+		if (is_http_test_finish) {
+			DeinitHttpStack();
+			break;
+		}
+		LmnSleep(200);
+	}
+	return 0;
+}
+
+int  test_ws_1() {
+	StartSeliThread();
+	LmnToolkits::WebSocket * s = new LmnToolkits::WebSocket;
+	s->Open("ws://localhost:8080/websocket");	
+	getchar();
+	delete s;
+	StopSeliThread();
 	return 0;
 }
 
 int main()
 {
+	LmnToolkits::ThreadManager::GetInstance();
 	CoInitialize(NULL);
 
-	test_http_1();
+	//test_http_1();
+	test_ws_1();
+	getchar();
 
 	CoUninitialize();
-	getchar();
+	LmnToolkits::ThreadManager::GetInstance()->ReleaseInstance();
+
 	return 0;
 }
