@@ -176,12 +176,14 @@ namespace LmnToolkits {
 		return 0;
 	}
 
-	int Thread::Stop(){
+	int Thread::Stop(BOOL bSetLoopFlag /*= TRUE*/){
 		if ( 0 == m_ThredHandle ) {
 			return LMNX_THREAD_NOT_RUNNING;
 		}
 
-		m_bLoop = FALSE;
+		if (bSetLoopFlag)
+			m_bLoop = FALSE;
+
 		// 如果非当前线程
 		if ( (LmnThrdType)-1 != m_ThredHandle ) {
 			LmnWait4Thrd( m_ThredHandle );

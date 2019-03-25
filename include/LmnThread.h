@@ -68,7 +68,8 @@ namespace LmnToolkits {
 		virtual ~Thread();
 
 		virtual int Start(BOOL bCreateSubThread = TRUE, DWORD dwIdleSleepTime = 100 );
-		virtual int Stop();
+		// bSetLoopFlag: 是否把m_bLoop设置为FALSE
+		virtual int Stop(BOOL bSetLoopFlag = TRUE);
 		virtual int AllDoneStop();
 
 		// ID 为0的消息默认为退出线程
