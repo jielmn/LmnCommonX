@@ -109,13 +109,13 @@ char *  GetStringFromUrl(char * szDest, DWORD dwDestSize, const char * szUrl)
 }
 
 static BOOL  s_bGLockInited = FALSE;
-LmnLockType  g_Lock;
+static LmnLockType  s_HttpLock;
 
 void    InitGLock()
 {
 	if (!s_bGLockInited)
 	{
-		LmnInitLock(&g_Lock);
+		LmnInitLock(&s_HttpLock);
 
 		s_bGLockInited = TRUE;
 	}
@@ -446,9 +446,9 @@ void  CHttpTransfer::Step()
                     PTDnsResolve  pDnsQuery = new TDnsResolve;
                     strncpy( pDnsQuery->szDomain, m_cDestAddr.m_sDomain.c_str(), MAX_DNS_DOMAIN_NAME_LEN - 1 );
 
-                    LmnLock( &g_Lock );
+                    LmnLock( &s_HttpLock );
                     s_vDnsQuery.push_back( pDnsQuery );
-                    LmnUnlock( &g_Lock );
+                    LmnUnlock( &s_HttpLock );
                     m_eState = TRANSFER_STATE_GETTING_DEST_NAME;
                 }
             }
@@ -460,9 +460,9 @@ void  CHttpTransfer::Step()
             PTDnsResolve  pDnsQuery = new TDnsResolve;
             strncpy( pDnsQuery->szDomain, m_cPeerAddr.m_sDomain.c_str(), MAX_DNS_DOMAIN_NAME_LEN - 1 );
 
-            LmnLock( &g_Lock );
+            LmnLock( &s_HttpLock );
             s_vDnsQuery.push_back( pDnsQuery );
-            LmnUnlock( &g_Lock );
+            LmnUnlock( &s_HttpLock );
 
             m_eState = TRANSFER_STATE_GETTING_HOST_NAME;
         }
@@ -494,9 +494,9 @@ void  CHttpTransfer::Step()
                     PTDnsResolve  pDnsQuery = new TDnsResolve;
                     strncpy( pDnsQuery->szDomain, m_cDestAddr.m_sDomain.c_str(), MAX_DNS_DOMAIN_NAME_LEN - 1 );
 
-                    LmnLock( &g_Lock );
+                    LmnLock( &s_HttpLock );
                     s_vDnsQuery.push_back( pDnsQuery );
-                    LmnUnlock( &g_Lock );
+                    LmnUnlock( &s_HttpLock );
                     m_eState = TRANSFER_STATE_GETTING_DEST_NAME;
                 }
             }
@@ -1961,7 +1961,7 @@ CHttpTransfer *  CHttp::GetTransfer( const std::string & strHost, WORD wPort, BO
 
     if ( 0 == pFirstIdle )
     {
-        pFirstIdle = new CHttpTransfer( &g_Lock );
+        pFirstIdle = new CHttpTransfer( &s_HttpLock );
         m_vTransfers.push_back( pFirstIdle );
     }
     
@@ -2012,7 +2012,7 @@ CHttpTransfer *  CHttp::GetTransfer( const std::string & strSock5Host, WORD wSoc
 
     if ( 0 == pFirstIdle )
     {
-        pFirstIdle = new CHttpTransfer( &g_Lock );
+        pFirstIdle = new CHttpTransfer( &s_HttpLock );
         pFirstIdle->SetUseSock5( TRUE );
         m_vTransfers.push_back( pFirstIdle );
     }
@@ -2059,7 +2059,7 @@ bool  CHttp::Get( const std::string & strUrl, void * context )
     CHttpRequest  request( sTemp, CHttpRequest::HTTP_METHOD_GET );
 
     // lock
-    CFuncLock  cLock( &g_Lock );
+    CFuncLock  cLock( &s_HttpLock );
 
     // 根据url获取一个恰当的transfer
     CHttpTransfer * pTransfer = GetTransfer( strHost, wPort, bHttps );
@@ -2077,7 +2077,7 @@ bool  CHttp::Get( const std::string & strUrl, void * context )
 bool CHttp::AddRequest( CHttpRequest & request, void * context /*= 0*/ )
 {
     // lock
-    CFuncLock  cLock( &g_Lock );
+    CFuncLock  cLock( &s_HttpLock );
 
     std::string   strHost, strPath;
     WORD          wPort;
@@ -2133,7 +2133,7 @@ bool CHttp::AddRequest( CHttpRequest & request, void * context /*= 0*/ )
 void  CHttp::CheckDnsResolved(  )
 {
     // lock
-    CFuncLock  cLock( &g_Lock );
+    CFuncLock  cLock( &s_HttpLock );
 
     std::vector<PTDnsResolve> & v = s_vDnsResolved;
 
@@ -2195,7 +2195,7 @@ void  CHttp::CheckDnsResolved(  )
 
 void  CHttp::CheckIdleOut( )
 {
-    CFuncLock  cLock( &g_Lock );
+    CFuncLock  cLock( &s_HttpLock );
 
     DWORD dwCurTick = LmnGetTickCount();
     DWORD dwMax     = HTTP_IDLE_TIMEOUT * 1000;
@@ -2219,7 +2219,7 @@ void  CHttp::CheckIdleOut( )
 
 void CHttp::PrintDebugInfo()
 {
-    CFuncLock cLock( &g_Lock );
+    CFuncLock cLock( &s_HttpLock );
 
     if ( 0 == m_vTransfers.size() )
     {
@@ -2296,10 +2296,10 @@ void * DnsResolveThread( void * pArg )
 {
     while( s_bHttpStack )
     {
-        LmnLock( &g_Lock );
+        LmnLock( &s_HttpLock );
         if ( 0 == s_vDnsQuery.size() )
         {
-            LmnUnlock( &g_Lock );
+            LmnUnlock( &s_HttpLock );
             SLEEP( 1000 );
         }
         else
@@ -2309,7 +2309,7 @@ void * DnsResolveThread( void * pArg )
 
             std::copy( s_vDnsQuery.begin(), s_vDnsQuery.end(), std::back_inserter(vCopy) );
             s_vDnsQuery.clear();
-            LmnUnlock( &g_Lock );
+            LmnUnlock( &s_HttpLock );
 
             for ( it = vCopy.begin(); it != vCopy.end(); it++ )
             {
@@ -2325,9 +2325,9 @@ void * DnsResolveThread( void * pArg )
                 }
             }
 
-            LmnLock( &g_Lock );
+            LmnLock( &s_HttpLock );
             std::copy( vCopy.begin(), vCopy.end(), std::back_inserter(s_vDnsResolved) );
-            LmnUnlock( &g_Lock );
+            LmnUnlock( &s_HttpLock );
         }
     }
     return 0;

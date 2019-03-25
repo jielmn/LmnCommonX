@@ -138,7 +138,7 @@ static rvprot_t  s_liProtData [2] =
 
 
 static  BOOL           s_bInited    = FALSE;
-// static  LmnLockType    g_Lock;
+static  LmnLockType    s_SeliLock;
 static  seliNode *     s_nodes      = 0;
 static  int            s_max_fd_cnt = FD_SETSIZE;
 
@@ -174,8 +174,6 @@ static  int            s_max_fd_cnt = FD_SETSIZE;
 #endif  // WIN32
 
 #define  NORMAL_BUF_SIZE                   8192
-
-extern LmnLockType  g_Lock;
 
 
 
@@ -299,7 +297,7 @@ static void _SetAllUnUse ( )
     }
 #endif
 
-    // LmnInitLock( &g_Lock );
+    LmnInitLock( &s_SeliLock );
 
     s_nodes = (seliNode *)malloc( sizeof(seliNode) * dwMaxSocketCnt );
     if ( 0 == s_nodes )
@@ -345,7 +343,7 @@ static void _SetAllUnUse ( )
 
     free( s_nodes );
     s_nodes = 0;
-    // LmnDeinitLock( &g_Lock );
+    LmnDeinitLock( &s_SeliLock );
 
     s_bInited = FALSE;
 
@@ -389,7 +387,7 @@ int  seliSelect( DWORD * pdwMs )
     FD_ZERO(&tmpwrSet);
     FD_ZERO(&tmpexSet);
 
-    LmnLock( &g_Lock );
+    LmnLock( &s_SeliLock );
 
     for ( nIndex = 0; nIndex < s_max_fd_cnt; nIndex++ )
     {
@@ -416,7 +414,7 @@ int  seliSelect( DWORD * pdwMs )
         // 设置inuse
         _SetAllUnUse();
 
-        LmnUnlock( &g_Lock );
+        LmnUnlock( &s_SeliLock );
 
         MYTRACE("=================\n");
         dwEndTick =  LmnGetTickCount();
@@ -432,8 +430,6 @@ int  seliSelect( DWORD * pdwMs )
         return 0;
     }
 
-    // LmnUnlock( &g_Lock );
-
     nMaxfd++;
 
 
@@ -443,8 +439,6 @@ int  seliSelect( DWORD * pdwMs )
     pTv        = &tv;
 
     nNum = select( nMaxfd, &tmprdSet, &tmpwrSet, &tmpexSet, pTv );
-
-    // LmnLock( &g_Lock );
 
     if( nNum < 0 )
     {
@@ -572,7 +566,7 @@ int  seliSelect( DWORD * pdwMs )
         }
     }
 
-    LmnUnlock( &g_Lock );
+    LmnUnlock( &s_SeliLock );
 
     dwEndTick =  LmnGetTickCount();
     DWORD dwElapsed = dwEndTick - dwBeginTick;
@@ -719,7 +713,7 @@ int  seliSelect( DWORD * pdwMs )
     }
 
 
-    LmnLock( &g_Lock );
+    LmnLock( &s_SeliLock );
     nIndex = _GetIdleNodeIndex(  );
 
     // 如果没有空间了
@@ -727,7 +721,7 @@ int  seliSelect( DWORD * pdwMs )
     {
         PERROR("NO socket array space! \n");
         close( s );
-        LmnUnlock( &g_Lock );
+        LmnUnlock( &s_SeliLock );
         return INVALID_SOCKET;
     }
 
@@ -756,7 +750,7 @@ int  seliSelect( DWORD * pdwMs )
         s_nodes[nIndex].dwInnerType = SELI_INNER_TYPE_TCP;
     }
 
-    LmnUnlock( &g_Lock );
+    LmnUnlock( &s_SeliLock );
 
     // 返回索引值
     return nIndex;
@@ -778,10 +772,10 @@ int  seliSelect( DWORD * pdwMs )
         return -1;
     }
 
-    LmnLock( &g_Lock );
+    LmnLock( &s_SeliLock );
     if ( !s_nodes[fd].valid )
     {
-        LmnUnlock( &g_Lock );
+        LmnUnlock( &s_SeliLock );
         return -1;
     }
 
@@ -789,7 +783,7 @@ int  seliSelect( DWORD * pdwMs )
     rc = ioctl( s_nodes[fd].fd, FIONBIO, (ioctlOnPtrTypeCast)&on );
     if ( 0 != rc )
     {
-        LmnUnlock( &g_Lock );
+        LmnUnlock( &s_SeliLock );
         return -1;
     }
 
@@ -797,7 +791,7 @@ int  seliSelect( DWORD * pdwMs )
     if ( 0 != rc )
     {
         PERROR("failed to close socket! \n");
-        LmnUnlock( &g_Lock );
+        LmnUnlock( &s_SeliLock );
         return -1;
     }
 
@@ -822,7 +816,7 @@ int  seliSelect( DWORD * pdwMs )
     s_nodes[fd].context       = 0;
     s_nodes[fd].dwInnerType   = 0;
 
-    LmnUnlock( &g_Lock );
+    LmnUnlock( &s_SeliLock );
     return 0;
 }
 
@@ -856,10 +850,10 @@ int  seliSelect( DWORD * pdwMs )
     }
 
 
-    LmnLock( &g_Lock );
+    LmnLock( &s_SeliLock );
     if ( !s_nodes[fd].valid )
     {
-        LmnUnlock( &g_Lock );
+        LmnUnlock( &s_SeliLock );
         return -1;
     }
 
@@ -880,7 +874,7 @@ int  seliSelect( DWORD * pdwMs )
         }
         else
         {
-            LmnUnlock( &g_Lock );
+            LmnUnlock( &s_SeliLock );
             return -1;
         }
     }
@@ -897,7 +891,7 @@ int  seliSelect( DWORD * pdwMs )
     s_nodes[fd].dwTick    = LmnGetTickCount();
     s_nodes[fd].dwTimeOut = dwTimeOut * 1000;
 
-    LmnUnlock( &g_Lock );
+    LmnUnlock( &s_SeliLock );
     return 0;
 }
 
@@ -916,16 +910,16 @@ int  seliSelect( DWORD * pdwMs )
     }
 
 
-    LmnLock( &g_Lock );
+    LmnLock( &s_SeliLock );
     if ( !s_nodes[fd].valid )
     {
-        LmnUnlock( &g_Lock );
+        LmnUnlock( &s_SeliLock );
         return -1;
     }
 
     if ( (listen ( s_nodes[fd].fd, queueLen) ) < 0 ) 
     {
-        LmnUnlock( &g_Lock );
+        LmnUnlock( &s_SeliLock );
         return -1;
     }
 
@@ -934,7 +928,7 @@ int  seliSelect( DWORD * pdwMs )
 
     s_nodes[fd].liState   = liStListening;
 
-    LmnUnlock( &g_Lock );
+    LmnUnlock( &s_SeliLock );
     return 0;
 }
 
@@ -959,10 +953,10 @@ int  seliSelect( DWORD * pdwMs )
         return -1;
     }
 
-    LmnLock( &g_Lock );
+    LmnLock( &s_SeliLock );
     if ( !s_nodes[fd].valid )
     {
-        LmnUnlock( &g_Lock );
+        LmnUnlock( &s_SeliLock );
         return -1;
     }
 
@@ -983,7 +977,7 @@ int  seliSelect( DWORD * pdwMs )
         nAcceptIndex = _GetIdleNodeIndex( );
         if ( nAcceptIndex < 0 )
         {
-            LmnUnlock( &g_Lock );
+            LmnUnlock( &s_SeliLock );
             return -1;
         }
 
@@ -1002,7 +996,7 @@ int  seliSelect( DWORD * pdwMs )
         _liUnblock(socketId);
     }
 
-    LmnUnlock( &g_Lock );
+    LmnUnlock( &s_SeliLock );
     return nAcceptIndex;
 }
 
@@ -1021,17 +1015,17 @@ int  seliSelect( DWORD * pdwMs )
         return -1;
     }
 
-    LmnLock( &g_Lock );
+    LmnLock( &s_SeliLock );
     if ( !s_nodes[fd].valid )
     {
-        LmnUnlock( &g_Lock );
+        LmnUnlock( &s_SeliLock );
         return -1;
     }
 
     rc = shutdown( s_nodes[fd].fd, 1);
     if ( 0 != rc )
     {
-        LmnUnlock( &g_Lock );
+        LmnUnlock( &s_SeliLock );
         return -1;
     }
 
@@ -1039,7 +1033,7 @@ int  seliSelect( DWORD * pdwMs )
 
     s_nodes[fd].liState = liStShutdowned;
 
-    LmnUnlock( &g_Lock );
+    LmnUnlock( &s_SeliLock );
     return 0;
 }
 
@@ -1063,10 +1057,10 @@ int  seliSelect( DWORD * pdwMs )
         return -1;
     }
 
-    LmnLock( &g_Lock );
+    LmnLock( &s_SeliLock );
     if ( !s_nodes[fd].valid )
     {
-        LmnUnlock( &g_Lock );
+        LmnUnlock( &s_SeliLock );
         return -1;
     }
 
@@ -1109,12 +1103,12 @@ int  seliSelect( DWORD * pdwMs )
     if ( ret >= 0 )
     {
         *plen = nSendCnt;
-        LmnUnlock( &g_Lock );
+        LmnUnlock( &s_SeliLock );
         return 0;
     }
     else
     {
-        LmnUnlock( &g_Lock );
+        LmnUnlock( &s_SeliLock );
         return -1;
     }
 }
@@ -1132,10 +1126,10 @@ int  seliSelect( DWORD * pdwMs )
         return -1;
     }
 
-    LmnLock( &g_Lock );
+    LmnLock( &s_SeliLock );
     if ( !s_nodes[fd].valid )
     {
-        LmnUnlock( &g_Lock );
+        LmnUnlock( &s_SeliLock );
         return -1;
     }
 
@@ -1144,13 +1138,13 @@ int  seliSelect( DWORD * pdwMs )
     _liBytesAvailable ( s_nodes[fd].fd, &bytes );
     if ( bytes < 0 )
     {
-        LmnUnlock( &g_Lock );
+        LmnUnlock( &s_SeliLock );
         return -1;
     }
     else if ( bytes == 0 )
     {
         *plen = 0;
-        LmnUnlock( &g_Lock );
+        LmnUnlock( &s_SeliLock );
         return 0;
     }
 
@@ -1164,12 +1158,12 @@ int  seliSelect( DWORD * pdwMs )
 
     if ( ret >= 0 )
     {
-        LmnUnlock( &g_Lock );
+        LmnUnlock( &s_SeliLock );
         return 0;
     }
     else
     {
-        LmnUnlock( &g_Lock );
+        LmnUnlock( &s_SeliLock );
         return -1;
     }
 }
@@ -1189,16 +1183,16 @@ int  seliSelect( DWORD * pdwMs )
         return -1;
     }
 
-    LmnLock( &g_Lock );
+    LmnLock( &s_SeliLock );
     if ( !s_nodes[fd].valid )
     {
-        LmnUnlock( &g_Lock );
+        LmnUnlock( &s_SeliLock );
         return -1;
     }
 
     int nTmpState = s_nodes[fd].liState;
 
-    LmnUnlock( &g_Lock );
+    LmnUnlock( &s_SeliLock );
     return nTmpState;
 }
 
@@ -1439,7 +1433,7 @@ static void _Sock5CallBack( FdType fd, int liEvent, int error, void * context )
         return INVALID_SOCKET;
     }
 
-    CFuncLock  cLock( &g_Lock );
+    CFuncLock  cLock( &s_SeliLock );
 
     // 如果使用sock5
     if ( ptParam->bUseSock5 )
