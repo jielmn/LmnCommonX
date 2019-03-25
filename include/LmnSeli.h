@@ -140,6 +140,8 @@ typedef struct tagCnnSock5Param
 
 
 
+  int  StartSeliThread();
+  int  StopSeliThread();
 
 
 #endif

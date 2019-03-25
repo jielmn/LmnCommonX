@@ -86,7 +86,7 @@ typedef socklen_t         sockaddr_namelen;
 
 
 #include "LmnSeli.h"
-
+#include "LmnThread.h"
 
 #ifdef WIN32
 #pragma comment(lib, "Ws2_32.lib")
@@ -1496,9 +1496,68 @@ static void _Sock5CallBack( FdType fd, int liEvent, int error, void * context )
 
 /*********************** end li extension *************************/
 
+#define  MSG_SELI_SELECT    100
+
+  static LmnToolkits::Thread * s_seli_thread = 0;
+
+  class SeliMessageHandler : public LmnToolkits::MessageHandler {
+  public:
+	  void OnMessage(DWORD dwMessageId, const LmnToolkits::MessageData * pMessageData) {
+		  switch (dwMessageId)
+		  {
+
+		  case MSG_SELI_SELECT:
+		  {
+			  DWORD  dwTime = 200;
+			  seliSelect(&dwTime);
+			  s_seli_thread->PostMessage(this, MSG_SELI_SELECT);
+		  }
+		  break;
+
+		  default:
+			  break;
+		  }
+	  }
+	  
+	  BOOL CanBeFreed() { 
+		  return FALSE; 
+	  }
+  };
+
+  
+  static SeliMessageHandler   s_seli_handler;
 
 
 
+  int  StartSeliThread() {
+	  if (s_seli_thread) {
+		  return -1;
+	  }
+
+	  if (!IsSeliInited())
+		  seliInit(64);
+
+	  s_seli_thread = new LmnToolkits::Thread;
+	  int ret = s_seli_thread->Start();
+	  if (0 != ret)
+		  return ret;
+
+	  ret = s_seli_thread->PostMessage(&s_seli_handler, MSG_SELI_SELECT);
+	  if (0 != ret)
+		  return ret;
+
+	  return 0;
+  }
+
+  int  StopSeliThread() {	  
+	  if (s_seli_thread) {
+		  s_seli_thread->Stop();
+		  delete s_seli_thread;
+		  s_seli_thread = 0;
+	  }		
+	  seliEnd();
+	  return 0;
+  }
 
 
 
