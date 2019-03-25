@@ -2818,6 +2818,31 @@ BOOL CDataBuf::Read( void * pData, DWORD dwDataSize /*= -1*/ )
 	}
 }
 
+// Read() 参数没有涉及pData的长度
+BOOL CDataBuf::ReadData(void * pData, DWORD & dwDataSize) {
+	if (0 == dwDataSize) {
+		return FALSE;
+	}
+
+	if (0 == pData) {
+		return FALSE;
+	}
+
+	assert( m_dwRPos <= m_dwDataLen );
+
+	// 已经是最末
+	if ( m_dwRPos == m_dwDataLen ) {
+		dwDataSize = 0;
+		return TRUE;
+	}
+
+	DWORD  dwSize =  MIN( dwDataSize, m_dwDataLen - m_dwRPos );
+	memcpy(pData, m_pData + m_dwRPos, dwSize);
+	m_dwRPos += dwSize;
+	dwDataSize = dwSize;
+	return TRUE;
+}
+
 
 void CDataBuf::ResetReadPos()
 {

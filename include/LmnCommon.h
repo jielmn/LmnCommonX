@@ -383,8 +383,12 @@ public:
 	void Clear();
 
 	BOOL Read( void * pData, DWORD dwDataSize = -1 );                    // 从当前读位置开始读取数据(可以连续读取数据)
+	// Read() 参数没有涉及pData的长度
+	// dwDataSize数据长度，返回值为读取的长度
+	BOOL ReadData(void * pData, DWORD & dwDataSize );
+
 	void ResetReadPos();                                                 // 把读重置为0
-	BOOL SetReadPos( DWORD dwPos );                                      // 任意指定读取位置
+	BOOL SetReadPos( DWORD dwPos );                                      // 任意指定读取位置	
 
 	DWORD         GetDataLength() const;                                 // 未读的数据长度
 	const void *  GetData() const;                                       // 未读的数据

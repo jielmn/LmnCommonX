@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <time.h>
 
+#include "Inner.h"
 #include "LmnCommon.h"
 #include "LmnFile.h"
 #include "LmnSeli.h"
@@ -18,7 +19,7 @@
 #include <iterator>
 #endif
 
-#define MIN( a, b )   ( (a) < (b) ? (a) : (b) )
+//#define MIN( a, b )   ( (a) < (b) ? (a) : (b) )
 
 #ifdef WIN32
 #define MICROBLOG_LOG(f,...)           MicroblgLog( f, __VA_ARGS__ )
