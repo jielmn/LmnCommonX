@@ -223,12 +223,14 @@ int  test_http_1() {
 }
 
 int  test_ws_1() {
+#ifdef WEBSOCKET_DEBUG_FLAG
 	StartSeliThread();
 	LmnToolkits::WebSocket * s = new LmnToolkits::WebSocket;
 	s->Open("ws://localhost:8080/websocket");	
 	getchar();
 	delete s;
 	StopSeliThread();
+#endif
 	return 0;
 }
 

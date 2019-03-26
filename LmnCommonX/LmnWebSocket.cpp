@@ -2,13 +2,26 @@
 #include "LmnCommon.h"
 #include "LmnString.h"
 #include "LmnWebSocket.h"
+#include <assert.h>
 
 #define  MSG_OPEN_WEBSOCKET              1
 #define  MSG_UPGRADE_HTTP                2
-#define  MSG_READ_DATA                   3
-#define  MSG_SOCKET_CLOSE                4
+#define  MSG_READ_WEBSOCKET_DATA         3
+#define  MSG_WEBSOCKET_SOCKET_CLOSE      4
+#define  MSG_WEBSOCKET_SEND_DATA         5
 
 namespace LmnToolkits {
+
+	class WebSocketData : public MessageData {
+	public:
+		WebSocketData(const char * szData) {
+			DWORD  dwLen = strlen(szData);
+			m_Data.Append(szData, dwLen);
+		}
+
+		CDataBuf  m_Data;
+	};
+
 	void WebSocket::OnWebSocketEvent (FdType fd, int liEvent, int error, void * context) {
 		switch (liEvent)
 		{
@@ -22,13 +35,13 @@ namespace LmnToolkits {
 		case liEvRead:
 		{
 			WebSocket * pWebSocket = (WebSocket *)context;
-			pWebSocket->m_thread.PostMessage(pWebSocket, MSG_READ_DATA);
+			pWebSocket->m_thread.PostMessage(pWebSocket, MSG_READ_WEBSOCKET_DATA, 0, TRUE);
 		}
 		break;
 
 		case liEvClose: {
 			WebSocket * pWebSocket = (WebSocket *)context;
-			pWebSocket->m_thread.PostMessage(pWebSocket, MSG_SOCKET_CLOSE);
+			pWebSocket->m_thread.PostMessage(pWebSocket, MSG_WEBSOCKET_SOCKET_CLOSE);
 		}
 		break;
 
@@ -50,26 +63,27 @@ namespace LmnToolkits {
 		}
 	}
 
+#ifdef WEBSOCKET_DEBUG_FLAG
 	void WebSocket::OnOpen()  {
-#ifdef _DEBUG
 		printf("OnOpen\n");
-#endif
 	}
 
 	void WebSocket::OnClose(DWORD dwErrCode) {
-#ifdef _DEBUG
 		printf("OnClose\n");
-#endif
 	}
 
 	void WebSocket::OnChatMessage( const void * pMsg, DWORD dwMsgLen) {
-#ifdef _DEBUG
-		printf("OnChatMessage:\n");
+		printf("OnChatMessage:\n");		
 		char buf[8192] = {0};
-		STRNCPY(buf, (const char *)pMsg, sizeof(buf) );
+		DebugStream(buf, sizeof(buf), pMsg, dwMsgLen);
 		printf(buf);
-#endif
+		printf("\n");
+
+		if (0 == memcmp(pMsg, "123", 3)) {
+			Chat("456");
+		}
 	}
+#endif
 
 	int  WebSocket::Open(const char * szUrl) {
 		if ( 0 == szUrl ) {
@@ -88,6 +102,29 @@ namespace LmnToolkits {
 		m_state  = OPENNING;
 
 		m_thread.PostMessage(this, MSG_OPEN_WEBSOCKET);
+		return 0;
+	}
+
+	int  WebSocket::Chat(const char * szMsg) {
+		if (0 == szMsg) {
+			return -1;
+		}
+
+		DWORD  dwLen = strlen(szMsg);
+		if (0 == dwLen ) {
+			return -1;
+		}
+
+		// 数据太长
+		if (dwLen > 0xFFFF) {
+			return 2;
+		}
+
+		if (m_state != OPENED) {
+			return 1;
+		}
+
+		m_thread.PostMessage(this, MSG_WEBSOCKET_SEND_DATA, new WebSocketData(szMsg) );
 		return 0;
 	}
 
@@ -206,6 +243,7 @@ namespace LmnToolkits {
 	void WebSocket::ReadData() {
 		char buf[8192];
 		int len = sizeof(buf);
+		
 		liTcpRecv(m_socket, buf, &len);
 
 		while (len > 0) {
@@ -268,12 +306,7 @@ namespace LmnToolkits {
 
 		// 
 		if ( m_state == OPENED ) {
-			DWORD dwDataLen = m_buf.GetDataLength();
-			// 如果还有未处理的数据
-			if (dwDataLen > 0) {
-				OnChatMessage( m_buf.GetData(), dwDataLen );
-				m_buf.Clear();
-			}
+			ParseData();
 		}
 	}
 
@@ -283,9 +316,92 @@ namespace LmnToolkits {
 			m_socket = -1;
 		}
 		m_state = CLOSED;
+		m_buf.Clear();
+		m_msg.Clear();
+	}
+
+	void  WebSocket::ParseData() {		
+		while (TRUE) {
+
+			DWORD dwDataLen = m_buf.GetDataLength();
+			// 如果还有未处理的数据(一帧数据至少要两个字节)
+			if (dwDataLen >= 2) {
+				const BYTE * pData = (const BYTE *)m_buf.GetData();
+				BOOL  bFinished = pData[0] & 0x80;
+				BYTE  byPayloadLen = pData[1] & 0x7F;
+				if (byPayloadLen < 126) {
+					if (dwDataLen >= (DWORD)byPayloadLen + 2) {
+						OnChatMessage(pData + 2, byPayloadLen);
+						m_buf.SetReadPos(byPayloadLen + 2);
+						m_buf.Reform();
+					}
+					else {
+						break;
+					}
+				}
+				else if (byPayloadLen == 126) {
+					if (dwDataLen >= 2 + 2) {
+						WORD wPayloadLen = pData[2] << 8 | pData[3];
+						if (dwDataLen >= 2 + 2 + (DWORD)wPayloadLen) {
+							OnChatMessage(pData + 2 + 2, wPayloadLen);
+							m_buf.SetReadPos(wPayloadLen + 2 + 2);
+							m_buf.Reform();
+						}
+						else {
+							break;
+						}
+					}
+					else {
+						break;
+					}
+				}
+				else {
+					// 太长的数据，暂时不处理
+					OnClose(1);
+					Close();
+					return;
+				}
+			}
+			else {
+				break;
+			}
+		}				
+	}
+
+	void  WebSocket::Send(const void * pData, DWORD dwDataLen) {
+		CDataBuf  data;
+		if (dwDataLen > 0xFFFF) {
+			assert(0);
+			OnClose(1);
+			Close();
+			return;
+		}
+
+		data.Append("\x81", 1);
+		BYTE  byTmp = 0;
+		if ( dwDataLen < 126 ) {
+			byTmp = (BYTE)(dwDataLen | 0x80);
+			data.Append(&byTmp, 1);
+		}
+		else {
+			byTmp = (BYTE)( 0x7E | 0x80 );
+			data.Append(&byTmp, 1);
+			WORD wPayloadLen = (WORD)dwDataLen;
+			data.Append(&wPayloadLen, sizeof(WORD));
+		}
+		// 掩码
+		data.Append("\x00\x00\x00\x00", 4);
+		// 数据
+		data.Append(pData, dwDataLen);
+
+		int len = data.GetDataLength();
+		liTcpSend( m_socket, (const char *)data.GetData(), &len );
 	}
 
 	void WebSocket::OnMessage(DWORD dwMessageId, const LmnToolkits::MessageData * pMessageData) {
+		//DWORD dwCnt = m_thread.GetMessagesCount();
+		//printf("thread message count = %lu\n", dwCnt);
+
 		switch (dwMessageId)
 		{
 		case MSG_OPEN_WEBSOCKET: {
@@ -298,14 +414,20 @@ namespace LmnToolkits {
 		}
 		break;
 
-		case MSG_READ_DATA: {
+		case MSG_READ_WEBSOCKET_DATA: {
 			ReadData();
 		}
 		break;
 
-		case MSG_SOCKET_CLOSE: {
+		case MSG_WEBSOCKET_SOCKET_CLOSE: {
 			OnClose(-1);
 			Close();
+		}
+		break;
+
+		case MSG_WEBSOCKET_SEND_DATA: {
+			WebSocketData * pParam = (WebSocketData *)pMessageData;
+			Send(pParam->m_Data.GetData(), pParam->m_Data.GetDataLength());
 		}
 		break;
 

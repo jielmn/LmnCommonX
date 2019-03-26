@@ -1503,6 +1503,9 @@ static void _Sock5CallBack( FdType fd, int liEvent, int error, void * context )
   class SeliMessageHandler : public LmnToolkits::MessageHandler {
   public:
 	  void OnMessage(DWORD dwMessageId, const LmnToolkits::MessageData * pMessageData) {
+		  //DWORD dwCnt = s_seli_thread->GetMessagesCount();
+		  // printf("seli thread message count = %lu\n", dwCnt);
+
 		  switch (dwMessageId)
 		  {
 
@@ -1510,7 +1513,7 @@ static void _Sock5CallBack( FdType fd, int liEvent, int error, void * context )
 		  {
 			  DWORD  dwTime = 200;
 			  seliSelect(&dwTime);
-			  s_seli_thread->PostMessage(this, MSG_SELI_SELECT);
+			  s_seli_thread->PostDelayMessage(200, this, MSG_SELI_SELECT);
 		  }
 		  break;
 
