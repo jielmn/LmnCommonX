@@ -54,33 +54,33 @@ typedef unsigned char       BYTE;
 
 enum LMNX_ERROR_NO {
 	LMNX_OK = 0,
-	LMNX_NO_MEMORY,   
-	LMNX_WRONG_PARAMS,
-	LMNX_NOT_ENOUGH_BUFF,
-	LMNX_NOT_NUMBER,
-	LMNX_OUT_OF_RANGE,
-	LMNX_NOT_BASE64,
-	LMNX_FIND_NO_KEY,
-	LMNX_ALREADY_INITED,
-	LMNX_FAIL_OPEN_FILE,
-	LMNX_NOT_INITED,
-	LMNX_NO_SUCH_CONSOLE_MENU,
-	LMNX_WRONG_FILE_PATH_FORMAT,
-	LMNX_FAIL_CREATE_SEMPHORE,
-	LMNX_FAIL_WAIT_SEMPHORE,
-	LMNX_FAIL_RELEASE_SEMPHORE,
-	LMNX_FAIL_DESTROY_SEMPHORE,
-	LMNX_INVALID_HANDLE,
-	LMNX_NO_RESOURCE,
-	LMNX_TOO_MUCH_DELAY_TIME,
-	LMNX_INVALID_FORMAT,
-	LMNX_THREAD_RUNNING,
-	LMNX_THREAD_NOT_RUNNING,
-	LMNX_FILE_EXISTS,
-	LMNX_FOLDER_EXISTS,
-	LMNX_FILE_DOES_NOT_EXIST,
-	LMNX_SYSTEM_ERROR,
-	LMNX_UNKNOW = -1,
+	LMNX_NO_MEMORY,                                  // 无内存，动态分配内存失败
+	LMNX_WRONG_PARAMS,                               // 错误的参数
+	LMNX_NOT_ENOUGH_BUFF,                            // 缓冲区不够大
+	LMNX_NOT_NUMBER,                                 // 不是数字
+	LMNX_OUT_OF_RANGE,                               // 超出范围
+	LMNX_NOT_BASE64,                                 // 不是base64参数
+	LMNX_FIND_NO_KEY,                                // 找不到key
+	LMNX_ALREADY_INITED,                             // 已经初始化
+	LMNX_FAIL_OPEN_FILE,                             // 打开文件失败
+	LMNX_NOT_INITED,                                 // 未初始化
+	LMNX_NO_SUCH_CONSOLE_MENU,                       // 没有console菜单
+	LMNX_WRONG_FILE_PATH_FORMAT,                     // 文件路径格式错误
+	LMNX_FAIL_CREATE_SEMPHORE,                       // 创建信号量失败
+	LMNX_FAIL_WAIT_SEMPHORE,                         // 等待信号量失败
+	LMNX_FAIL_RELEASE_SEMPHORE,                      // 释放信号量失败
+	LMNX_FAIL_DESTROY_SEMPHORE,                      // 销毁信号量失败
+	LMNX_INVALID_HANDLE,                             // 无效句柄
+	LMNX_NO_RESOURCE,                                // 没有资源
+	LMNX_TOO_MUCH_DELAY_TIME,                        // 太大的delay时间
+	LMNX_INVALID_FORMAT,                             // 无效格式
+	LMNX_THREAD_RUNNING,                             // 线程已经运行
+	LMNX_THREAD_NOT_RUNNING,                         // 线程未运行
+	LMNX_FILE_EXISTS,                                // 文件已存在
+	LMNX_FOLDER_EXISTS,                              // 文件夹已存在
+	LMNX_FILE_DOES_NOT_EXIST,                        // 文件不存在
+	LMNX_SYSTEM_ERROR,                               // 系统API调用失败
+	LMNX_UNKNOW = -1,                                // 其他未知错误
 };
 
 // 用来强制宏后加引号
