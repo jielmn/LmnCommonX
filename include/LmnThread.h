@@ -25,14 +25,11 @@ namespace LmnToolkits {
 
 	class Message {
 	public:
-		Message() : m_phandler(0), m_dwMessageId(0), m_pData(0), m_bTimeTriggerd(FALSE), m_dwTime(0), m_dwPriority(0) {}
-		Message( MessageHandler * pHandler, DWORD dwMessageId, MessageData * pData, DWORD dwTriggerTime = 0, DWORD dwPriority = 0 ) : 
-		m_phandler(pHandler), m_dwMessageId(dwMessageId), m_pData(pData), m_dwPriority(dwPriority) {
-			if ( dwTriggerTime > 0 ) {
-				m_bTimeTriggerd = TRUE;
-				m_dwTime = dwTriggerTime;
-			}
-		}
+		Message() : m_phandler(0), m_dwMessageId(0), m_pData(0), m_bTimeTriggerd(FALSE), m_dwStartTime(0), m_dwDelayTime(0), m_dwPriority(0) {}
+		Message( MessageHandler * pHandler, DWORD dwMessageId, MessageData * pData, BOOL bTimeTriggered = FALSE, 
+			DWORD dwStartTime = 0, DWORD dwDelayTime = 0, DWORD dwPriority = 0 ) : 
+		m_phandler(pHandler), m_dwMessageId(dwMessageId), m_pData(pData),m_bTimeTriggerd(bTimeTriggered),
+			m_dwStartTime(dwStartTime), m_dwDelayTime(dwDelayTime), m_dwPriority(dwPriority) {}
 
 		virtual ~Message(){
 			if ( m_phandler && m_phandler->CanBeFreed() ) {
@@ -54,7 +51,8 @@ namespace LmnToolkits {
 		DWORD            m_dwMessageId;
 		MessageData *    m_pData;
 		BOOL             m_bTimeTriggerd;
-		DWORD            m_dwTime;		
+		DWORD            m_dwStartTime;		
+		DWORD            m_dwDelayTime;
 		DWORD            m_dwPriority;
 	};
 

@@ -223,7 +223,7 @@ namespace LmnToolkits {
 			assert( pMessageItem && pMessageItem->m_bTimeTriggerd );
 
 			// 时间已到
-			if ( pMessageItem->m_dwTime <= dwCurTime ) {
+			if ( dwCurTime - pMessageItem->m_dwStartTime >= pMessageItem->m_dwDelayTime ) {
 				pMessage = pMessageItem;
 				EraseArray( m_DelayMessageQueue, 0 );
 				return 0;
@@ -249,7 +249,7 @@ namespace LmnToolkits {
 
 
 	int Thread::PostMessage( MessageHandler * phandler, DWORD dwMessageID /*= THREAD_ID_CLOSE_THREAD*/, MessageData * pdata /*= 0*/, BOOL bDropSameMsg /*= FALSE*/, DWORD dwPriority /*= 0*/ ){
-		Message * pMessage = new Message( phandler, dwMessageID, pdata, 0, dwPriority );
+		Message * pMessage = new Message( phandler, dwMessageID, pdata, FALSE, 0, 0, dwPriority );
 		if ( 0 == pMessage ) {
 			return LMNX_SYSTEM_ERROR;
 		}
@@ -287,11 +287,16 @@ namespace LmnToolkits {
 
 	int Thread::PostDelayMessage( DWORD dwDelayTime, MessageHandler * phandler, DWORD dwMessageID /*= THREAD_ID_CLOSE_THREAD*/, MessageData * pdata /*= 0*/, BOOL bDropSameMsg /*= FALSE*/, DWORD dwPriority /*= 0*/){
 		if ( 0 == dwDelayTime ) {
-			return PostMessage( phandler, dwMessageID, pdata );
+			return PostMessage( phandler, dwMessageID, pdata,bDropSameMsg,dwPriority );
+		}
+
+		// 延时时间不能超过一天
+		if ( dwDelayTime > 86400000 ) {
+			return LMNX_WRONG_PARAMS;
 		}
 
 		DWORD dwCurTime = LmnGetTickCount();
-		Message * pMessage = new Message( phandler, dwMessageID, pdata, dwCurTime + dwDelayTime, dwPriority );
+		Message * pMessage = new Message( phandler, dwMessageID, pdata, TRUE, dwCurTime, dwDelayTime, dwPriority );
 		if ( 0 == pMessage ) {
 			return LMNX_SYSTEM_ERROR;
 		}
@@ -351,7 +356,9 @@ namespace LmnToolkits {
 			Message * pMessageItem = (Message *)pData;
 			assert( pMessageItem && pMessageItem->m_bTimeTriggerd );
 
-			if ( pMessage->m_dwTime < pMessageItem->m_dwTime ) {
+			int nDiff = (pMessage->m_dwStartTime + pMessage->m_dwDelayTime) - (pMessageItem->m_dwStartTime + pMessageItem->m_dwDelayTime);
+			// 两者延时触发时间的差不应超过2147483647
+			if ( nDiff < 0 ) {
 				if ( dwStart == dwMiddle ){
 					dwRet = Insert2Array( m_DelayMessageQueue, dwMiddle, pMessage );
 					break;
@@ -408,7 +415,7 @@ namespace LmnToolkits {
 			assert(pMessageItem && pMessageItem->m_bTimeTriggerd);
 
 			// 时间已到
-			if ( pMessageItem->m_dwTime <= dwCurTime ) {
+			if ( dwCurTime - pMessageItem->m_dwStartTime >= pMessageItem->m_dwDelayTime ) {
 
 				if ( pMessageItem->m_dwPriority > 0 ) {
 					if ( pMessageItem->m_dwPriority > dwMaxPriority ) {
@@ -500,7 +507,7 @@ namespace LmnToolkits {
 			assert(pMessageItem && pMessageItem->m_bTimeTriggerd);
 
 			// 时间已到
-			if (pMessageItem->m_dwTime <= dwCurTime) {
+			if ( dwCurTime - pMessageItem->m_dwStartTime >= pMessageItem->m_dwDelayTime ) {
 
 				// 如果忽略掉优先级(总是给低优先级一点机会)
 				if ( !bPriority ) {
