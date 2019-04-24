@@ -177,6 +177,25 @@ DWORD   FileConfig::ClearConfig() {
 	return 0;
 }
 
+DWORD   FileConfig::RemoveConfig(const char * szConfigName) {
+	PHashNode pNode = GetHashtableFirstNode(m_pHtable);
+	while (pNode) {
+		char * pKey = (char *)GetHashNodeKey(pNode);
+		char * pValue = (char *)pNode->pData;
+		assert(pKey && pValue);
+
+		if (0 == strcmp(szConfigName, pKey)) {
+			EraseHashtable(pNode);
+			delete[] pKey;
+			delete[] pValue;
+			return 0;
+		}
+
+		pNode = GetNextHashtableNode(pNode);
+	}
+	return 0;
+}
+
 
 
 DWORD  FileConfig::Deinit()
@@ -1072,6 +1091,31 @@ DWORD   FileConfigEx::Save() {
 
 DWORD   FileConfigEx::ClearConfig() {
 	Clear();
+	return 0;
+}
+
+DWORD  FileConfigEx::RemoveConfig(const char * szConfigName) {
+	if (0 == szConfigName) {
+		return LMNX_WRONG_PARAMS;
+	}
+
+	PListNode pNode = GetListHead(m_pList);
+	while (pNode) {
+		ConfigItem_ * pItem = (ConfigItem_ *)pNode->pData;
+		assert(pItem);
+		if (pItem->nType == LINE_TYPE_KEY_VALUE) {
+			assert(pItem->szKey && pItem->szValue);
+
+			// Èç¹ûÕÒµ½key
+			if (0 == StrICmp(pItem->szKey, szConfigName)) {
+				EraseList(m_pList, pNode);
+				ClearConfigItem_(pItem);
+				delete pItem;
+				return 0;
+			}
+		}
+		pNode = GetNextListNode(pNode);
+	}
 	return 0;
 }
 

@@ -33,6 +33,7 @@ public:
 	virtual DWORD     Save() = 0;
 
 	virtual DWORD     ClearConfig() = 0;
+	virtual DWORD     RemoveConfig(const char * szConfigName) = 0;
 };
 
 
@@ -65,6 +66,7 @@ public:
 	DWORD       Save();
 
 	DWORD     ClearConfig();
+	DWORD     RemoveConfig(const char * szConfigName);
 
 private:
 	void          Clear();
@@ -126,6 +128,7 @@ public:
 	DWORD       Save();
 
 	DWORD     ClearConfig();
+	DWORD     RemoveConfig(const char * szConfigName);
 
 private:
 	void          Clear();
