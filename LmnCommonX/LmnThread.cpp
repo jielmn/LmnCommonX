@@ -269,7 +269,7 @@ namespace LmnToolkits {
 					EraseArray(m_MessageQueue, i);
 					assert(dwSize > 0);
 					dwSize--;
-
+					// 销毁消息
 					if ( pMessageItem->CanBeFreed() ) {
 						delete pMessageItem;
 					}
@@ -328,10 +328,14 @@ namespace LmnToolkits {
 				assert(pMessageItem && pMessageItem->m_bTimeTriggerd);
 
 				// 如果定时器消息ID相同
-				if ( pMessageItem->m_dwMessageId == dwMessageID ) {
+				if ( pMessageItem->m_dwMessageId == dwMessageID ) {					
 					EraseArray( m_DelayMessageQueue, i );
 					assert(dwSize > 0);
 					dwSize--;
+					// 销毁消息
+					if ( pMessageItem->CanBeFreed() ) {
+						delete pMessageItem;
+					}
 				}
 				else {
 					i++;
