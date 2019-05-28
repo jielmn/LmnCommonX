@@ -269,6 +269,10 @@ namespace LmnToolkits {
 					EraseArray(m_MessageQueue, i);
 					assert(dwSize > 0);
 					dwSize--;
+
+					if ( pMessageItem->CanBeFreed() ) {
+						delete pMessageItem;
+					}
 				}
 				else {
 					i++;
