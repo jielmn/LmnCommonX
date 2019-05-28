@@ -470,14 +470,14 @@ int  CExcelEx::PrintChartWithTwoColumns( DWORD dwStartRowIndex, DWORD dwStartCol
 		pageSetup->Orientation = Excel::xlPortrait;
 	pageSetup->PutPaperSize(Excel::xlPaperA4);
 	pChart->SetSourceData(pRange, _variant_t(2));
-	if (0 == szTitle) {
-		if (pChart->ChartTitle)
-			pChart->ChartTitle->PutText("");
-	}
-	else {
-		if (pChart->ChartTitle)
-			pChart->ChartTitle->PutText(szTitle);
-	}	
+	//if (0 == szTitle) {
+	//	if (pChart->ChartTitle)
+	//		pChart->ChartTitle->PutText("");
+	//}
+	//else {
+	//	if (pChart->ChartTitle)
+	//		pChart->ChartTitle->PutText(szTitle);
+	//}	
 	Excel::LegendPtr lengend = pChart->GetLegend();
 	lengend->Delete();
 
@@ -539,12 +539,14 @@ int  CExcelEx::PrintChartWithMultiSeries( Series * series_data, DWORD dwSeriesCn
 	pageSetup->CenterVertically = VARIANT_TRUE;
 
 	// БъЬт
-	if (0 == szTitle) {
-		pChart->ChartTitle->PutText("");
-	}
-	else {
-		pChart->ChartTitle->PutText(szTitle);
-	}
+	//if (0 == szTitle) {
+	//	if (pChart->GetChartTitle())
+	//		pChart->ChartTitle->PutText("");
+	//}
+	//else {
+	//	if (pChart->GetChartTitle())
+	//		pChart->ChartTitle->PutText(szTitle);
+	//}
 
 	Excel::AxisPtr axe = pChart->Axes(Excel::xlValue, Excel::xlPrimary);
 	if (pdYAxeMin)
