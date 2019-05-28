@@ -236,15 +236,18 @@ int  test_ws_1() {
 
 int main()
 {
-	LmnToolkits::ThreadManager::GetInstance();
+	//LmnToolkits::ThreadManager::GetInstance();
+	//CoInitialize(NULL);
+
+	////test_http_1();
+	//test_ws_1();
+	//getchar();
+
+	//CoUninitialize();
+	//LmnToolkits::ThreadManager::GetInstance()->ReleaseInstance();
+
 	CoInitialize(NULL);
-
-	//test_http_1();
-	test_ws_1();
-	getchar();
-
-	CoUninitialize();
-	LmnToolkits::ThreadManager::GetInstance()->ReleaseInstance();
+	test_excel_1();
 
 	return 0;
 }

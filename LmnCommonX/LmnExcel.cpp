@@ -471,10 +471,12 @@ int  CExcelEx::PrintChartWithTwoColumns( DWORD dwStartRowIndex, DWORD dwStartCol
 	pageSetup->PutPaperSize(Excel::xlPaperA4);
 	pChart->SetSourceData(pRange, _variant_t(2));
 	if (0 == szTitle) {
-		pChart->ChartTitle->PutText("");
+		if (pChart->ChartTitle)
+			pChart->ChartTitle->PutText("");
 	}
 	else {
-		pChart->ChartTitle->PutText(szTitle);
+		if (pChart->ChartTitle)
+			pChart->ChartTitle->PutText(szTitle);
 	}	
 	Excel::LegendPtr lengend = pChart->GetLegend();
 	lengend->Delete();
