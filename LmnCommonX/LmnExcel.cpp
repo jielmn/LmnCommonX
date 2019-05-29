@@ -554,17 +554,20 @@ int  CExcelEx::PrintChartWithMultiSeries( Series * series_data, DWORD dwSeriesCn
 
 	Excel::SeriesCollectionPtr series = pChart->SeriesCollection();
 	DWORD  dwIndex = 0;
+	DWORD cnt = 0;
 	for ( DWORD i = 0; i < dwSeriesCnt; i++ ) {
 		if ( series_data[i].bEmpty ) {
 			continue;
 		}
 
 		Excel::SeriesPtr s;
-		if ( dwIndex > 0 ) {
+		cnt = series->Count;
+
+		if ( dwIndex >= cnt) {
 			s = series->NewSeries();
 		}
-		else {
-			s = series->Item(_variant_t(1));
+		else {			
+			s = series->Item(_variant_t(dwIndex +1));
 		}
 
 		DWORD dwEndColIndex = series_data[i].dwStartColIndex + 1;
@@ -595,13 +598,25 @@ int  CExcelEx::PrintChartWithMultiSeries( Series * series_data, DWORD dwSeriesCn
 	}
 
 	//pChart->PrintPreview();
-	pChart->PrintOut();
+	cnt = series->Count;
+	for ( DWORD i = dwIndex; i < cnt; i++ ) {
+		Excel::SeriesPtr s = series->Item(_variant_t(dwIndex + 1));
+		s->Delete();
+	}
 
+	int ret = 0;
+	try {
+		pChart->PrintOut();
+	}
+	catch (...) {
+		ret = -1;
+	}
+	
 	axe->Release();
 	pageSetup->Release();
 	pChart->Release();
 
-	return 0;
+	return ret;
 }
 
 int  CExcelEx::Save() {
