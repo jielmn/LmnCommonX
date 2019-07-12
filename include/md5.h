@@ -22,7 +22,8 @@
 extern "C" {
 #endif
 
-typedef long unsigned int uint32;
+//typedef long unsigned int uint32;
+typedef unsigned int uint32;
 typedef struct MD5Context MD5_CTX;
 
 #define md5byte unsigned char
