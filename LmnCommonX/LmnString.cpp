@@ -1678,7 +1678,7 @@ CLmnString CLmnString::Mid(DWORD dwStartIndex, DWORD dwCount /*= -1*/) {
 		return CLmnString();
 	}
 
-	if ( dwCount == -1 ) {
+	if ( dwCount == (DWORD)-1 ) {
 		dwCount = m_dwStrLen - dwStartIndex;
 	}
 	else if (dwStartIndex + dwCount > m_dwStrLen) {

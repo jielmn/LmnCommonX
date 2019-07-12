@@ -433,7 +433,7 @@ namespace LmnToolkits {
 					}
 				}
 				else {
-					if (dwDelayItemIndex == -1) {
+					if (dwDelayItemIndex == (DWORD)-1) {
 						dwDelayItemIndex = i;
 						dwMaxPriority = pMessageItem->m_dwPriority;
 						pMessage = pMessageItem;
@@ -460,7 +460,7 @@ namespace LmnToolkits {
 				}
 			}
 			else {
-				if ( dwDelayItemIndex == -1 && dwItemIndex == -1 ) {
+				if ( dwDelayItemIndex == (DWORD)-1 && dwItemIndex == (DWORD)-1 ) {
 					dwItemIndex = i;
 					dwMaxPriority = pMessageItem->m_dwPriority;
 					pMessage = pMessageItem;
@@ -469,22 +469,22 @@ namespace LmnToolkits {
 		}
 
 		if ( dwMaxPriority > 0 ) {
-			if ( dwItemIndex != -1 ) {
+			if ( dwItemIndex != (DWORD)-1 ) {
 				EraseArray(m_MessageQueue, dwItemIndex);
 				return 0;
 			}
 			else {
-				assert( dwDelayItemIndex != -1 );
+				assert( dwDelayItemIndex != (DWORD)-1 );
 				EraseArray(m_DelayMessageQueue, dwDelayItemIndex);
 				return 0;
 			}
 		}
 		else {
-			if (dwDelayItemIndex != -1) {
+			if (dwDelayItemIndex != (DWORD)-1) {
 				EraseArray(m_DelayMessageQueue, dwDelayItemIndex);
 				return 0;
 			}
-			else if (dwItemIndex != -1) {
+			else if (dwItemIndex != (DWORD)-1) {
 				EraseArray(m_MessageQueue, dwItemIndex);
 				return 0;
 			}
@@ -532,7 +532,7 @@ namespace LmnToolkits {
 						}
 					}
 					else {
-						if (dwDelayItemIndex == -1) {
+						if (dwDelayItemIndex == (DWORD)-1) {
 							dwDelayItemIndex = i;
 							dwMaxPriority = pMessageItem->m_dwPriority;
 							pMessage = pMessageItem;
@@ -565,7 +565,7 @@ namespace LmnToolkits {
 					}
 				}
 				else {
-					if (dwDelayItemIndex == -1 && dwItemIndex == -1) {
+					if (dwDelayItemIndex == (DWORD)-1 && dwItemIndex == (DWORD)-1) {
 						dwItemIndex = i;
 						dwMaxPriority = pMessageItem->m_dwPriority;
 						pMessage = pMessageItem;
@@ -575,22 +575,22 @@ namespace LmnToolkits {
 		}
 
 		if (dwMaxPriority > 0) {
-			if (dwItemIndex != -1) {
+			if (dwItemIndex != (DWORD)-1) {
 				EraseArray(m_MessageQueue, dwItemIndex);
 				return 0;
 			}
 			else {
-				assert(dwDelayItemIndex != -1);
+				assert(dwDelayItemIndex != (DWORD)-1);
 				EraseArray(m_DelayMessageQueue, dwDelayItemIndex);
 				return 0;
 			}
 		}
 		else {
-			if (dwDelayItemIndex != -1) {
+			if (dwDelayItemIndex != (DWORD)-1) {
 				EraseArray(m_DelayMessageQueue, dwDelayItemIndex);
 				return 0;
 			}
-			else if (dwItemIndex != -1) {
+			else if (dwItemIndex != (DWORD)-1) {
 				EraseArray(m_MessageQueue, dwItemIndex);
 				return 0;
 			}
