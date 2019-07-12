@@ -798,7 +798,7 @@ void  CHttpTransfer::OnEventRead( )
                     WORD wPort;
                     std::string strPath;
                     BOOL bHasSlash = FALSE;
-                    BOOL bHttps    = FALSE;
+                    // BOOL bHttps    = FALSE;
                     BOOL bUseSsl   = FALSE;
                     CHttp::ParseUrl( pResponse->GetLocation(), strHost, wPort, strPath, &bHasSlash, &bUseSsl );
 
@@ -1300,7 +1300,7 @@ static int socket_recv( void * socket, void * data, size_t length, int * pbBlock
         *pbBlocked = 0;
     }
 
-    if ( 0 == liTcpRecv( (int)socket, (char *)data, (int *)&length ) )
+    if ( 0 == liTcpRecv( (int)(long)socket, (char *)data, (int *)&length ) )
     {
         if ( 0 == length && pbBlocked )
         {
@@ -1321,7 +1321,7 @@ static int socket_send( void * socket, const void * data, size_t length, int * p
         *pbBlocked = 0;
     }
 
-    if ( 0 == liTcpSend( (int)socket, (const char *)data, (int *)&length ) )
+    if ( 0 == liTcpSend( (int)(long)socket, (const char *)data, (int *)&length ) )
     {
         if ( 0 == length && pbBlocked )
         {
@@ -1337,7 +1337,7 @@ static int socket_send( void * socket, const void * data, size_t length, int * p
 
 static int close_socket( void * socket )
 {
-    return liClose( (int)socket );
+    return liClose( (int)(long)socket );
 }
 
 
@@ -1438,7 +1438,7 @@ void  CHttpTransfer::BeginTransaction( CHttpTransaction * pTransaction )
         if ( CHttpRequest::HTTP_CONTENT_TYPE_NORMAL == request.GetContentType() )
         {
             char szContentLength[256] = { 0 };
-            sprintf( szContentLength, "%u", request.GetData().length() );
+            sprintf( szContentLength, "%u", (unsigned int)request.GetData().length() );
             request["Content-Length"] = szContentLength;
         }
         // 表单形式
@@ -1450,7 +1450,7 @@ void  CHttpTransfer::BeginTransaction( CHttpTransaction * pTransaction )
 
             // 计算所有表单的长度
             char szContentLength[256] = { 0 };
-            sprintf( szContentLength, "%u", dwContentLen );
+            sprintf( szContentLength, "%u", (unsigned int)dwContentLen );
             request["Content-Length"] = szContentLength;
             //
 
