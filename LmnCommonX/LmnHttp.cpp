@@ -473,7 +473,7 @@ void  CHttpTransfer::Step()
         // Ω‚Œˆ ß∞‹
         if ( (DWORD)-1 == m_cPeerAddr.m_dwServerIp )
         {
-            OnEventClose();
+            OnEventClose(-1);
         }
         else
         {
@@ -1896,12 +1896,24 @@ bool  CHttp::ParseUrl( const std::string & strUrl, std::string & strHost, WORD &
     // URL–Œ»Á: [url]
     if ( std::string::npos == dwSlashPos )
     {
-        strHost = strUrlCopy;
         strPath = "/";
         if ( pHasSlash )
         {
             *pHasSlash = FALSE;
         }
+
+		std::string strAddr = strUrlCopy;
+		std::string::size_type dwColon = strAddr.find_first_of(":");
+		if (std::string::npos == dwColon)
+		{
+			strHost = strAddr;
+			return true;
+		}
+
+		strHost = strAddr.substr(0, dwColon);
+		DWORD dwTmp = 0;
+		sscanf(strAddr.substr(dwColon + 1).c_str(), " %lu", &dwTmp);
+		wPort = (WORD)dwTmp;
         return true;
     }
 

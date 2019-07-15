@@ -301,7 +301,7 @@ static  SelectChoiceCb   s_pfnSelect          = 0;
 static  PList            s_pMenusList         = 0;
 
 
-void clean_stdin()
+static void clean_stdin()
 {
 	int c;
 	do {
