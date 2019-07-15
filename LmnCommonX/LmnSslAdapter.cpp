@@ -1414,7 +1414,9 @@ namespace lmn_base
 
             if (ssl_) 
             {
-                //SSL_free(ssl_);           // 如果放开注释，会崩溃，不知道如何解决
+#if SSL_free_FLAG
+                SSL_free(ssl_);
+#endif
                 ssl_ = NULL;
             }
 

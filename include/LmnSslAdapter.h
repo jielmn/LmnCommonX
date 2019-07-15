@@ -1,6 +1,8 @@
 #ifndef  _LMN_SSL_ADAPTER_
 #define  _LMN_SSL_ADAPTER_
 
+// 如果放开SSL_free，会崩溃，不知道如何解决
+#define SSL_free_FLAG     0           // 1.打开  0.关闭
 
 namespace  lmn_base
 {
