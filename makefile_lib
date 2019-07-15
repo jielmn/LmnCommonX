@@ -3,7 +3,7 @@
 # ==============================================================
 #              请修改这部分的内容
 # omit .o  包括完整的路径，如 $(BASE)/t1 $(CALL)/call
-OBJS            := LmnCommonX/LmnCommon LmnCommonX/LmnConfig LmnCommonX/LmnContainer LmnCommonX/LmnLog LmnCommonX/LmnString LmnCommonX/LmnThread LmnCommonX/md5c LmnCommonX/LmnHttp
+OBJS            := LmnCommonX/LmnCommon LmnCommonX/LmnConfig LmnCommonX/LmnContainer LmnCommonX/LmnLog LmnCommonX/LmnString LmnCommonX/LmnThread LmnCommonX/md5c LmnCommonX/LmnHttp LmnCommonX/LmnFile LmnCommonX/LmnSeli LmnCommonX/LmnSslAdapter LmnCommonX/Inner
 
 
 # 宏定义

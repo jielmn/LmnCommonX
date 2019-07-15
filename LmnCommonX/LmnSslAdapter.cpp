@@ -16,6 +16,7 @@
 #include "openssl/ssl.h"
 #include "openssl/err.h"
 #include "openssl/x509v3.h"
+#include <unistd.h>
 #endif
 
 #include <assert.h>
@@ -231,7 +232,7 @@ static int socket_read(BIO* b, char* out, int outl)
     }
     else
     {
-        result = ::recv( (int)socket, out, outl, 0 );
+        result = ::recv( (int)(long)socket, out, outl, 0 );
         nError = errno;
     }
 
@@ -287,7 +288,7 @@ static int socket_write(BIO* b, const char* in, int inl)
     }
     else
     {
-        result = ::send( (int)socket, in, inl, 0 );
+        result = ::send( (int)(long)socket, in, inl, 0 );
         nError = errno;
     }
 
@@ -1436,7 +1437,7 @@ namespace lmn_base
             }
             else if ( (void *)-1 != m_socket )
             {
-                ::close( (int)m_socket );
+                ::close( (int)(long)m_socket );
                 m_socket = (void *)-1;
             }
 

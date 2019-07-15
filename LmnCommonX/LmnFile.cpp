@@ -630,7 +630,7 @@ static  BOOL   CopyFile_ ( const F_CHAR * old_path, const F_CHAR * new_path, BOO
 static BOOL TraverseCopyFile_( const F_CHAR * full_path, BOOL bFolder, const F_CHAR * file_name, void * pParam0, void * pParam1 )
 {
 	const F_CHAR * new_path   = (const F_CHAR *)pParam0;
-	BOOL           bOverWrite = (BOOL)pParam1;
+	BOOL           bOverWrite = (BOOL)(long)pParam1;
 
 	F_CHAR  new_sub_path[LMN_MAX_FILE_PATH];
 #ifdef WIN32
@@ -714,7 +714,7 @@ static  BOOL   MoveFile_ ( const F_CHAR * old_path, const F_CHAR * new_path, BOO
 static BOOL TraverseMoveFile_( const F_CHAR * full_path, BOOL bFolder, const F_CHAR * file_name, void * pParam0, void * pParam1 )
 {
 	const F_CHAR * new_path   = (const F_CHAR *)pParam0;
-	BOOL           bOverWrite = (BOOL)pParam1;
+	BOOL           bOverWrite = (BOOL)(long)pParam1;
 
 	F_CHAR  new_sub_path[LMN_MAX_FILE_PATH];
 #ifdef WIN32

@@ -27,7 +27,7 @@ enum  MenuIndex {
 **********************************/
 
 DWORD OnSelectChoice( ConsoleMenuHandle hMenu, const void * pArg, const char * szChoice ) {
-	int e = (int)pArg;
+	int e = (int)(long)pArg;
 
 	if (0 == strcmp(szChoice, "1")) {
 		return 0;
@@ -55,7 +55,7 @@ DWORD OnSelectChoice( ConsoleMenuHandle hMenu, const void * pArg, const char * s
 }
 
 void OnHandleChoice( ConsoleMenuHandle hMenu, const void * pArg, DWORD dwIndex ) {
-	int e = (int)pArg;
+	int e = (int)(long)pArg;
 
 	if ( e == MENU_HTTP ) {
 		// visiting www.baidu.com
@@ -86,7 +86,7 @@ void OnHandleChoice( ConsoleMenuHandle hMenu, const void * pArg, DWORD dwIndex )
 			fgets(szWebSite, sizeof(szWebSite), stdin);
 			StrTrim(szWebSite);
 			CHttp * pHttp = CHttp::GetInstance();
-			CHAR  szWebSiteHttps[256];
+			char  szWebSiteHttps[256];
 			SNPRINTF(szWebSiteHttps, sizeof(szWebSiteHttps), "http://%s", szWebSite);
 			pHttp->Get(szWebSiteHttps);
 		}
