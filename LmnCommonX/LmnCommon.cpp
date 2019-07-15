@@ -282,7 +282,13 @@ void   LmnSleep( DWORD dwMiliSeconds )         //单位：毫秒
 
 /************************* 简略命令行菜单   ********************************/
 #define MAX_CONSOLE_MENU_NAME_SIZE             80
+
+#ifdef WIN32
 #define CONSOLE_CLEAR()                        DO_ONCE( system("cls"); )
+#else
+#define CONSOLE_CLEAR()                        DO_ONCE( system("clear"); )
+#endif
+
 #define CONSOLE_LINE_WIDTH                     80
 #define MAX_CONSOLE_CHOICE_BUF_SIZE            1024
 
