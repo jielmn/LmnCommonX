@@ -1946,7 +1946,14 @@ bool  CHttp::ParseUrl( const std::string & strUrl, std::string & strHost, WORD &
 // 找到一个用于传输http request的transfer object，不使用sock5代理
 CHttpTransfer *  CHttp::GetTransfer( const std::string & strHost, WORD wPort, BOOL bUseSsl )
 {
+#ifdef	__x86_64__
     DWORD dwIp = inet_addr( strHost.c_str() );
+	if ( dwIp == 0xFFFFFFFF ) {
+		dwIp = (DWORD)-1;
+	}
+#else
+	DWORD dwIp = inet_addr(strHost.c_str());
+#endif
     std::vector<CHttpTransfer *>::iterator it;
     CSockAddr  cAddr( dwIp, wPort, strHost );
 
