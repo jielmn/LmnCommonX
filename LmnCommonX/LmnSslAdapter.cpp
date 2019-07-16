@@ -1540,16 +1540,22 @@ namespace lmn_base
                     {
                         ext_str = meth->d2i(NULL, ext_value_data, extension->value->length);
                     }
-
-                    STACK_OF(CONF_VALUE)* value = meth->i2v(meth, ext_str, NULL);
-                    for (int j = 0; j < sk_CONF_VALUE_num(value); ++j) 
-                    {
-                        CONF_VALUE* nval = sk_CONF_VALUE_value(value, j);
-                        if (!strcmp(nval->name, "DNS") && !strcmp(nval->value, host)) 
-                        {
-                            ok = true;
-                            break;
-                        }
+                    
+					// 内存不知如何释放(meth->i2v)，下面代码注释掉
+                    //STACK_OF(CONF_VALUE)* value = meth->i2v(meth, ext_str, NULL);
+                    //for (int j = 0; j < sk_CONF_VALUE_num(value); ++j) 
+                    //{
+                    //    CONF_VALUE* nval = sk_CONF_VALUE_value(value, j);
+                    //    if (!strcmp(nval->name, "DNS") && !strcmp(nval->value, host)) 
+                    //    {
+                    //        ok = true;
+                    //        break;
+                    //    }
+                    //}
+                                        
+					// 释放内存(ASN1_item_d2i)
+                    if (meth->it) {
+                         ASN1_item_free( (ASN1_VALUE*)ext_str, ASN1_ITEM_ptr(meth->it) );
                     }
                 }
                 if (ok)
