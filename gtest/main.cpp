@@ -13,7 +13,9 @@
 #include "md5.h"
 #include "LmnTelSvr.h"
 #include "gtest/gtest.h"
+#ifdef WIN32
 #include "XUnzip.h"
+#endif
 
 TEST( String, StrTrim )
 {
@@ -1424,6 +1426,7 @@ TEST(MD5, MD5) {
 	ASSERT_EQ(0, memcmp("\xe3\x5c\xf7\xb6\x64\x49\xdf\x56\x5f\x93\xc6\x07\xd5\xa8\x1d\x09", digest, 16));
 }
 
+#ifdef WIN32
 TEST(UNZIP, UNZIP) {
 	HZIP hz = 0;
 	ZRESULT ret = 0;
@@ -1432,9 +1435,8 @@ TEST(UNZIP, UNZIP) {
 	DWORD  dwSize = 0;
 	BYTE  data[8192];
 
-#ifdef WIN32
+
 	hz = OpenZip( "../stuff/test_1.zip", 0, 2 );
-#endif
 	ASSERT_NE(hz, INVALID_HANDLE_VALUE);
 
 	// first file
@@ -1489,7 +1491,7 @@ TEST(UNZIP, UNZIP) {
 	ret = CloseZip(hz);
 	ASSERT_EQ(ret, 0);
 }
-
+#endif
 
 
 
