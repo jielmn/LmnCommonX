@@ -13,6 +13,7 @@
 #include "md5.h"
 #include "LmnTelSvr.h"
 #include "gtest/gtest.h"
+#include "XUnzip.h"
 
 TEST( String, StrTrim )
 {
@@ -1290,7 +1291,6 @@ TEST( MISC, COMMON )
 
 
 
-
 LmnToolkits::Thread *  g_pMainThread = 0;
 
 class MyMessageHandlerMain : public LmnToolkits::MessageHandler {
@@ -1423,6 +1423,80 @@ TEST(MD5, MD5) {
 
 	ASSERT_EQ(0, memcmp("\xe3\x5c\xf7\xb6\x64\x49\xdf\x56\x5f\x93\xc6\x07\xd5\xa8\x1d\x09", digest, 16));
 }
+
+TEST(UNZIP, UNZIP) {
+	HZIP hz = 0;
+	ZRESULT ret = 0;
+	ZIPENTRY ze;
+	int i;
+	DWORD  dwSize = 0;
+	BYTE  data[8192];
+
+#ifdef WIN32
+	hz = OpenZip( "../stuff/test_1.zip", 0, 2 );
+#endif
+	ASSERT_NE(hz, INVALID_HANDLE_VALUE);
+
+	// first file
+	ret = FindZipItem(hz, "123.txt", true, &i, &ze);
+	ASSERT_EQ(ret, 0);
+
+	dwSize = ze.unc_size;
+	ASSERT_EQ(dwSize, 6);
+
+	ret = UnzipItem(hz, i, data, sizeof(data), 3);
+	if (ret == ZR_MORE) {
+		ret = 0;
+	}
+	ASSERT_EQ(ret, 0);
+
+	ret = memcmp(data, "123456", 6);
+	ASSERT_EQ(ret, 0);
+
+	// second file
+	ret = FindZipItem(hz, "abc.txt", true, &i, &ze);
+	ASSERT_EQ(ret, 0);
+
+	dwSize = ze.unc_size;
+	ASSERT_EQ(dwSize, 26);
+
+	ret = UnzipItem(hz, i, data, sizeof(data), 3);
+	if (ret == ZR_MORE) {
+		ret = 0;
+	}
+	ASSERT_EQ(ret, 0);
+
+	ret = memcmp(data, "abcdefghijklmnopqrstuvwxyz", 26);
+	ASSERT_EQ(ret, 0);
+
+	// third file
+	ret = FindZipItem(hz, "sub/hello.txt", true, &i, &ze);
+	ASSERT_EQ(ret, 0);
+
+	dwSize = ze.unc_size;
+	ASSERT_EQ(dwSize, 12);
+
+	ret = UnzipItem(hz, i, data, sizeof(data), 3);
+	if (ret == ZR_MORE) {
+		ret = 0;
+	}
+	ASSERT_EQ(ret, 0);
+
+	ret = memcmp(data, "hello world!", 12);
+	ASSERT_EQ(ret, 0);
+
+
+	ret = CloseZip(hz);
+	ASSERT_EQ(ret, 0);
+}
+
+
+
+
+
+
+
+
 
 int main(int argc, char* argv[])
 {
