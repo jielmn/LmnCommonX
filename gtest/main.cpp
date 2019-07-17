@@ -932,8 +932,6 @@ TEST( STRING, LMNSTRING )
 	ASSERT_EQ('y', d.GetAt(1));
 	ASSERT_EQ('z', d.GetAt(2));
 	ASSERT_EQ('1', d.GetAt(3));
-
-	char a = d[0];
 }
 
 TEST( STRING, SPLIT )
