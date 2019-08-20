@@ -9,6 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gtest", "gtest\gtest.vcxpro
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "test\test.vcxproj", "{7F38D662-F3A5-4809-9FDB-14D1AF6F5C15}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MfcTest", "MfcTest\MfcTest.vcxproj", "{4C623C06-196B-40AB-8F43-04C62B7FBB1D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -37,6 +39,14 @@ Global
 		{7F38D662-F3A5-4809-9FDB-14D1AF6F5C15}.Release|Win32.Build.0 = Release|Win32
 		{7F38D662-F3A5-4809-9FDB-14D1AF6F5C15}.Release|x64.ActiveCfg = Release|x64
 		{7F38D662-F3A5-4809-9FDB-14D1AF6F5C15}.Release|x64.Build.0 = Release|x64
+		{4C623C06-196B-40AB-8F43-04C62B7FBB1D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4C623C06-196B-40AB-8F43-04C62B7FBB1D}.Debug|Win32.Build.0 = Debug|Win32
+		{4C623C06-196B-40AB-8F43-04C62B7FBB1D}.Debug|x64.ActiveCfg = Debug|x64
+		{4C623C06-196B-40AB-8F43-04C62B7FBB1D}.Debug|x64.Build.0 = Debug|x64
+		{4C623C06-196B-40AB-8F43-04C62B7FBB1D}.Release|Win32.ActiveCfg = Release|Win32
+		{4C623C06-196B-40AB-8F43-04C62B7FBB1D}.Release|Win32.Build.0 = Release|Win32
+		{4C623C06-196B-40AB-8F43-04C62B7FBB1D}.Release|x64.ActiveCfg = Release|x64
+		{4C623C06-196B-40AB-8F43-04C62B7FBB1D}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
