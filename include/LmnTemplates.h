@@ -2,6 +2,7 @@
 #define  _LEMON_TEMPLATES_2017_09_08_
 
 #include "LmnCommon.h"
+#include <vector>
 
 /*******************************************************************************/
 // 功能: 查看数字(char|unsigned char|short|unsigned short|int|unsigned int等
@@ -251,6 +252,18 @@ private:
 	T        m_items[M];
 	BOOL     m_bUsed[M];                // 对应的items是否被使用(未被使用的，可以作为空间存储新的item)
 };
+
+
+// templates
+template <class T>
+void VectorClear(std::vector<T> & v) {
+	typedef std::vector<T>::iterator v_it;
+	v_it it;
+	for (it = v.begin(); it != v.end(); it++) {
+		delete *it;
+	}
+	v.clear();
+}
 
 
 #endif
