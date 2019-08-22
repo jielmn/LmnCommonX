@@ -401,6 +401,12 @@ int  Utf8Stream2UnicodeStream( IN const BYTE * pUtf8, IN DWORD dwUtf8Size,
 // %t           星期一或者今天
 // %T           周一或者今天
 char * LmnFormatTime(char * szTime, DWORD dwTimeSize, time_t t, const char * szFormat = 0);
+
+// 今天的零点时间
+time_t  GetTdZeroTime();
+
+// 任意时间的当天零点时间
+time_t  GetAdZeroTime(time_t);
 /*********************  END 时间转换  *******************/
 
 

@@ -2883,7 +2883,34 @@ char * LmnFormatTime(char * szTime, DWORD dwTimeSize, time_t t, const char * szF
 }
 
 
+// 今天的零点时间
+time_t  GetTdZeroTime() {
+	time_t now = time(0);
+	return GetAdZeroTime(now);
+}
 
+// 任意时间的当天零点时间
+time_t  GetAdZeroTime(time_t t) {
+	struct tm tmp;
+#ifndef WIN32
+	struct tm * p = 0;
+#endif 
+
+#ifdef WIN32
+	localtime_s(&tmp, &t);
+#else
+	p = localtime(&t);
+	if (p) {
+		memcpy(&tmp, p, sizeof(struct tm));
+	}
+#endif
+
+	tmp.tm_hour = 0;
+	tmp.tm_min = 0;
+	tmp.tm_sec = 0;
+
+	return mktime(&tmp);
+}
 
 
 

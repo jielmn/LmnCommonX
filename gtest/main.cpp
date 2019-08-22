@@ -1564,6 +1564,12 @@ TEST(TIME, TIME) {
 
 	LmnFormatTime(szTime, sizeof(szTime), t, "%%%Y-%m-%d %H:%M:%S %p%%");
 	ASSERT_EQ(strcmp(szTime, "%2019-08-22 09:54:00 AM%"), 0);
+
+	time_t t1 = GetAdZeroTime(t);
+	ASSERT_EQ( t1, 1566403200);
+
+	LmnFormatTime(szTime, sizeof(szTime), t1);
+	ASSERT_EQ(strcmp(szTime, "2019-08-22 00:00:00"), 0);
 }
 
 
