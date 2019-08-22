@@ -2686,7 +2686,18 @@ char * LmnFormatTime(char * szTime, DWORD dwTimeSize, time_t t, const char * szF
 		return szTime;
 
 	struct tm  tmp;
+#ifndef WIN32
+	struct tm * p = 0;
+#endif
+
+#ifdef WIN32
 	localtime_s(&tmp, &t);
+#else
+	p = localtime(&t);
+	if (p) {
+		memcpy(&tmp, p, sizeof(struct tm));
+	}
+#endif
 
 	// 年-月-日 时:分:秒
 	if ( 0 == szFormat ) {
@@ -2754,7 +2765,15 @@ char * LmnFormatTime(char * szTime, DWORD dwTimeSize, time_t t, const char * szF
 
 	time_t now = time(0);
 	struct tm  tmp1;
+
+#ifdef WIN32
 	localtime_s(&tmp1, &now);
+#else
+	p = localtime(&now);
+	if (p) {
+		memcpy(&tmp1, p, sizeof(struct tm));
+	}
+#endif
 
 	BOOL bToday = FALSE;
 	// 如果年月日相同，认为是今天
