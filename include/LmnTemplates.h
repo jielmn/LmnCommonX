@@ -257,7 +257,7 @@ private:
 // templates
 template <class T>
 void VectorClear(std::vector<T> & v) {
-	typedef std::vector<T>::iterator v_it;
+	typedef typename std::vector<T>::iterator v_it;
 	v_it it;
 	for (it = v.begin(); it != v.end(); it++) {
 		delete *it;
