@@ -1564,6 +1564,12 @@ TEST(TIME, TIME) {
 
 	LmnFormatTime(szTime, sizeof(szTime), t, "%%%Y-%m-%d %H:%M:%S %p%%");
 	ASSERT_EQ(strcmp(szTime, "%2019-08-22 09:54:00 AM%"), 0);
+
+	LmnFormatTime(szTime, sizeof(szTime), t, "%Y-%m-%d %H:%M:%S(%n)");
+	ASSERT_EQ(strcmp(szTime, "2019-08-22 09:54:00(周四)"), 0);
+
+	LmnFormatTime(szTime, sizeof(szTime), t, "%Y-%m-%d %H:%M:%S(%N)");
+	ASSERT_EQ(strcmp(szTime, "2019-08-22 09:54:00(星期四)"), 0);
 }
 
 

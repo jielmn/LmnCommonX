@@ -394,6 +394,12 @@ int  Utf8Stream2UnicodeStream( IN const BYTE * pUtf8, IN DWORD dwUtf8Size,
 // %X           14:32:18
 // %y           11          两位数表示的年（00 - 99） 支持#
 // %Y           2011        年 支持#
+
+// 增加的，可能需要中文的星期表示
+// %n           星期一
+// %N           周一
+// %t           星期一或者今天
+// %T           周一或者今天
 char * LmnFormatTime(char * szTime, DWORD dwTimeSize, time_t t, const char * szFormat = 0);
 /*********************  END 时间转换  *******************/
 

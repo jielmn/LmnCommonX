@@ -2706,6 +2706,10 @@ char * LmnFormatTime(char * szTime, DWORD dwTimeSize, time_t t, const char * szF
 		                         "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
 	const char * szWeek[7] = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
 	const char * szWeek_s[7] = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
+
+	const char * szWeek_cn[7] = { "星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六" };
+	const char * szWeek_cns[7] = { "周日", "周一", "周二", "周三", "周四", "周五", "周六" };
+
 	// AM OR PM
 	BOOL bAm = tmp.tm_hour < 12 ? TRUE : FALSE;
 	// 12小时制的小时
@@ -2747,6 +2751,16 @@ char * LmnFormatTime(char * szTime, DWORD dwTimeSize, time_t t, const char * szF
 
 	char szYDay[64] = { 0 };
 	SNPRINTF(szYDay, sizeof(szYDay), "%03d", tmp.tm_yday + 1);
+
+	time_t now = time(0);
+	struct tm  tmp1;
+	localtime_s(&tmp1, &now);
+
+	BOOL bToday = FALSE;
+	// 如果年月日相同，认为是今天
+	if ( tmp.tm_year == tmp1.tm_year && tmp.tm_mon == tmp1.tm_mon && tmp.tm_mday == tmp1.tm_mday) {
+		bToday = TRUE;
+	}
 
 	CLmnString  strRet;
 	for ( DWORD i = 0; i < dwFormatLen; i++ ) {
@@ -2816,6 +2830,18 @@ char * LmnFormatTime(char * szTime, DWORD dwTimeSize, time_t t, const char * szF
 					break;
 				case '%':
 					strRet += '%';
+					break;
+				case 'n':
+					strRet += szWeek_cns[tmp.tm_wday];
+					break;
+				case 'N':
+					strRet += szWeek_cn[tmp.tm_wday];
+					break;
+				case 't':
+					strRet += bToday ? "今天" : szWeek_cns[tmp.tm_wday];
+					break;
+				case 'T':
+					strRet += bToday ? "今天" : szWeek_cn[tmp.tm_wday];
 					break;
 				default:
 					break;
