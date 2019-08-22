@@ -143,6 +143,14 @@ public:
 	CLmnString & operator += ( int n );
 	CLmnString   operator +  (DWORD n);
 	CLmnString & operator += (DWORD n);
+	CLmnString   operator +  (char ch);
+	CLmnString & operator += (char ch);
+	CLmnString   operator +  (BYTE by);
+	CLmnString & operator += (BYTE by);
+	CLmnString   operator +  (WORD w);
+	CLmnString & operator += (WORD w);
+	CLmnString   operator +  (short s);
+	CLmnString & operator += (short s);
 
 	operator char *() const;
 

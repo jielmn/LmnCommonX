@@ -4,6 +4,7 @@
 #include "LmnContainer.h"
 #include "LmnString.h"
 #include "LmnTemplates.h"
+#include <time.h>
 
 #define IGNORED_DIMENSION                  (0.000001f)
 #define IS_FLOAT_ZEOR( n )                 ( (n) >= -IGNORED_DIMENSION && (n) <= IGNORED_DIMENSION )
@@ -2673,6 +2674,172 @@ int  Utf8Stream2UnicodeStream( IN const BYTE * pUtf8, IN DWORD dwUtf8Size,
 
 
 /****************** end unicode和utf-8转换 **************************/
+
+
+
+/*********************  时间转换  ***********************/
+char * LmnFormatTime(char * szTime, DWORD dwTimeSize, time_t t, const char * szFormat /*= 0*/) {
+	if (0 == szTime)
+		return 0;
+
+	if (0 == dwTimeSize)
+		return szTime;
+
+	struct tm  tmp;
+	localtime_s(&tmp, &t);
+
+	// 年-月-日 时:分:秒
+	if ( 0 == szFormat ) {
+		SNPRINTF( szTime, dwTimeSize, "%04d-%02d-%02d %02d:%02d:%02d", tmp.tm_year + 1900,
+			tmp.tm_mon + 1, tmp.tm_mday, tmp.tm_hour, tmp.tm_min, tmp.tm_sec);
+		return szTime;
+	}
+
+	DWORD  dwFormatLen = strlen(szFormat);
+	if ( 0 == dwFormatLen ) {
+		return szTime;
+	}
+
+	const char * szMon[12] = { "January", "February", "March", "April", "May", "June",
+							   "July", "August", "September", "October", "November", "December" };
+	const char * szMon_s[12] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+		                         "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+	const char * szWeek[7] = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
+	const char * szWeek_s[7] = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
+	// AM OR PM
+	BOOL bAm = tmp.tm_hour < 12 ? TRUE : FALSE;
+	// 12小时制的小时
+	int ih = tmp.tm_hour;
+	if (!bAm) {
+		ih -= 12;
+	}	
+	
+	char szDate[64] = { 0 };
+	SNPRINTF( szDate, sizeof(szDate), "%02d/%02d/%02d", tmp.tm_mon + 1, tmp.tm_mday, 
+		     (tmp.tm_year + 1900) % 100);
+
+	char sztime[64] = { 0 };
+	SNPRINTF(sztime, sizeof(sztime), "%02d:%02d:%02d", tmp.tm_hour, tmp.tm_min, tmp.tm_sec);
+
+	char szYear[64] = { 0 };
+	SNPRINTF(szYear, sizeof(szYear), "%04d", tmp.tm_year + 1900 );
+
+	char year[64] = { 0 };
+	SNPRINTF(year, sizeof(year), "%02d", (tmp.tm_year + 1900) % 100 );
+
+	char szMonth[64] = { 0 };
+	SNPRINTF(szMonth, sizeof(szMonth), "%02d", tmp.tm_mon + 1);
+
+	char szDay[64] = { 0 };
+	SNPRINTF(szDay, sizeof(szDay), "%02d", tmp.tm_mday);
+
+	char szHour[64] = { 0 };
+	SNPRINTF(szHour, sizeof(szHour), "%02d", tmp.tm_hour);
+
+	char szIHour[64] = { 0 };
+	SNPRINTF(szIHour, sizeof(szIHour), "%02d", ih);
+
+	char szMinute[64] = { 0 };
+	SNPRINTF(szMinute, sizeof(szMinute), "%02d", tmp.tm_min);
+
+	char szSecond[64] = { 0 };
+	SNPRINTF(szSecond, sizeof(szSecond), "%02d", tmp.tm_sec);
+
+	char szYDay[64] = { 0 };
+	SNPRINTF(szYDay, sizeof(szYDay), "%03d", tmp.tm_yday + 1);
+
+	CLmnString  strRet;
+	for ( DWORD i = 0; i < dwFormatLen; i++ ) {
+		char ch = szFormat[i];
+		// 如果出现%格式化标志
+		if ( ch == '%' ) {
+			// 如果后面还有字符
+			if ( i < dwFormatLen - 1 ) {
+				char ch1 = szFormat[i + 1];
+				switch (ch1)
+				{
+				case 'a':
+					strRet += szWeek_s[tmp.tm_wday];
+					break;
+				case 'A':
+					strRet += szWeek[tmp.tm_wday];
+					break;
+				case 'b':
+					strRet += szMon_s[tmp.tm_mon];
+					break;
+				case 'B':
+					strRet += szMon[tmp.tm_mon];
+					break;
+				case 'c':
+					strRet += szDate;
+					strRet += " ";
+					strRet += sztime;
+					break;
+				case 'd':
+					strRet += szDay;
+					break;
+				case 'H':
+					strRet += szHour;
+					break;
+				case 'I':
+					strRet += szIHour;
+					break;
+				case 'j':
+					strRet += szYDay;
+					break;
+				case 'm':
+					strRet += szMonth;
+					break;
+				case 'M':
+					strRet += szMinute;
+					break;
+				case 'p':
+					strRet += bAm ? "AM" : "PM";
+					break;
+				case 'S':
+					strRet += szSecond;
+					break;
+				case 'w':
+					strRet += tmp.tm_wday;
+					break;
+				case 'x':
+					strRet += szDate;
+					break;
+				case 'X':
+					strRet += sztime;
+					break;
+				case 'y':
+					strRet += year;
+					break;
+				case 'Y':
+					strRet += szYear;
+					break;
+				case '%':
+					strRet += '%';
+					break;
+				default:
+					break;
+				}
+				i++;
+			}
+		}
+		// 如果没有格式化字符
+		else {
+			strRet += ch;
+		}
+	}
+
+	STRNCPY(szTime, strRet, dwTimeSize);
+	return szTime;
+}
+
+
+
+
+
+
+
+/********************* end  时间转换  ***********************/
 
 
 

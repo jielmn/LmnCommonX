@@ -1492,6 +1492,79 @@ TEST(UNZIP, UNZIP) {
 #endif
 
 
+TEST(TIME, TIME) {
+	// Ê±¼ä:  1566438840
+	//        2019-08-22 09:54:00
+
+	time_t t = 1566438840;
+
+	char szTime[256];
+	LmnFormatTime(szTime, sizeof(szTime), t, "%a");
+	ASSERT_EQ(strcmp(szTime, "Thu"), 0);
+
+	LmnFormatTime(szTime, sizeof(szTime), t, "%A");
+	ASSERT_EQ(strcmp(szTime, "Thursday"), 0);
+
+	LmnFormatTime(szTime, sizeof(szTime), t, "%b");
+	ASSERT_EQ(strcmp(szTime, "Aug"), 0);
+
+	LmnFormatTime(szTime, sizeof(szTime), t, "%B");
+	ASSERT_EQ(strcmp(szTime, "August"), 0);
+
+	LmnFormatTime(szTime, sizeof(szTime), t, "%c");
+	ASSERT_EQ(strcmp(szTime, "08/22/19 09:54:00"), 0);
+
+	LmnFormatTime(szTime, sizeof(szTime), t, "%d");
+	ASSERT_EQ(strcmp(szTime, "22"), 0);
+
+	LmnFormatTime(szTime, sizeof(szTime), t, "%H");
+	ASSERT_EQ(strcmp(szTime, "09"), 0);
+
+	LmnFormatTime(szTime, sizeof(szTime), t, "%I");
+	ASSERT_EQ(strcmp(szTime, "09"), 0);
+
+	LmnFormatTime(szTime, sizeof(szTime), t, "%j");
+	ASSERT_EQ(strcmp(szTime, "234"), 0);
+
+	LmnFormatTime(szTime, sizeof(szTime), t, "%m");
+	ASSERT_EQ(strcmp(szTime, "08"), 0);
+
+	LmnFormatTime(szTime, sizeof(szTime), t, "%M");
+	ASSERT_EQ(strcmp(szTime, "54"), 0);
+
+	LmnFormatTime(szTime, sizeof(szTime), t, "%p");
+	ASSERT_EQ(strcmp(szTime, "AM"), 0);
+
+	LmnFormatTime(szTime, sizeof(szTime), t, "%S");
+	ASSERT_EQ(strcmp(szTime, "00"), 0);
+
+	LmnFormatTime(szTime, sizeof(szTime), t, "%w");
+	ASSERT_EQ(strcmp(szTime, "4"), 0);
+
+	LmnFormatTime(szTime, sizeof(szTime), t, "%x");
+	ASSERT_EQ(strcmp(szTime, "08/22/19"), 0);
+
+	LmnFormatTime(szTime, sizeof(szTime), t, "%X");
+	ASSERT_EQ(strcmp(szTime, "09:54:00"), 0);
+
+	LmnFormatTime(szTime, sizeof(szTime), t, "%y");
+	ASSERT_EQ(strcmp(szTime, "19"), 0);
+
+	LmnFormatTime(szTime, sizeof(szTime), t, "%Y");
+	ASSERT_EQ(strcmp(szTime, "2019"), 0);
+
+	LmnFormatTime(szTime, sizeof(szTime), t);
+	ASSERT_EQ(strcmp(szTime, "2019-08-22 09:54:00"), 0);
+
+	LmnFormatTime(szTime, sizeof(szTime), t, "%Y-%m-%d %H:%M:%S");
+	ASSERT_EQ(strcmp(szTime, "2019-08-22 09:54:00"), 0);
+
+	LmnFormatTime(szTime, sizeof(szTime), t, "%Y-%m-%d %H:%M:%S %p");
+	ASSERT_EQ(strcmp(szTime, "2019-08-22 09:54:00 AM"), 0);
+
+	LmnFormatTime(szTime, sizeof(szTime), t, "%%%Y-%m-%d %H:%M:%S %p%%");
+	ASSERT_EQ(strcmp(szTime, "%2019-08-22 09:54:00 AM%"), 0);
+}
 
 
 

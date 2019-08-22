@@ -1516,6 +1516,52 @@ CLmnString & CLmnString::operator += (DWORD n) {
 	return this->operator +=(buf);
 }
 
+CLmnString   CLmnString::operator +  (char ch) {
+	CLmnString ret;
+	ret += *this;
+	ret += ch;
+	return ret;
+}
+
+CLmnString & CLmnString::operator += (char ch) {
+	char buf[256];
+	SNPRINTF(buf, sizeof(buf), "%c", ch);
+	return this->operator +=(buf);
+}
+
+CLmnString   CLmnString::operator +  (BYTE by) {
+	CLmnString ret;
+	ret += *this;
+	ret += by;
+	return ret;
+}
+
+CLmnString & CLmnString::operator += (BYTE by) {
+	return this->operator+= ((DWORD)by);
+}
+
+CLmnString   CLmnString::operator +  (WORD w) {
+	CLmnString ret;
+	ret += *this;
+	ret += w;
+	return ret;
+}
+
+CLmnString & CLmnString::operator += (WORD w) {
+	return this->operator+= ((DWORD)w);
+}
+
+CLmnString   CLmnString::operator +  (short s) {
+	CLmnString ret;
+	ret += *this;
+	ret += s;
+	return ret;
+}
+
+CLmnString & CLmnString::operator += (short s) {
+	return this->operator+= ((int)s);
+}
+
 
 CLmnString::operator char *() const {
 	return m_str;
