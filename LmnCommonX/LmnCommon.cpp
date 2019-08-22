@@ -2718,8 +2718,10 @@ char * LmnFormatTime(char * szTime, DWORD dwTimeSize, time_t t, const char * szF
 	const char * szWeek[7] = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
 	const char * szWeek_s[7] = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
 
+#ifdef WIN32
 	const char * szWeek_cn[7] = { "星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六" };
 	const char * szWeek_cns[7] = { "周日", "周一", "周二", "周三", "周四", "周五", "周六" };
+#endif
 
 	// AM OR PM
 	BOOL bAm = tmp.tm_hour < 12 ? TRUE : FALSE;
@@ -2850,6 +2852,7 @@ char * LmnFormatTime(char * szTime, DWORD dwTimeSize, time_t t, const char * szF
 				case '%':
 					strRet += '%';
 					break;
+#ifdef WIN32
 				case 'n':
 					strRet += szWeek_cns[tmp.tm_wday];
 					break;
@@ -2862,6 +2865,7 @@ char * LmnFormatTime(char * szTime, DWORD dwTimeSize, time_t t, const char * szF
 				case 'T':
 					strRet += bToday ? "今天" : szWeek_cn[tmp.tm_wday];
 					break;
+#endif
 				default:
 					break;
 				}
