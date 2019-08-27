@@ -1,4 +1,6 @@
 #include <math.h>
+#include <vector>
+#include <assert.h>
 #include "LmnGdi.h"
 
 static void LineTo_( POINT start, POINT end, int nWidth, void * pArg, 
@@ -224,4 +226,80 @@ BOOL   DashLineTo( POINT start, POINT end, int nSegmentLength, int nGapLength,
 	}
 
 	return TRUE;
+}
+
+
+
+// 画一条折线(原来的点的x坐标有相同的，对这些点的y坐标要求平均值)
+// 参数：
+//       pts，原折线点
+//       cpt, 点个数         
+//       nGap,多少像素差内的x坐标视为x坐标重合
+void   LmnPolyline( const POINT * pts, int cpt, int nGap, void * pArg,
+	                DrawPolylineCb pfnPolyline) {
+	if ( 0 == pts || cpt <= 0 || pfnPolyline == 0 || nGap < 0 )
+		return;	
+
+	// 临时vector
+	std::vector<const POINT *> vTmp;
+	// 临时vector的item有共同的点，它们的x坐标相同(或者差在nGap之内)
+	int nTmpX = 0;
+	// 最终vector
+	std::vector<POINT> vRet;
+	std::vector<const POINT *>::iterator  it_tmp;
+
+	for (int i = 0; i < cpt; i++) {
+		const POINT * pt = &pts[i];
+
+		// 如果vTmp为空
+		if (vTmp.size() == 0) {
+			vTmp.push_back(pt);
+			nTmpX = pt->x;
+		}
+		else {
+			// 如果偏移量和上次的相同，放置在临时vector中
+			int nDiff = pt->x - nTmpX;
+			if ( (nDiff <= nGap) && (nDiff >= -nGap) ) {
+				vTmp.push_back(pt);
+			}
+			else {
+				int  sum = 0;
+				for (it_tmp = vTmp.begin(); it_tmp != vTmp.end(); ++it_tmp) {
+					const POINT * pTmpItem = *it_tmp;
+					sum += pTmpItem->y;
+				}
+				// 求平均值
+				int  ave = sum / vTmp.size();
+
+				POINT point;
+				point.x = nTmpX;
+				point.y = ave;
+				vRet.push_back(point);
+
+				vTmp.clear();
+				vTmp.push_back(pt);
+				nTmpX = pt->x;
+			}
+		}
+	}
+
+	if (vTmp.size() > 0) {
+		int  sum = 0;
+		for (it_tmp = vTmp.begin(); it_tmp != vTmp.end(); ++it_tmp) {
+			const POINT * pTmpItem = *it_tmp;
+			sum += pTmpItem->y;
+		}
+		// 求平均值
+		int  ave = sum / vTmp.size();
+
+		POINT point;
+		point.x = nTmpX;
+		point.y = ave;
+		vRet.push_back(point);
+
+		vTmp.clear();
+	}
+
+	assert(vRet.size() > 0);
+	pfnPolyline(pArg, &vRet[0], vRet.size());
 }
