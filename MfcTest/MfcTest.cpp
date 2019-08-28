@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "MfcTest.h"
 #include "MfcTestDlg.h"
+#include "PolylineDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -70,7 +71,11 @@ BOOL CMfcTestApp::InitInstance()
 	// 例如修改为公司或组织名
 	SetRegistryKey(_T("应用程序向导生成的本地应用程序"));
 
-	CMfcTestDlg dlg;
+	// dash line 测试
+	// CMfcTestDlg dlg;
+	// 有相同x轴坐标的曲线测试
+	PolylineDlg dlg;
+
 	m_pMainWnd = &dlg;
 	INT_PTR nResponse = dlg.DoModal();
 	if (nResponse == IDOK)

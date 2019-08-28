@@ -163,6 +163,10 @@ void CMfcTestDlg::OnPaint()
 
 		//::MoveToEx(dc, 0, 5, 0);
 		//::LineTo(dc, 200, 5);
+
+		DeleteObject(hBlueBrush);
+		DeleteObject(hGreenBrush);
+		DeleteObject(hRedPen);
 		CDialogEx::OnPaint();
 	}
 }
