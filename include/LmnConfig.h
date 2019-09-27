@@ -34,6 +34,11 @@ public:
 
 	virtual DWORD     ClearConfig() = 0;
 	virtual DWORD     RemoveConfig(const char * szConfigName) = 0;
+
+	// 读取配置项
+	virtual DWORD     GetIntConfig(const char * szConfigName, int & nConfigValue, int nDefault = 0) = 0;
+	// 设置配置项
+	virtual DWORD     SetIntConfig(const char * szConfigName, int nConfigValue, int * pnDefault = 0) = 0;
 };
 
 
@@ -67,6 +72,11 @@ public:
 
 	DWORD     ClearConfig();
 	DWORD     RemoveConfig(const char * szConfigName);
+
+	// 读取配置项
+	DWORD     GetIntConfig(const char * szConfigName, int & nConfigValue, int nDefault = 0);
+		// 设置配置项
+	DWORD     SetIntConfig(const char * szConfigName, int nConfigValue, int * pnDefault = 0);
 
 private:
 	void          Clear();
@@ -129,6 +139,11 @@ public:
 
 	DWORD     ClearConfig();
 	DWORD     RemoveConfig(const char * szConfigName);
+
+	// 读取配置项
+	DWORD     GetIntConfig(const char * szConfigName, int & nConfigValue, int nDefault = 0);
+	// 设置配置项
+	DWORD     SetIntConfig(const char * szConfigName, int nConfigValue, int * pnDefault = 0);
 
 private:
 	void          Clear();

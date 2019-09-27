@@ -51,6 +51,12 @@ BOOL  CLmnSerialPort::OpenUartPort(const char *UartPortName, DWORD BaudRate /*= 
 	return TRUE;
 }
 
+BOOL  CLmnSerialPort::OpenUartPort(DWORD dwComPort, DWORD BaudRate /*= 9600*/, BYTE ByteSize /*= 8*/, BYTE Parity /*= NOPARITY*/, BYTE StopBits /*= ONESTOPBIT*/ ) {
+	char  szCom[16] = { 0 };
+	SNPRINTF(szCom, sizeof(szCom), "com%lu", dwComPort);
+	return OpenUartPort(szCom, BaudRate, ByteSize, Parity, StopBits);
+}
+
 BOOL  CLmnSerialPort::CloseUartPort() {
 	// 如果已经打开串口
 	if (0 != m_hComm) {

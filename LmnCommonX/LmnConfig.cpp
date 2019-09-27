@@ -402,6 +402,74 @@ DWORD  FileConfig::SetConfig ( const char * szConfigName, DWORD dwConfigValue, D
 	return 0;
 }
 
+// 读取配置项
+DWORD  FileConfig::GetIntConfig(const char * szConfigName, int & nConfigValue, int nDefault /*= 0*/) {
+	if (0 == szConfigName) {
+		return LMNX_WRONG_PARAMS;
+	}
+
+	void * pValue = 0;
+	BOOL bRet = GetHashtableValue(m_pHtable, szConfigName, &pValue);
+	if (!bRet) {
+		nConfigValue = nDefault;
+		return 0;
+	}
+
+	if (1 != sscanf((char *)pValue, " %d", &nConfigValue)) {
+		nConfigValue = nDefault;
+		return 0;
+	}
+
+	return 0;
+}
+
+// 设置配置项
+DWORD  FileConfig::SetIntConfig(const char * szConfigName, int nConfigValue, int * pnDefault /*= 0*/) {
+	if (0 == szConfigName) {
+		return LMNX_WRONG_PARAMS;
+	}
+
+	char buf[256];
+	SNPRINTF(buf, sizeof(buf), "%d", nConfigValue);
+
+	char * pKey = 0;
+	char * pValue = 0;
+	DWORD dwLen = 0;
+
+	PHashNode pNode = GetHashtableNode(m_pHtable, szConfigName);
+	if (0 != pNode) {
+		assert(pNode->pData);
+
+		// 如果值没有改变
+		if (0 == strcmp(buf, (char *)pNode->pData)) {
+			return 0;
+		}
+
+		delete[](char *)pNode->pData;
+
+		dwLen = strlen(buf);
+		pValue = new char[dwLen + 1];
+		strcpy(pValue, buf);
+
+		pNode->pData = pValue;
+
+	}
+	else {
+		dwLen = strlen(buf);
+		pValue = new char[dwLen + 1];
+		strcpy(pValue, buf);
+
+		dwLen = strlen(szConfigName);
+		pKey = new char[dwLen + 1];
+		strcpy(pKey, szConfigName);
+
+		Add2Hashtable(m_pHtable, pKey, pValue);
+	}
+
+	m_bChanged = TRUE;
+	return 0;
+}
+
 
 DWORD  FileConfig::GetBooleanConfig(const char * szConfigName, BOOL & bConfigValue, BOOL bDefault /*= FALSE*/) {
 	char buf[32];
@@ -989,14 +1057,58 @@ DWORD   FileConfigEx::GetConfig(const char * szConfigName, DWORD & dwConfigValue
 
 DWORD   FileConfigEx::SetConfig(const char * szConfigName, DWORD dwConfigValue, DWORD * pdwDefault /*= 0*/ ) {
 	char szValue[64] = {0};
-	SNPRINTF(szValue, sizeof(szValue), "%d", (int)dwConfigValue);
+	SNPRINTF(szValue, sizeof(szValue), "%lu", dwConfigValue);
 
 	if ( 0 == pdwDefault ) {
 		return SetConfig( szConfigName, szValue );
 	}
 	else {
 		char szDefault[64] = { 0 };
-		SNPRINTF(szDefault, sizeof(szDefault), "%d", (int)*pdwDefault);
+		SNPRINTF(szDefault, sizeof(szDefault), "%lu", *pdwDefault);
+		return SetConfig(szConfigName, szValue, szDefault);
+	}
+}
+
+// 读取配置项
+DWORD  FileConfigEx::GetIntConfig(const char * szConfigName, int & nConfigValue, int nDefault /*= 0*/) {
+	if (0 == szConfigName) {
+		return LMNX_WRONG_PARAMS;
+	}
+
+	PListNode pNode = GetListHead(m_pList);
+	while (pNode) {
+		ConfigItem_ * pItem = (ConfigItem_ *)pNode->pData;
+		assert(pItem);
+
+		if (pItem->nType == LINE_TYPE_KEY_VALUE) {
+			assert(pItem->szKey && pItem->szValue);
+			// 如果找到key
+			if (0 == StrICmp(pItem->szKey, szConfigName)) {
+				if (1 != sscanf(pItem->szValue, " %d", &nConfigValue)) {
+					nConfigValue = nDefault;
+				}
+				return 0;
+			}
+		}
+
+		pNode = GetNextListNode(pNode);
+	}
+
+	nConfigValue = nDefault;
+	return 0;
+}
+
+// 设置配置项
+DWORD  FileConfigEx::SetIntConfig(const char * szConfigName, int nConfigValue, int * pnDefault /*= 0*/) {
+	char szValue[64] = { 0 };
+	SNPRINTF(szValue, sizeof(szValue), "%d", nConfigValue);
+
+	if (0 == pnDefault) {
+		return SetConfig(szConfigName, szValue);
+	}
+	else {
+		char szDefault[64] = { 0 };
+		SNPRINTF(szDefault, sizeof(szDefault), "%d", *pnDefault);
 		return SetConfig(szConfigName, szValue, szDefault);
 	}
 }

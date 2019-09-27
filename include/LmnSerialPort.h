@@ -17,6 +17,7 @@ public:
 	// 打开串口
 	// 参数 BaudRate 波特率，ByteSize 数据位，Parity 校验位，StopBits 停止位
 	virtual BOOL  OpenUartPort(const char *UartPortName, DWORD BaudRate = 9600, BYTE ByteSize = 8, BYTE Parity = NOPARITY, BYTE StopBits = ONESTOPBIT );
+	virtual BOOL  OpenUartPort(DWORD nComPort, DWORD BaudRate = 9600, BYTE ByteSize = 8, BYTE Parity = NOPARITY, BYTE StopBits = ONESTOPBIT);
 
 	// 关闭串口
 	virtual BOOL  CloseUartPort();
