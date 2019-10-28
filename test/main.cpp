@@ -4,6 +4,7 @@
 
 #include "LmnCommon.h"
 #include "LmnHttp.h"
+#include "LmnSerialPort.h"
 
 void clean_stdin()
 {
@@ -91,6 +92,18 @@ void OnHandleChoice( ConsoleMenuHandle hMenu, const void * pArg, DWORD dwIndex )
 			pHttp->Get(szWebSiteHttps);
 		}
 	}
+	else if (e == MENU_MAIN) {
+		if (dwIndex == 2) {
+			std::map<int, std::string> m;
+			BOOL bRet = GetAllSerialPorts(m);
+			if (bRet) {
+				std::map<int, std::string>::iterator it;
+				for ( it = m.begin(); it != m.end(); ++it ) {
+					fprintf(stdout, "%d, %s\n", it->first, it->second.c_str());
+				}				
+			}
+		}
+	}
 }
 
 void OnHttpData ( int nError, DWORD dwCode, const char * szData, DWORD dwDataLen,
@@ -128,15 +141,17 @@ int main () {
 	TConsoleMenuItem  items[10];
 	memset(items, 0, sizeof(items));
 
-	STRNCPY(items[0].szName, "1.HTTP",      sizeof(items[0].szName) );
-	STRNCPY(items[1].szName, "2.HTTPS",     sizeof(items[1].szName));
-	STRNCPY(items[2].szName, "q.QUIT",      sizeof(items[2].szName));
+	STRNCPY(items[0].szName, "1.HTTP",         sizeof(items[0].szName) );
+	STRNCPY(items[1].szName, "2.HTTPS",        sizeof(items[1].szName));
+	STRNCPY(items[2].szName, "3.Serial Ports", sizeof(items[2].szName));
+	STRNCPY(items[3].szName, "q.QUIT",         sizeof(items[3].szName));
 	items[0].hMenu = hHttp;
 	items[1].hMenu = hHttps;
 
 	ret = AddConsoleMenuItem(hMain, &items[0]);
 	ret = AddConsoleMenuItem(hMain, &items[1]);
 	ret = AddConsoleMenuItem(hMain, &items[2]);
+	ret = AddConsoleMenuItem(hMain, &items[3]);
 
 	// http ×Ó²Ëµ¥
 	memset(items, 0, sizeof(items));

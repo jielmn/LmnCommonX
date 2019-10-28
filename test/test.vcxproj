@@ -94,7 +94,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>LmnCommonXD.lib;Secur32.lib</AdditionalDependencies>
+      <AdditionalDependencies>LmnCommonXD.lib;Secur32.lib;Advapi32.lib;Setupapi.lib;</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>

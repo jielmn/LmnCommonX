@@ -2,7 +2,7 @@
 #define _SERIAL_PORT_2018_04_17_
 
 #include "LmnCommon.h"
-#include <vector>
+#include <map>
 
 class   CLmnSerialPort
 {
@@ -40,7 +40,7 @@ private:
 };
 
 
-// 获取当前机器的所有串口
-BOOL GetAllSerialPorts(std::vector<std::string> & v);
+// 获取当前机器的所有串口(串口号，描述字符串)
+BOOL GetAllSerialPorts(std::map<int, std::string> & m);
 
 #endif
