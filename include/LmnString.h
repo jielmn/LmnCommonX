@@ -171,6 +171,9 @@ public:
 
 	DWORD  GetLength() const;
 	BOOL   IsEmpty() const;
+
+	int    ToInt() const;
+	BOOL   ToBoolean() const;
 private:
 	void  Clear();
 	void  Init( const char * s = 0 );

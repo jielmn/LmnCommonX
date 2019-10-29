@@ -1755,6 +1755,32 @@ int  CLmnString::SetAt(DWORD dwStartIndex, char ch) {
 //	return GetAt(dwStartIndex);
 //}
 
+int  CLmnString::ToInt() const {
+	if (m_str) {
+		int n = 0;
+		int ret = sscanf(m_str, " %d", &n);
+		if (1 == ret) {
+			return n;
+		}
+		else {
+			return 0;
+		}
+	}
+	return 0;
+}
+
+BOOL CLmnString::ToBoolean() const {
+	if (m_str) {
+		if (0 == StrICmp(m_str, "true")) {
+			return TRUE;
+		}
+		else {
+			return FALSE;
+		}
+	}
+	return FALSE;
+}
+
 bool operator == (const CLmnString & a, const CLmnString & b) {
 	return 0 == strcmp(a, b);
 }

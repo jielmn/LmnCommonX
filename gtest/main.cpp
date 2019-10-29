@@ -932,6 +932,25 @@ TEST( STRING, LMNSTRING )
 	ASSERT_EQ('y', d.GetAt(1));
 	ASSERT_EQ('z', d.GetAt(2));
 	ASSERT_EQ('1', d.GetAt(3));
+
+	CLmnString m = "True";
+	ASSERT_EQ( TRUE, m.ToBoolean() );
+
+	m = 100;
+	ASSERT_EQ( 100, m.ToInt() );
+
+	m = (DWORD)0xFFFFFFFF;
+	ASSERT_EQ( 0xFFFFFFFF, (DWORD)m.ToInt() );
+
+	m = "";
+	ASSERT_EQ(FALSE, m.ToBoolean());
+	ASSERT_EQ(0, m.ToInt());
+
+	m = " 128";
+	ASSERT_EQ(128, m.ToInt());
+
+	m = " abc ";
+	ASSERT_EQ(0, m.ToInt());
 }
 
 TEST( STRING, SPLIT )
