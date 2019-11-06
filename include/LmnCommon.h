@@ -31,6 +31,8 @@ typedef unsigned char       BYTE;
 typedef unsigned int        DWORD;
 #elif __i386__
 typedef unsigned long       DWORD;
+#else
+typedef unsigned long       DWORD;
 #endif
 
 #endif // _WINDEF_ 

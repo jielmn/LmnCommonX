@@ -2,7 +2,7 @@
 #include <assert.h>
 #include "LmnString.h"
 #include "LmnConfig.h"
-
+#include "Inner.h"
 
 DWORD MyStrHash( void * pKey ) {
 	const char * p = (const char *)pKey;
@@ -348,7 +348,7 @@ DWORD  FileConfig::GetConfig ( const char * szConfigName, DWORD & dwConfigValue,
 		return 0;
 	}
 
-	if ( 1 != sscanf( (char *)pValue, " %lu", &dwConfigValue ) ) {
+	if ( 1 != sscanf( (char *)pValue, DWORD_FORMAT_STR_S, &dwConfigValue ) ) {
 		dwConfigValue = dwDefault;
 		return 0;
 	}
@@ -363,7 +363,7 @@ DWORD  FileConfig::SetConfig ( const char * szConfigName, DWORD dwConfigValue, D
 	}
 
 	char buf[256];
-	SNPRINTF( buf, sizeof(buf), "%lu", dwConfigValue );
+	SNPRINTF( buf, sizeof(buf), DWORD_FORMAT_STR, dwConfigValue );
 
 	char * pKey   = 0;
 	char * pValue = 0;
@@ -1041,7 +1041,7 @@ DWORD   FileConfigEx::GetConfig(const char * szConfigName, DWORD & dwConfigValue
 			assert(pItem->szKey && pItem->szValue);
 			// Èç¹ûÕÒµ½key
 			if (0 == StrICmp(pItem->szKey, szConfigName)) {
-				if ( 1 != sscanf( pItem->szValue, " %lu", &dwConfigValue) ) {
+				if ( 1 != sscanf( pItem->szValue, DWORD_FORMAT_STR_S, &dwConfigValue) ) {
 					dwConfigValue = dwDefault;
 				}
 				return 0;
@@ -1057,14 +1057,14 @@ DWORD   FileConfigEx::GetConfig(const char * szConfigName, DWORD & dwConfigValue
 
 DWORD   FileConfigEx::SetConfig(const char * szConfigName, DWORD dwConfigValue, DWORD * pdwDefault /*= 0*/ ) {
 	char szValue[64] = {0};
-	SNPRINTF(szValue, sizeof(szValue), "%lu", dwConfigValue);
+	SNPRINTF(szValue, sizeof(szValue), DWORD_FORMAT_STR, dwConfigValue);
 
 	if ( 0 == pdwDefault ) {
 		return SetConfig( szConfigName, szValue );
 	}
 	else {
 		char szDefault[64] = { 0 };
-		SNPRINTF(szDefault, sizeof(szDefault), "%lu", *pdwDefault);
+		SNPRINTF(szDefault, sizeof(szDefault), DWORD_FORMAT_STR, *pdwDefault);
 		return SetConfig(szConfigName, szValue, szDefault);
 	}
 }
