@@ -70,6 +70,15 @@ int StrReplaceLast (  OUT char * szDest, IN DWORD dwDestSize,
 					  IN const char * szToReplace, 
 					  IN const char * szReplaceWith );
 
+// 把字节流转化为字符串
+// 例如 FF 01 02 03 06 C2 (十六进制) ->  "FF01020306C2", 或者 "FF-01-02-03-06-C2"
+char * Bytes2String( char * szDest, DWORD dwDestSize, const BYTE * pSrc, DWORD dwSrcLen, 
+	                 char chDelimiter = 0, BOOL bUpperCase = FALSE);
+
+// 逆过程
+// "FF01020306C2" -> FF 01 02 03 06 C2 (十六进制)
+// "FF-01-02-03-06-C2" -> FF 01 02 03 06 C2 (十六进制)
+int String2Bytes(BYTE * pDest, DWORD & dwDestSize, const char * szSrc, char chDelimiter = 0);
 
 
 

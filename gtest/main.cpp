@@ -1001,6 +1001,70 @@ TEST( STRING, SPLIT )
 
 }
 
+TEST(STRING, BYTES_TO_STRING) {
+	char buf[256];
+	const BYTE * pSrc = (const BYTE *)"\xF1\xF2\x01\x02\xCD\x10";
+
+	char * pRet = Bytes2String(buf, sizeof(buf), pSrc, 6 );
+	ASSERT_FALSE( pRet == 0 );
+	ASSERT_EQ(strcmp(buf, "f1f20102cd10"), 0);
+
+	Bytes2String(buf, sizeof(buf), pSrc, 6, '-', TRUE);
+	ASSERT_EQ(strcmp(buf, "F1-F2-01-02-CD-10"), 0);
+
+	Bytes2String(buf, sizeof(buf), pSrc, 6, '-');
+	ASSERT_EQ(strcmp(buf, "f1-f2-01-02-cd-10"), 0);
+
+	Bytes2String(buf, 6, pSrc, 6, '-');
+	ASSERT_EQ(strcmp(buf, "f1-f2"), 0);
+
+	Bytes2String(buf, 7, pSrc, 6, '-');
+	ASSERT_EQ(strcmp(buf, "f1-f2-"), 0);
+
+	Bytes2String(buf, 8, pSrc, 6, '-');
+	ASSERT_EQ(strcmp(buf, "f1-f2-"), 0);
+
+	Bytes2String(buf, 9, pSrc, 6, '-');
+	ASSERT_EQ(strcmp(buf, "f1-f2-01"), 0);
+
+	BYTE data[256];
+	DWORD dwDataSize = sizeof(data);
+	int ret = String2Bytes(data, dwDataSize, "F1-F2-01-02-CD-10", '-');
+	ASSERT_EQ(0, ret);
+	ASSERT_TRUE(0 == memcmp(data, "\xF1\xF2\x01\x02\xCD\x10", 6));
+	ASSERT_EQ(dwDataSize, 6);
+
+	dwDataSize = sizeof(data);
+	ret = String2Bytes(data, dwDataSize, "f1-f2-01-02-cd-10", '-');
+	ASSERT_EQ(0, ret);
+	ASSERT_TRUE(0 == memcmp(data, "\xF1\xF2\x01\x02\xCD\x10", 6));
+	ASSERT_EQ(dwDataSize, 6);
+
+	dwDataSize = sizeof(data);
+	ret = String2Bytes(data, dwDataSize, "f1", '-');
+	ASSERT_EQ(0, ret);
+	ASSERT_TRUE(0 == memcmp(data, "\xF1", 1));
+	ASSERT_EQ(dwDataSize, 1);
+
+	dwDataSize = sizeof(data);
+	ret = String2Bytes(data, dwDataSize, "f1f20102cd10");
+	ASSERT_EQ(0, ret);
+	ASSERT_TRUE(0 == memcmp(data, "\xF1\xF2\x01\x02\xCD\x10", 6));
+	ASSERT_EQ(dwDataSize, 6);
+
+	dwDataSize = sizeof(data);
+	ret = String2Bytes(data, dwDataSize, "f1f2011wcd10");
+	ASSERT_EQ(ret, -1);
+
+	dwDataSize = sizeof(data);
+	ret = String2Bytes(data, dwDataSize, "010");
+	ASSERT_EQ(ret, -1);
+
+	dwDataSize = sizeof(data);
+	ret = String2Bytes(data, dwDataSize, "01-02-", '-');
+	ASSERT_EQ(ret, -1);
+}
+
 TEST( LOG, FILELOG )
 {
 //#ifdef WIN32

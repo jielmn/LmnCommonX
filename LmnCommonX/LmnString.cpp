@@ -522,7 +522,124 @@ int StrReplaceLast ( OUT char * szDest, IN DWORD dwDestSize,
 	return _StrReplace( szDest, dwDestSize, szSource, szToReplace, szReplaceWith, STR_REPLACE_MODE_LAST );
 }
 
+// 把字节流转化为字符串
+// 例如 FF 01 02 03 06 C2 (十六进制) ->  "FF01020306C2", 或者 "FF-01-02-03-06-C2"
+char * Bytes2String(char * szDest, DWORD dwDestSize, const BYTE * pSrc, DWORD dwSrcLen,
+	char chDelimiter /*= 0*/, BOOL bUpperCase /*= FALSE*/ ) {
 
+	if (0 == szDest || 0 == dwDestSize) {
+		return szDest;
+	}
+
+	if (0 == pSrc || 0 == dwSrcLen) {
+		szDest[0] = '\0';
+		return szDest;
+	}
+
+	char * pDest = szDest;
+	DWORD  dwLeft = dwDestSize;
+
+	for ( DWORD i = 0; i < dwSrcLen; i++ ) {
+		// 需要3个字符位置XX和结束符号
+		if ( dwLeft < 3 ) {
+			break;
+		}
+
+		if (bUpperCase) {
+			SNPRINTF(pDest, dwLeft, "%02X", (DWORD)pSrc[i]);
+		}
+		else {
+			SNPRINTF(pDest, dwLeft, "%02x", (DWORD)pSrc[i]);
+		}
+		pDest += 2;
+		dwLeft -= 2;
+		
+		// 如果需要分隔符号
+		if ( (chDelimiter != 0) && (i < dwSrcLen - 1) ) {
+
+			if ( dwLeft < 2 ) {
+				break;
+			}
+
+			*pDest = chDelimiter;
+			pDest++;
+			dwLeft--;
+		}
+	}
+
+	*pDest = '\0';
+	return szDest;
+}
+
+// 逆过程
+// "FF01020306C2" -> FF 01 02 03 06 C2 (十六进制)
+// "FF-01-02-03-06-C2" -> FF 01 02 03 06 C2 (十六进制)
+int String2Bytes(BYTE * pDest, DWORD & dwDestSize, const char * szSrc, char chDelimiter /*= 0*/) {
+	if ( pDest == 0 || dwDestSize == 0 ) {
+		return -1;
+	}
+
+	if ( szSrc == 0 ) {
+		dwDestSize = 0;
+		return 0;
+	}
+
+	DWORD  dwSrcLen = strlen(szSrc);
+	DWORD  dwStep = (0 == chDelimiter ? 2 : 3);
+
+	if ( 0 == chDelimiter ) {
+		// 检查是否格式正确
+		if ( dwSrcLen % 2 != 0 ) {
+			return -1;
+		}
+	}
+	else {
+		// 检查是否格式正确
+		if (dwSrcLen % 3 != 2) {
+			return -1;
+		}
+	}
+
+	for ( DWORD i = 0; i < dwSrcLen; i += dwStep ) {
+		char buf[16] = {0};
+		memcpy(buf, szSrc + i, 2);
+		Str2Lower(buf);
+
+		// 如果不是十六进制数
+		if ( !((buf[0] >= 'a' && buf[0] <= 'f') || (buf[0] >= '0' && buf[0] <= '9'))  ) {
+			return -1;
+		}
+
+		if (!((buf[1] >= 'a' && buf[1] <= 'f') || (buf[1] >= '0' && buf[1] <= '9'))) {
+			return -1;
+		}
+
+		DWORD dwNumber = 0;
+		int ret = sscanf(buf, "%x", &dwNumber);
+		if ( 1 == ret ) {
+			pDest[i/dwStep] = (BYTE)dwNumber;
+		}
+		else {
+			return -1;
+		}
+
+		// 检查格式是否正确
+		if ( (chDelimiter != 0) && (i + 2 < dwSrcLen) ) {
+			if (szSrc[i + 2] != chDelimiter) {
+				return -1;
+			}
+		}
+	}
+
+	if (0 == chDelimiter) {
+		dwDestSize = dwSrcLen / 2;
+	}
+	else {
+		dwDestSize = (dwSrcLen + 1) / 3;
+	}
+
+	return 0;
+}
 
 
 
