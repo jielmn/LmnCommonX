@@ -407,6 +407,9 @@ time_t  GetTdZeroTime();
 
 // 任意时间的当天零点时间
 time_t  GetAdZeroTime(time_t);
+
+time_t SystemTime2Time(const SYSTEMTIME & s);
+SYSTEMTIME Time2SystemTime(const time_t & t);
 /*********************  END 时间转换  *******************/
 
 

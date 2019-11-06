@@ -2912,6 +2912,37 @@ time_t  GetAdZeroTime(time_t t) {
 	return mktime(&tmp);
 }
 
+time_t SystemTime2Time(const SYSTEMTIME & s) {
+	struct tm tTmTime;
+
+	tTmTime.tm_year = (int)s.wYear - 1900;
+	tTmTime.tm_mon = (int)s.wMonth - 1;
+	tTmTime.tm_mday = (int)s.wDay;
+	tTmTime.tm_hour = (int)s.wHour;
+	tTmTime.tm_min = (int)s.wMinute;
+	tTmTime.tm_sec = (int)s.wSecond;
+
+	return mktime(&tTmTime);
+}
+
+SYSTEMTIME Time2SystemTime(const time_t & t) {
+	struct tm tTmTime;
+	localtime_s(&tTmTime, &t);
+
+	SYSTEMTIME s;
+	memset(&s, 0, sizeof(SYSTEMTIME));
+
+	s.wYear = (WORD)(tTmTime.tm_year + 1900);
+	s.wMonth = (WORD)(tTmTime.tm_mon + 1);
+	s.wDay = (WORD)tTmTime.tm_mday;
+	s.wHour = (WORD)tTmTime.tm_hour;
+	s.wMinute = (WORD)tTmTime.tm_min;
+	s.wSecond = (WORD)tTmTime.tm_sec;
+	s.wDayOfWeek = (WORD)tTmTime.tm_wday;
+
+	return s;
+}
+
 
 
 
