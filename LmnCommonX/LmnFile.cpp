@@ -2027,7 +2027,7 @@ static BOOL GetFilePos_( const F_CHAR * path, BOOL bFolder, TFileStreamPos * pPo
 static BOOL TraverseGetFilePos_( const F_CHAR * full_path, BOOL bFolder, const F_CHAR * file_name, void * pParam0, void * pParam1 )
 {
 	TFileStreamPos * pPosition = (TFileStreamPos *)pParam0;
-	DWORD dwRootPathLen = (DWORD)pParam1;            
+	DWORD dwRootPathLen = (long)pParam1;            
 
 	if ( !GetFilePos_(full_path, bFolder, pPosition, dwRootPathLen) )
 	{

@@ -11,12 +11,14 @@
 #endif
 
 #if  DWORD_FLAG  
-#define  DWORD_FORMAT_STR   "%lu"
-#define  DWORD_FORMAT_STR_S " %lu"
+#define  DWORD_FORMAT_STR     "%lu"
+#define  DWORD_FORMAT_STR_X   "lx"
 #else
-#define  DWORD_FORMAT_STR   "%u"
-#define  DWORD_FORMAT_STR_S " %u"
+#define  DWORD_FORMAT_STR     "%u"
+#define  DWORD_FORMAT_STR_X   "x"
 #endif
+
+#define  DWORD_FORMAT_STR_S    (" " DWORD_FORMAT_STR)
 
 #define MIN( a, b )               ( (a) < (b) ? (a) : (b) )
 #define MAX( a, b )               ( (a) > (b) ? (a) : (b) )

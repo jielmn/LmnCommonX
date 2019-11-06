@@ -1316,7 +1316,7 @@ int DebugStream(  char *       pchDebugBuf,  DWORD  dwDebugBufLen,
 			}
 
 			// want the front 11 characters
-			SNPRINTF( szBuf, sizeof(szBuf), "%08lxh: ", i );
+			SNPRINTF( szBuf, sizeof(szBuf), "%08" DWORD_FORMAT_STR_X "h: ", i );
 
 			if ( dwLeftSize < 11 )
 			{
@@ -1471,7 +1471,7 @@ CLmnString::CLmnString(int n) : m_str(0), m_dwStrSize(0), m_dwStrLen(0) {
 
 CLmnString::CLmnString(DWORD n) : m_str(0), m_dwStrSize(0), m_dwStrLen(0) {
 	char buf[256];
-	SNPRINTF(buf, sizeof(buf), "%lu", n);
+	SNPRINTF(buf, sizeof(buf), DWORD_FORMAT_STR, n);
 	Init(buf);
 }
 
@@ -1629,7 +1629,7 @@ CLmnString   CLmnString::operator +  (DWORD n) {
 
 CLmnString & CLmnString::operator += (DWORD n) {
 	char buf[256];
-	SNPRINTF(buf, sizeof(buf), "%lu", n);
+	SNPRINTF(buf, sizeof(buf), DWORD_FORMAT_STR, n);
 	return this->operator +=(buf);
 }
 

@@ -896,7 +896,7 @@ BOOL  CHttpTransfer::ParseLine( CHttpResponse * pResponse )
 			// END 简单检验格式
 
 			DWORD  dwTemp = 0;
-			int ret = sscanf( szCode, " %lu", &dwTemp );
+			int ret = sscanf( szCode, DWORD_FORMAT_STR_S, &dwTemp );
             if ( 0 == ret )
             {
                 return FALSE;
@@ -948,7 +948,7 @@ BOOL  CHttpTransfer::ParseLine( CHttpResponse * pResponse )
             else if ( 0 == StrICmp( pResponse->GetLastOption()->m_sKey.c_str(), "Content-Length" )  )
             {
                 DWORD dwTemp = 0;
-                sscanf( szValue, " %lu", &dwTemp );
+                sscanf( szValue, DWORD_FORMAT_STR_S, &dwTemp );
                 pResponse->SetContentLen( dwTemp );
             }
             return TRUE;
@@ -1912,7 +1912,7 @@ bool  CHttp::ParseUrl( const std::string & strUrl, std::string & strHost, WORD &
 
 		strHost = strAddr.substr(0, dwColon);
 		DWORD dwTmp = 0;
-		sscanf(strAddr.substr(dwColon + 1).c_str(), " %lu", &dwTmp);
+		sscanf(strAddr.substr(dwColon + 1).c_str(), DWORD_FORMAT_STR_S, &dwTmp);
 		wPort = (WORD)dwTmp;
         return true;
     }
@@ -1936,7 +1936,7 @@ bool  CHttp::ParseUrl( const std::string & strUrl, std::string & strHost, WORD &
 
     strHost = strAddr.substr( 0, dwColon );
     DWORD dwTmp = 0;
-    sscanf(strAddr.substr(dwColon+1).c_str(), " %lu", &dwTmp);
+    sscanf(strAddr.substr(dwColon+1).c_str(), DWORD_FORMAT_STR_S, &dwTmp);
     wPort = (WORD)dwTmp;
 
     return true;
