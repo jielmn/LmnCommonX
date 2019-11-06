@@ -24,9 +24,15 @@
 // 防止和windows的头文件定义冲突
 #ifndef _WINDEF_ 
 typedef int                 BOOL;
-typedef unsigned long       DWORD;
 typedef unsigned short      WORD;
 typedef unsigned char       BYTE;
+
+#ifdef __x86_64__
+typedef unsigned int        DWORD;
+#elif __i386__
+typedef unsigned long       DWORD;
+#endif
+
 #endif // _WINDEF_ 
 
 
@@ -408,8 +414,10 @@ time_t  GetTdZeroTime();
 // 任意时间的当天零点时间
 time_t  GetAdZeroTime(time_t);
 
+#ifdef WIN32
 time_t SystemTime2Time(const SYSTEMTIME & s);
 SYSTEMTIME Time2SystemTime(const time_t & t);
+#endif
 /*********************  END 时间转换  *******************/
 
 

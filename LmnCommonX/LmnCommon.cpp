@@ -2912,6 +2912,7 @@ time_t  GetAdZeroTime(time_t t) {
 	return mktime(&tmp);
 }
 
+#ifdef WIN32
 time_t SystemTime2Time(const SYSTEMTIME & s) {
 	struct tm tTmTime;
 
@@ -2942,6 +2943,7 @@ SYSTEMTIME Time2SystemTime(const time_t & t) {
 
 	return s;
 }
+#endif
 
 
 
