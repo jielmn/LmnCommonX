@@ -4,23 +4,19 @@
 #include "LmnCommon.h"
 #include "LmnContainer.h"
 
-#ifndef _WINDEF_ 
-
-#ifdef __x86_64__
-#define  DWORD_FORMAT_STR   "%u"
-#define  DWORD_FORMAT_STR_S " %u"
-#elif __i386__
-#define  DWORD_FORMAT_STR   "%lu"
-#define  DWORD_FORMAT_STR_S " %lu"
+#if !defined(_WINDEF_) && defined(__x86_64__)
+#define  DWORD_FLAG         0
 #else
-#define  DWORD_FORMAT_STR   "%lu"
-#define  DWORD_FORMAT_STR_S " %lu"
+#define  DWORD_FLAG         1
 #endif
 
-#else
+#if  DWORD_FLAG  
 #define  DWORD_FORMAT_STR   "%lu"
 #define  DWORD_FORMAT_STR_S " %lu"
-#endif // _WINDEF_ 
+#else
+#define  DWORD_FORMAT_STR   "%u"
+#define  DWORD_FORMAT_STR_S " %u"
+#endif
 
 #define MIN( a, b )               ( (a) < (b) ? (a) : (b) )
 #define MAX( a, b )               ( (a) > (b) ? (a) : (b) )

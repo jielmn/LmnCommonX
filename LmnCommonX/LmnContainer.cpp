@@ -1332,7 +1332,7 @@ DWORD _GetHashValue( HashFunc pfunHash, const void * pKey )
 	}
 	else
 	{
-		dwHash = (DWORD)pKey;
+		dwHash = (long)pKey;
 	}
 	return dwHash;
 }
