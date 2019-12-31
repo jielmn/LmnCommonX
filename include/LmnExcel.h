@@ -36,6 +36,7 @@ private:
 
 #pragma warning(disable:4192)
 
+// 需要先安装WPS或者office软件
 #import "../Office2007/MSO.DLL"     rename("DocumentProperties", "DocumentPropertiesXL")  rename( "RGB", "MSORGB" ) no_namespace
 #import "../Office2007/VBE6EXT.OLB" no_namespace   
 #import "../Office2007/EXCEL.EXE"   rename("DialogBox", "DialogBoxXL") rename("CopyFile", "CopyFileXL") rename("ReplaceText", "ReplaceTextXL") rename("RGB", "RBGXL") rename("DocumentProperties", "DocumentPropertiesXL") no_dual_interfaces
