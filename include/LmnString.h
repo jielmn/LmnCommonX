@@ -14,6 +14,8 @@ char * StrTrim( INOUT char * szStr );
 // 返回值: 0, 成功
 int StrTrim( IN const char * szStr, INOUT char * szDest, IN DWORD dwDestSize );
 
+char * StrReverse(INOUT char * szStr);
+int StrReverse(IN const char * szStr, INOUT char * szDest, IN DWORD dwDestSize);
 
 /****************************************************************************
  * 函数名：  Str2Lower                                                      *

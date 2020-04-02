@@ -47,6 +47,45 @@ TEST( String, StrTrim )
 	ASSERT_EQ( LMNX_WRONG_PARAMS, ret );
 }
 
+TEST(String, StrReverse)
+{
+	const char * pSrc = "abcd";
+
+	char buf[10];
+	strncpy(buf, pSrc, sizeof(buf));
+
+	char * pRet = StrReverse(buf);
+	ASSERT_FALSE(pRet == 0);
+	int ret = strcmp(buf, "dcba");
+	ASSERT_EQ(0, ret);
+
+	pSrc = "abcde";
+	strncpy(buf, pSrc, sizeof(buf));
+
+	pRet = StrReverse(buf);
+	ASSERT_FALSE(pRet == 0);
+	ret = strcmp(buf, "edcba");
+	ASSERT_EQ(0, ret);
+	
+
+	char buf1[10];
+	pSrc = "abcde";
+	ret = StrReverse(pSrc, buf1, sizeof(buf1));
+	ASSERT_EQ(0, ret);
+	ret = strcmp(buf1, "edcba");
+	ASSERT_EQ(0, ret);
+
+	char buf2[5];
+	ret = StrReverse(pSrc, buf2, sizeof(buf2));
+	ASSERT_EQ(-1, ret);
+
+	pSrc = "abcd";
+	ret = StrReverse(pSrc, buf1, sizeof(buf1));
+	ASSERT_EQ(0, ret);
+	ret = strcmp(buf1, "dcba");
+	ASSERT_EQ(0, ret);
+}
+
 
 TEST( String, StrCase )
 {

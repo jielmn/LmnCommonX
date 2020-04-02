@@ -113,6 +113,42 @@ int StrTrim( IN const char * szStr, INOUT char * szDest, IN DWORD dwDestSize ) {
 }
 
 
+char * StrReverse(INOUT char * szStr) {
+	// 如果参数为0
+	if (0 == szStr) {
+		return 0;
+	}
+
+	DWORD  dwLen = strlen(szStr);
+	DWORD  dwHalfLen = dwLen / 2;
+
+	for ( DWORD i = 0; i < dwHalfLen; i++ ) {
+		char ch = szStr[i];
+		szStr[i] = szStr[dwLen - i - 1];
+		szStr[dwLen - i - 1] = ch;
+	}
+	
+	return szStr;
+}
+
+int StrReverse(IN const char * szStr, INOUT char * szDest, IN DWORD dwDestSize) {
+	if ( szStr == 0 || szDest == 0 ) {
+		return -1;
+	}
+
+	DWORD  dwLen = strlen(szStr);
+	if ( dwDestSize <= dwLen ) {
+		return -1;
+	}
+
+	for (DWORD i = 0; i < dwLen; i++) {
+		szDest[i] = szStr[dwLen - i - 1];
+	}
+	szDest[dwLen] = '\0';
+
+	return 0;
+}
+
 
 
 
